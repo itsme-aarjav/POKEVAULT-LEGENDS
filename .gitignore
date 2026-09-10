@@ -1,0 +1,30 @@
+# Environment & Secrets — NEVER commit these
+.env
+*.env.local
+*.env.production
+
+# Node binary bundled in project root
+node
+
+# Node Modules
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+build/
+
+# Vite cache
+.vite/
+
+# macOS junk
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/

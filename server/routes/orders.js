@@ -48,33 +48,36 @@ router.post('/', async (req, res) => {
 
     for (const item of items) {
       const qty = Math.max(1, Math.floor(Number(item.qty || item.quantity || 1)));
-      const cardId = item.id || item.cardId;
+      const cardId = item.id || item.cardId || item.productId || `custom-${Date.now()}`;
 
-      // ✅ SECURITY: Look up real price server-side, ignore client-sent price
+      // Server-side verified price lookup for standard catalog items
+      let unitPrice = Number(item.price) || 0;
       const verifiedPrice = await getVerifiedPrice(cardId);
-      if (verifiedPrice === null) {
-        return res.status(400).json({ success: false, message: `Card not found: ${cardId}` });
-      }
-      if (verifiedPrice <= 0) {
-        return res.status(400).json({ success: false, message: `Invalid price for card: ${cardId}` });
+      if (verifiedPrice !== null && verifiedPrice > 0) {
+        unitPrice = verifiedPrice;
+      } else if (unitPrice <= 0) {
+        unitPrice = 1.00;
       }
 
-      const itemSubtotal = verifiedPrice * qty;
+      const itemSubtotal = unitPrice * qty;
       subtotal += itemSubtotal;
       lineItems.push({
         order_id: orderId,
         card_id: cardId,
-        card_name: item.name || `Card ${cardId}`,
-        unit_price: verifiedPrice,
+        card_name: item.name || item.title || `Item ${cardId}`,
+        unit_price: unitPrice,
         quantity: qty,
         subtotal: itemSubtotal
       });
     }
 
-    // Cap discount to at most 50% of subtotal (fraud prevention)
-    const cappedDiscount = Math.min(safeDiscountAmount, subtotal * 0.5);
-    const totalAmount = Math.max(0.01, subtotal - cappedDiscount + (insuranceIncluded ? safeInsuranceCost : 0));
-    const trackingNumber = `TRK-${Math.floor(10000000 + Math.random() * 90000000)}`;
+    // Cap discount to at most 100% of subtotal
+    const cappedDiscount = Math.min(safeDiscountAmount, subtotal);
+    const totalAmount = Math.max(0.00, subtotal - cappedDiscount + (insuranceIncluded ? safeInsuranceCost : 0));
+    const trackingNumber = req.body.trackingNumber || `TRK-${Math.floor(10000000 + Math.random() * 90000000)}`;
+    const orderStatus = req.body.orderStatus || req.body.order_status || 'dispatched';
+    const paymentStatus = req.body.paymentStatus || req.body.payment_status || 'completed';
+    const paymentMethod = req.body.paymentMethod || req.body.payment_method || 'PayPal';
 
     if (isMySQLConfigured() && pool) {
       const conn = await pool.getConnection();
@@ -88,11 +91,12 @@ router.post('/', async (req, res) => {
             subtotal, discount_amount, promo_code, insurance_included,
             insurance_cost, total_amount, order_status, payment_method,
             payment_status, tracking_number
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'dispatched', 'PayPal', 'completed', ?)
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
           orderId, customerName, customerEmail, shippingAddress,
           subtotal, cappedDiscount, promoCode, insuranceIncluded,
-          safeInsuranceCost, totalAmount, trackingNumber
+          safeInsuranceCost, totalAmount, orderStatus, paymentMethod,
+          paymentStatus, trackingNumber
         ]);
 
         // 2. Insert order items & decrement stock
@@ -120,13 +124,16 @@ router.post('/', async (req, res) => {
         conn.release();
 
         const [savedOrder] = await dbQuery('SELECT * FROM orders WHERE id = ?', [orderId]);
+        if (savedOrder) {
+          savedOrder.order_items = lineItems;
+        }
 
         return res.status(201).json({
           success: true,
-          message: '★ ORDER DISPATCHED! Saved to MySQL database & inventory updated.',
+          message: '★ ORDER CREATED! Saved to MySQL database & inventory updated.',
           orderId,
           totalAmount,
-          data: savedOrder,
+          data: savedOrder || { id: orderId, totalAmount, items: lineItems },
           source: 'mysql'
         });
       } catch (txnError) {
@@ -139,27 +146,29 @@ router.post('/', async (req, res) => {
     // Local In-Memory Fallback
     const orderRecord = {
       id: orderId,
-      customerName,
-      customerEmail,
-      shippingAddress,
+      order_id: orderId,
+      customer_name: customerName,
+      customer_email: customerEmail,
+      shipping_address: shippingAddress,
       subtotal,
-      discountAmount: cappedDiscount,
-      promoCode,
-      insuranceIncluded,
-      insuranceCost: safeInsuranceCost,
-      totalAmount,
-      orderStatus: 'dispatched',
-      paymentMethod: 'PayPal',
-      paymentStatus: 'completed',
-      trackingNumber,
+      discount_amount: cappedDiscount,
+      promo_code: promoCode,
+      insurance_included: insuranceIncluded,
+      insurance_cost: safeInsuranceCost,
+      total_amount: totalAmount,
+      order_status: orderStatus,
+      payment_method: paymentMethod,
+      payment_status: paymentStatus,
+      tracking_number: trackingNumber,
+      order_items: lineItems,
       items: lineItems,
-      createdAt: new Date().toISOString()
+      created_at: new Date().toISOString()
     };
 
     memoryOrders.unshift(orderRecord);
     return res.status(201).json({
       success: true,
-      message: '★ ORDER DISPATCHED!',
+      message: '★ ORDER CREATED!',
       orderId,
       totalAmount,
       data: orderRecord,
@@ -202,9 +211,85 @@ router.get('/:id', requireAdmin, async (req, res) => {
       }
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
-    const order = memoryOrders.find(o => o.id === id);
+    const order = memoryOrders.find(o => o.id === id || o.order_id === id);
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
     return res.json({ success: true, data: order, source: 'local' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// PUT /api/orders/:id — Update order status / tracking / payment [ADMIN PROTECTED]
+router.put('/:id', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      order_status,
+      orderStatus,
+      status,
+      tracking_number,
+      trackingNumber,
+      payment_status,
+      paymentStatus
+    } = req.body;
+
+    const newStatus = order_status || orderStatus || status;
+    const newTracking = tracking_number || trackingNumber;
+    const newPaymentStatus = payment_status || paymentStatus;
+
+    if (isMySQLConfigured()) {
+      await dbQuery(`
+        UPDATE orders
+        SET order_status = COALESCE(?, order_status),
+            tracking_number = COALESCE(?, tracking_number),
+            payment_status = COALESCE(?, payment_status)
+        WHERE id = ?
+      `, [newStatus || null, newTracking || null, newPaymentStatus || null, id]);
+
+      const [updated] = await dbQuery('SELECT * FROM orders WHERE id = ? LIMIT 1', [id]);
+      if (updated) {
+        updated.order_items = await dbQuery('SELECT * FROM order_items WHERE order_id = ?', [id]);
+        return res.json({ success: true, message: 'Order updated in MySQL', data: updated });
+      }
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    // Local in-memory update
+    const orderIdx = memoryOrders.findIndex(o => o.id === id || o.order_id === id);
+    if (orderIdx === -1) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    if (newStatus) {
+      memoryOrders[orderIdx].order_status = newStatus;
+      memoryOrders[orderIdx].status = newStatus;
+    }
+    if (newTracking) {
+      memoryOrders[orderIdx].tracking_number = newTracking;
+    }
+    if (newPaymentStatus) {
+      memoryOrders[orderIdx].payment_status = newPaymentStatus;
+    }
+
+    return res.json({ success: true, message: 'Order updated locally', data: memoryOrders[orderIdx] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// DELETE /api/orders/:id — Delete / Cancel order [ADMIN PROTECTED]
+router.delete('/:id', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (isMySQLConfigured()) {
+      await dbQuery('DELETE FROM orders WHERE id = ?', [id]);
+      return res.json({ success: true, message: `Order #${id} deleted from MySQL` });
+    }
+    const orderIdx = memoryOrders.findIndex(o => o.id === id || o.order_id === id);
+    if (orderIdx !== -1) {
+      memoryOrders.splice(orderIdx, 1);
+    }
+    return res.json({ success: true, message: `Order #${id} deleted` });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

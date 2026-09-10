@@ -170,3 +170,111 @@ export const getOrders = async () => {
     return { success: false, error: err.message };
   }
 };
+
+export const createOrder = async (orderData) => {
+  try {
+    const res = await fetch(`${API_BASE}/orders`, {
+      method: 'POST',
+      headers: getHeaders(true),
+      body: JSON.stringify(orderData)
+    });
+    return await res.json();
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const updateOrderStatus = async (orderId, updateData) => {
+  try {
+    const res = await fetch(`${API_BASE}/orders/${orderId}`, {
+      method: 'PUT',
+      headers: getHeaders(true),
+      body: JSON.stringify(updateData)
+    });
+    return await res.json();
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const deleteOrder = async (orderId) => {
+  try {
+    const res = await fetch(`${API_BASE}/orders/${orderId}`, {
+      method: 'DELETE',
+      headers: getHeaders(true)
+    });
+    return await res.json();
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+};
+
+// ─── Discounts & Promo Codes ───────────────────────────────────────────────
+const DEFAULT_DISCOUNTS = [
+  {
+    id: 'd1',
+    code: 'POKEVAULT10',
+    type: 'percentage',
+    value: 10,
+    summary: '10% off entire order (Storewide VIP)',
+    appliesTo: 'entire_store',
+    minRequirement: { type: 'minimum_amount', value: 0 },
+    customerEligibility: 'all',
+    totalUses: 0,
+    maxUses: 1000,
+    startsAt: '2026-01-01',
+    endsAt: '2027-12-31',
+    status: 'Active'
+  },
+  {
+    id: 'd2',
+    code: 'FREESHIP',
+    type: 'free_shipping',
+    value: 0,
+    summary: 'Free Armored Vault Courier Shipping',
+    appliesTo: 'entire_store',
+    minRequirement: { type: 'minimum_amount', value: 100 },
+    customerEligibility: 'all',
+    totalUses: 0,
+    maxUses: 500,
+    startsAt: '2026-01-01',
+    endsAt: '2027-12-31',
+    status: 'Active'
+  },
+  {
+    id: 'd3',
+    code: 'LEGENDS20',
+    type: 'percentage',
+    value: 20,
+    summary: '20% off high-tier Pokémon cards & items',
+    appliesTo: 'entire_store',
+    minRequirement: { type: 'minimum_amount', value: 150 },
+    customerEligibility: 'all',
+    totalUses: 0,
+    maxUses: 250,
+    startsAt: '2026-01-01',
+    endsAt: '2027-12-31',
+    status: 'Active'
+  }
+];
+
+export const getDiscounts = () => {
+  if (typeof window === 'undefined') return DEFAULT_DISCOUNTS;
+  try {
+    const saved = localStorage.getItem('pokevault_active_discounts');
+    if (saved) return JSON.parse(saved);
+  } catch (e) {
+    console.warn('Error reading discounts:', e);
+  }
+  return DEFAULT_DISCOUNTS;
+};
+
+export const saveDiscounts = (discounts) => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem('pokevault_active_discounts', JSON.stringify(discounts));
+  } catch (e) {
+    console.error('Error saving discounts:', e);
+  }
+};
+

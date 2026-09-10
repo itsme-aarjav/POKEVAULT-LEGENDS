@@ -1,156 +1,135 @@
-import React, { useState } from 'react';
-import { CATEGORIES_DATA } from '../../../data/categories.js';
+import React, { useState, useEffect } from 'react';
+import { getDiscounts, saveDiscounts } from '../../../lib/api.js';
 
 /**
- * MODULE 4: Promotions & Coupon Engine (Shopify Polaris Grade)
- * Configures Percentage, Fixed Amount, Free Shipping, and BXGY discounts
- * with Collection/Product targeting, Minimum Cart rules, Customer Segments, and Usage limits.
+ * MODULE 4: Promotions & Coupon Engine (Shopify Polaris-Grade)
+ * Manages active store promo codes with live persistence.
  */
-
-export default function ShopifyDiscountEngine() {
-  const [discounts, setDiscounts] = useState([
-    {
-      id: 'd1',
-      code: 'POKEVAULT10',
-      type: 'percentage',
-      value: 10,
-      summary: '10% off entire order &bull; Min purchase $50 &bull; All customers',
-      appliesTo: 'entire_store',
-      minRequirement: { type: 'minimum_amount', value: 50 },
-      customerEligibility: 'all',
-      totalUses: 342,
-      maxUses: 1000,
-      startsAt: '2026-01-01',
-      endsAt: '2027-12-31',
-      status: 'Active'
-    },
-    {
-      id: 'd2',
-      code: 'FREESHIP100',
-      type: 'free_shipping',
-      value: 0,
-      summary: 'Free Vault Armored Courier Shipping &bull; Min purchase $100',
-      appliesTo: 'entire_store',
-      minRequirement: { type: 'minimum_amount', value: 100 },
-      customerEligibility: 'all',
-      totalUses: 189,
-      maxUses: 500,
-      startsAt: '2026-01-01',
-      endsAt: '2027-12-31',
-      status: 'Active'
-    },
-    {
-      id: 'd3',
-      code: 'CHARIZARD20',
-      type: 'percentage',
-      value: 20,
-      summary: '20% off Trading Cards & Graded Slabs collection',
-      appliesTo: 'specific_collections',
-      targetCollection: 'trading-cards',
-      minRequirement: { type: 'none', value: 0 },
-      customerEligibility: 'specific_segments',
-      segment: 'VIP Master Collectors',
-      totalUses: 78,
-      maxUses: 200,
-      startsAt: '2026-02-01',
-      endsAt: '2026-12-31',
-      status: 'Active'
-    },
-    {
-      id: 'd4',
-      code: 'BUY2GET1BOOSTER',
-      type: 'bxgy',
-      value: 50,
-      summary: 'Buy 2 Graded Cards, Get 1 Vintage Booster Pack at 50% Off',
-      appliesTo: 'specific_collections',
-      targetCollection: 'trading-cards',
-      bxgy: { buyQty: 2, getQty: 1, getDiscount: 50 },
-      minRequirement: { type: 'minimum_quantity', value: 2 },
-      customerEligibility: 'all',
-      totalUses: 45,
-      maxUses: 100,
-      startsAt: '2026-03-01',
-      endsAt: '2026-10-31',
-      status: 'Active'
-    }
-  ]);
-
+export default function ShopifyDiscountEngine({ orders = [] }) {
+  const [discounts, setDiscounts] = useState([]);
   const [activeTab, setActiveTab] = useState('list'); // 'list' | 'create'
-  
-  // Create Coupon Form State
+  const [feedback, setFeedback] = useState(null);
+
+  // Form State
   const [formState, setFormState] = useState({
     code: '',
-    type: 'percentage', // 'percentage' | 'fixed_amount' | 'free_shipping' | 'bxgy'
+    type: 'percentage', // 'percentage' | 'fixed_amount' | 'free_shipping'
     value: 15,
-    appliesTo: 'entire_store', // 'entire_store' | 'specific_collections' | 'specific_products'
-    targetCollection: 'trading-cards',
-    minType: 'none', // 'none' | 'minimum_amount' | 'minimum_quantity'
-    minValue: 50,
-    customerEligibility: 'all', // 'all' | 'specific_segments' | 'specific_customers'
-    segment: 'VIP Master Collectors',
-    limitTotalUses: true,
-    maxUses: 250,
-    limitOncePerCustomer: true,
-    startsAt: '2026-08-19',
-    hasEndDate: true,
-    endsAt: '2026-12-31',
-    bxgyBuyQty: 2,
-    bxgyGetQty: 1,
-    bxgyDiscount: 50
+    summary: '',
+    minRequirement: 0,
+    startsAt: '2026-01-01',
+    endsAt: '2027-12-31'
   });
 
+  useEffect(() => {
+    const loaded = getDiscounts();
+    setDiscounts(loaded);
+  }, []);
+
+  const showFeedback = (text, type = 'success') => {
+    setFeedback({ text, type });
+    setTimeout(() => setFeedback(null), 4000);
+  };
+
   const generateRandomCode = () => {
-    const prefixes = ['VAULT', 'POKE', 'LEGEND', 'SUMMER', 'MASTER'];
+    const prefixes = ['VAULT', 'POKE', 'LEGEND', 'SUMMER', 'MASTER', 'VIP'];
     const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
     const num = Math.floor(10 + Math.random() * 90);
     setFormState({ ...formState, code: `${prefix}${num}` });
   };
 
   const handleSaveDiscount = () => {
-    if (!formState.code) {
-      alert('Please enter or generate a coupon code.');
+    const code = formState.code.trim().toUpperCase();
+    if (!code) {
+      alert('Please enter or generate a discount code.');
       return;
     }
 
     let summary = '';
-    if (formState.type === 'percentage') summary = `${formState.value}% off ${formState.appliesTo.replace('_', ' ')}`;
-    else if (formState.type === 'fixed_amount') summary = `$${formState.value} off ${formState.appliesTo.replace('_', ' ')}`;
-    else if (formState.type === 'free_shipping') summary = `Free Vault Armored Courier Shipping`;
-    else if (formState.type === 'bxgy') summary = `Buy ${formState.bxgyBuyQty}, Get ${formState.bxgyGetQty} at ${formState.bxgyDiscount}% off`;
+    if (formState.type === 'percentage') {
+      summary = `${formState.value}% off entire order`;
+    } else if (formState.type === 'fixed_amount') {
+      summary = `$${formState.value} off entire order`;
+    } else if (formState.type === 'free_shipping') {
+      summary = `Free Vault Armored Courier Shipping`;
+    }
 
     const newDiscount = {
       id: `d_${Date.now()}`,
-      code: formState.code.toUpperCase(),
+      code,
       type: formState.type,
-      value: formState.value,
+      value: Number(formState.value) || 0,
       summary,
-      appliesTo: formState.appliesTo,
-      targetCollection: formState.targetCollection,
-      minRequirement: { type: formState.minType, value: formState.minValue },
-      customerEligibility: formState.customerEligibility,
-      segment: formState.segment,
+      appliesTo: 'entire_store',
+      minRequirement: { type: 'minimum_amount', value: Number(formState.minRequirement) || 0 },
+      customerEligibility: 'all',
       totalUses: 0,
-      maxUses: formState.limitTotalUses ? formState.maxUses : 9999,
-      startsAt: formState.startsAt,
-      endsAt: formState.hasEndDate ? formState.endsAt : 'Never',
+      maxUses: 1000,
+      startsAt: formState.startsAt || '2026-01-01',
+      endsAt: formState.endsAt || '2027-12-31',
       status: 'Active'
     };
 
-    setDiscounts([newDiscount, ...discounts]);
+    const updated = [newDiscount, ...discounts.filter(d => d.code !== code)];
+    setDiscounts(updated);
+    saveDiscounts(updated);
+    showFeedback(`Promo code "${code}" created and activated!`);
     setActiveTab('list');
+  };
+
+  const handleToggleStatus = (id) => {
+    const updated = discounts.map(d => {
+      if (d.id === id) {
+        const nextStatus = d.status === 'Active' ? 'Disabled' : 'Active';
+        return { ...d, status: nextStatus };
+      }
+      return d;
+    });
+    setDiscounts(updated);
+    saveDiscounts(updated);
+  };
+
+  const handleDeleteDiscount = (id) => {
+    if (!confirm('Are you sure you want to delete this promotion?')) return;
+    const updated = discounts.filter(d => d.id !== id);
+    setDiscounts(updated);
+    saveDiscounts(updated);
+    showFeedback('Promotion deleted.');
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', color: '#F8FAFC' }}>
       
+      {/* Toast Alert */}
+      {feedback && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          background: feedback.type === 'error' ? '#EF4444' : '#10B981',
+          color: '#FFF',
+          padding: '12px 20px',
+          borderRadius: '8px',
+          fontWeight: 800,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <span>{feedback.type === 'error' ? '⚠️' : '✅'}</span>
+          <span>{feedback.text}</span>
+        </div>
+      )}
+
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFF' }}>
-            {activeTab === 'list' ? 'Promotions, Discounts & Coupons' : 'Create New Promotion'}
+            {activeTab === 'list' ? 'Promotions & Promo Codes' : 'Create New Promotion'}
           </h2>
           <p style={{ fontSize: '0.82rem', color: '#94A3B8' }}>
-            {activeTab === 'list' ? 'Manage Percentage discounts, Free Shipping rules, BXGY promotions & usage lifespans' : 'Polaris discount rule builder with customer segment eligibility'}
+            {activeTab === 'list' ? 'Manage active coupon codes used during checkout & cart' : 'Configure percentage discounts, fixed savings, or free shipping'}
           </p>
         </div>
 
@@ -160,7 +139,7 @@ export default function ShopifyDiscountEngine() {
               onClick={() => setActiveTab('list')}
               style={{ background: '#334155', color: '#FFF', border: 'none', padding: '8px 16px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}
             >
-              ← Back to Discounts
+              ← Back to Promotions
             </button>
           )}
 
@@ -188,11 +167,11 @@ export default function ShopifyDiscountEngine() {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
             <thead>
               <tr style={{ background: '#0F172A', borderBottom: '1px solid #334155', color: '#94A3B8', textTransform: 'uppercase', fontSize: '0.72rem', letterSpacing: '0.5px' }}>
-                <th style={{ padding: '12px 16px' }}>Discount Code</th>
+                <th style={{ padding: '12px 16px' }}>Promo Code</th>
                 <th style={{ padding: '12px 16px' }}>Type & Details</th>
-                <th style={{ padding: '12px 16px' }}>Redemptions</th>
-                <th style={{ padding: '12px 16px' }}>Validity</th>
+                <th style={{ padding: '12px 16px' }}>Min Purchase</th>
                 <th style={{ padding: '12px 16px' }}>Status</th>
+                <th style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -205,16 +184,35 @@ export default function ShopifyDiscountEngine() {
                   </td>
                   <td style={{ padding: '12px 16px' }}>
                     <strong style={{ color: '#FFF', display: 'block' }}>{d.summary}</strong>
-                    <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>Eligibility: {d.customerEligibility === 'all' ? 'Everyone' : d.segment}</span>
+                    <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>{d.type.replace('_', ' ').toUpperCase()}</span>
                   </td>
                   <td style={{ padding: '12px 16px', fontFamily: 'monospace' }}>
-                    <strong>{d.totalUses}</strong> / {d.maxUses} used
-                  </td>
-                  <td style={{ padding: '12px 16px', fontSize: '0.78rem', color: '#94A3B8' }}>
-                    {d.startsAt} &rarr; {d.endsAt}
+                    {d.minRequirement?.value > 0 ? `$${d.minRequirement.value}` : 'No minimum'}
                   </td>
                   <td style={{ padding: '12px 16px' }}>
-                    <span style={{ background: 'rgba(16,185,129,0.15)', color: '#34D399', fontSize: '0.72rem', fontWeight: 800, padding: '3px 8px', borderRadius: '12px' }}>{d.status}</span>
+                    <button
+                      onClick={() => handleToggleStatus(d.id)}
+                      style={{
+                        background: d.status === 'Active' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
+                        color: d.status === 'Active' ? '#34D399' : '#F87171',
+                        border: '1px solid currentColor',
+                        padding: '3px 10px',
+                        borderRadius: '12px',
+                        fontSize: '0.72rem',
+                        fontWeight: 800,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {d.status === 'Active' ? '● Active' : '○ Disabled'}
+                    </button>
+                  </td>
+                  <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                    <button
+                      onClick={() => handleDeleteDiscount(d.id)}
+                      style={{ background: 'transparent', color: '#F87171', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700 }}
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -223,17 +221,17 @@ export default function ShopifyDiscountEngine() {
         </div>
       )}
 
-      {/* VIEW 2: SHOPIFY POLARIS DISCOUNT BUILDER */}
+      {/* VIEW 2: DISCOUNT BUILDER */}
       {activeTab === 'create' && (
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
           
-          {/* Left Column: Code, Type, Value, Minimums */}
+          {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             
-            {/* Coupon Code Input */}
+            {/* Promo Code Input */}
             <div style={{ background: '#1E293B', border: '1px solid #334155', borderRadius: '12px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#FFF' }}>Discount Code</label>
+                <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#FFF' }}>Discount Promo Code</label>
                 <button
                   type="button"
                   onClick={generateRandomCode}
@@ -250,7 +248,7 @@ export default function ShopifyDiscountEngine() {
                 onChange={(e) => setFormState({ ...formState, code: e.target.value.toUpperCase() })}
                 style={{ width: '100%', background: '#0F172A', border: '1px solid #334155', borderRadius: '6px', padding: '10px 14px', color: '#60A5FA', fontFamily: 'monospace', fontWeight: 800, fontSize: '1.1rem', outline: 'none' }}
               />
-              <p style={{ fontSize: '0.75rem', color: '#94A3B8' }}>Customers will enter this code at checkout to claim their promotion.</p>
+              <p style={{ fontSize: '0.75rem', color: '#94A3B8' }}>Customers will enter this code at checkout to claim their discount.</p>
             </div>
 
             {/* Discount Type Selector */}
@@ -261,8 +259,7 @@ export default function ShopifyDiscountEngine() {
                 {[
                   { id: 'percentage', title: 'Percentage Off', desc: '% discount on products' },
                   { id: 'fixed_amount', title: 'Fixed Amount Off', desc: 'Fixed $ off subtotal' },
-                  { id: 'free_shipping', title: 'Free Shipping', desc: 'Free courier delivery' },
-                  { id: 'bxgy', title: 'Buy X Get Y (BXGY)', desc: 'Bundle quantity deal' }
+                  { id: 'free_shipping', title: 'Free Shipping', desc: 'Free courier delivery' }
                 ].map(t => (
                   <div
                     key={t.id}
@@ -281,7 +278,7 @@ export default function ShopifyDiscountEngine() {
                 ))}
               </div>
 
-              {/* Dynamic Value Input */}
+              {/* Value Input */}
               {formState.type === 'percentage' && (
                 <div style={{ marginTop: '10px' }}>
                   <label style={{ display: 'block', fontSize: '0.75rem', color: '#94A3B8', marginBottom: '4px' }}>Discount Percentage (%)</label>
@@ -301,182 +298,40 @@ export default function ShopifyDiscountEngine() {
                   <label style={{ display: 'block', fontSize: '0.75rem', color: '#94A3B8', marginBottom: '4px' }}>Discount Amount ($ USD)</label>
                   <input
                     type="number"
+                    min="1"
                     value={formState.value}
                     onChange={(e) => setFormState({ ...formState, value: parseFloat(e.target.value) || 0 })}
                     style={{ width: '120px', background: '#0F172A', border: '1px solid #334155', color: '#34D399', fontWeight: 800, padding: '8px 12px', borderRadius: '6px' }}
                   />
                 </div>
               )}
-
-              {formState.type === 'bxgy' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginTop: '10px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.72rem', color: '#94A3B8', marginBottom: '4px' }}>Customer Buys (Qty)</label>
-                    <input
-                      type="number"
-                      value={formState.bxgyBuyQty}
-                      onChange={(e) => setFormState({ ...formState, bxgyBuyQty: parseInt(e.target.value, 10) || 1 })}
-                      style={{ width: '100%', background: '#0F172A', border: '1px solid #334155', color: '#FFF', padding: '6px 10px', borderRadius: '6px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.72rem', color: '#94A3B8', marginBottom: '4px' }}>Customer Gets (Qty)</label>
-                    <input
-                      type="number"
-                      value={formState.bxgyGetQty}
-                      onChange={(e) => setFormState({ ...formState, bxgyGetQty: parseInt(e.target.value, 10) || 1 })}
-                      style={{ width: '100%', background: '#0F172A', border: '1px solid #334155', color: '#FFF', padding: '6px 10px', borderRadius: '6px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.72rem', color: '#94A3B8', marginBottom: '4px' }}>At Discount (%)</label>
-                    <input
-                      type="number"
-                      value={formState.bxgyDiscount}
-                      onChange={(e) => setFormState({ ...formState, bxgyDiscount: parseFloat(e.target.value) || 0 })}
-                      style={{ width: '100%', background: '#0F172A', border: '1px solid #334155', color: '#34D399', fontWeight: 800, padding: '6px 10px', borderRadius: '6px' }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Applies To & Minimum Requirements */}
-            <div style={{ background: '#1E293B', border: '1px solid #334155', borderRadius: '12px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#FFF' }}>Applies To</label>
-              
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', color: '#E2E8F0', cursor: 'pointer' }}>
-                  <input
-                    type="radio"
-                    name="appliesTo"
-                    checked={formState.appliesTo === 'entire_store'}
-                    onChange={() => setFormState({ ...formState, appliesTo: 'entire_store' })}
-                  />
-                  Entire Store
-                </label>
-
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', color: '#E2E8F0', cursor: 'pointer' }}>
-                  <input
-                    type="radio"
-                    name="appliesTo"
-                    checked={formState.appliesTo === 'specific_collections'}
-                    onChange={() => setFormState({ ...formState, appliesTo: 'specific_collections' })}
-                  />
-                  Specific Collections
-                </label>
-              </div>
-
-              {formState.appliesTo === 'specific_collections' && (
-                <select
-                  value={formState.targetCollection}
-                  onChange={(e) => setFormState({ ...formState, targetCollection: e.target.value })}
-                  style={{ width: '100%', background: '#0F172A', border: '1px solid #334155', color: '#FFF', padding: '8px 12px', borderRadius: '6px' }}
-                >
-                  {CATEGORIES_DATA.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-              )}
             </div>
 
           </div>
 
-          {/* Right Column: Customer Eligibility, Usage Limits & Active Dates */}
+          {/* Right Column: Minimum Requirements & Action */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             
-            {/* Customer Eligibility */}
-            <div style={{ background: '#1E293B', border: '1px solid #334155', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#FFF' }}>👥 Customer Eligibility</h3>
+            <div style={{ background: '#1E293B', border: '1px solid #334155', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#FFF' }}>⚙️ Rules & Thresholds</h3>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#E2E8F0', cursor: 'pointer' }}>
-                <input
-                  type="radio"
-                  name="eligibility"
-                  checked={formState.customerEligibility === 'all'}
-                  onChange={() => setFormState({ ...formState, customerEligibility: 'all' })}
-                />
-                All Customers
-              </label>
-
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#E2E8F0', cursor: 'pointer' }}>
-                <input
-                  type="radio"
-                  name="eligibility"
-                  checked={formState.customerEligibility === 'specific_segments'}
-                  onChange={() => setFormState({ ...formState, customerEligibility: 'specific_segments' })}
-                />
-                Specific Customer Segments
-              </label>
-
-              {formState.customerEligibility === 'specific_segments' && (
-                <select
-                  value={formState.segment}
-                  onChange={(e) => setFormState({ ...formState, segment: e.target.value })}
-                  style={{ width: '100%', background: '#0F172A', border: '1px solid #334155', color: '#FFF', padding: '6px 10px', borderRadius: '6px', fontSize: '0.8rem' }}
-                >
-                  <option value="VIP Master Collectors">VIP Master Collectors (Spend &gt; $5k)</option>
-                  <option value="First-Time Buyers">First-Time Store Buyers</option>
-                  <option value="HypeDrop Early Access List">HypeDrop Early Access List</option>
-                </select>
-              )}
-            </div>
-
-            {/* Usage Limits */}
-            <div style={{ background: '#1E293B', border: '1px solid #334155', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#FFF' }}>⚙️ Usage Limits</h3>
-
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#E2E8F0', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={formState.limitTotalUses}
-                  onChange={(e) => setFormState({ ...formState, limitTotalUses: e.target.checked })}
-                />
-                Limit number of times this code can be used
-              </label>
-
-              {formState.limitTotalUses && (
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: '#94A3B8', marginBottom: '4px' }}>Minimum Purchase Amount ($)</label>
                 <input
                   type="number"
-                  value={formState.maxUses}
-                  onChange={(e) => setFormState({ ...formState, maxUses: parseInt(e.target.value, 10) || 100 })}
-                  style={{ width: '100px', background: '#0F172A', border: '1px solid #334155', color: '#FFF', padding: '6px 10px', borderRadius: '6px' }}
-                />
-              )}
-
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#E2E8F0', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={formState.limitOncePerCustomer}
-                  onChange={(e) => setFormState({ ...formState, limitOncePerCustomer: e.target.checked })}
-                />
-                Limit to one use per customer
-              </label>
-            </div>
-
-            {/* Active Dates */}
-            <div style={{ background: '#1E293B', border: '1px solid #334155', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#FFF' }}>📅 Active Date Range</h3>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', color: '#94A3B8', marginBottom: '4px' }}>Start Date</label>
-                <input
-                  type="date"
-                  value={formState.startsAt}
-                  onChange={(e) => setFormState({ ...formState, startsAt: e.target.value })}
-                  style={{ width: '100%', background: '#0F172A', border: '1px solid #334155', color: '#FFF', padding: '6px 10px', borderRadius: '6px' }}
+                  min="0"
+                  value={formState.minRequirement}
+                  onChange={(e) => setFormState({ ...formState, minRequirement: parseFloat(e.target.value) || 0 })}
+                  style={{ width: '100%', background: '#0F172A', border: '1px solid #334155', color: '#FFF', padding: '8px 12px', borderRadius: '6px' }}
                 />
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', color: '#94A3B8', marginBottom: '4px' }}>End Date</label>
-                <input
-                  type="date"
-                  value={formState.endsAt}
-                  onChange={(e) => setFormState({ ...formState, endsAt: e.target.value })}
-                  style={{ width: '100%', background: '#0F172A', border: '1px solid #334155', color: '#FFF', padding: '6px 10px', borderRadius: '6px' }}
-                />
-              </div>
+              <button
+                onClick={handleSaveDiscount}
+                style={{ width: '100%', background: '#10B981', color: '#FFF', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', marginTop: '10px' }}
+              >
+                💾 Save & Activate Code
+              </button>
             </div>
 
           </div>

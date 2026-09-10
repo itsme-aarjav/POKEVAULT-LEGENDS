@@ -11,7 +11,7 @@ WORKDIR /app
 
 # Install build dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 # Copy application source code
 COPY . .
@@ -34,7 +34,7 @@ RUN apk add --no-cache curl
 
 # Install production dependencies only
 COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm install --omit=dev && npm cache clean --force
 
 # Copy built frontend assets and server application
 COPY --from=builder /app/dist ./dist

@@ -1,7 +1,9 @@
 node_modules
+node
 .git
 .gitignore
 .env
+.env.*
 .DS_Store
 dist
 scratch
@@ -9,3 +11,7 @@ scratch
 npm-debug.log*
 .idea
 .vscode
+docs
+deploy
+docker
+*.md

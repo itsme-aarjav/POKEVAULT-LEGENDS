@@ -26,19 +26,25 @@ if [[ ! -f .env ]]; then
     cp .env.example .env
 fi
 
-echo -e "\n${YELLOW}[1/4] Pulling latest code changes from Git repository...${NC}"
+echo -e "\n${YELLOW}[1/5] Pulling latest code changes from Git repository...${NC}"
 if git rev-parse --is-inside-work-tree &>/dev/null; then
     git fetch --all --prune
     git pull origin main || echo -e "${YELLOW}[WARN] Git pull skipped or on custom branch.${NC}"
 fi
 
-echo -e "\n${YELLOW}[2/4] Building Multi-Stage Docker Images...${NC}"
+echo -e "\n${YELLOW}[2/5] Cleaning up Docker build cache & dangling images to free disk...${NC}"
+docker builder prune -f 2>/dev/null || true
+docker image prune -f 2>/dev/null || true
+echo -e "${GREEN}[INFO] Available disk space:${NC}"
+df -h / | tail -n 1
+
+echo -e "\n${YELLOW}[3/5] Building Multi-Stage Docker Images...${NC}"
 docker compose build --pull app
 
-echo -e "\n${YELLOW}[3/4] Launching 3-Tier Services (MySQL -> Express App -> Nginx)...${NC}"
+echo -e "\n${YELLOW}[4/5] Launching 3-Tier Services (MySQL -> Express App -> Nginx)...${NC}"
 docker compose up -d --remove-orphans
 
-echo -e "\n${YELLOW}[4/4] Running Liveness & Readiness Health Probes...${NC}"
+echo -e "\n${YELLOW}[5/5] Running Liveness & Readiness Health Probes...${NC}"
 MAX_RETRIES=15
 RETRY_COUNT=0
 HEALTH_URL="http://127.0.0.1/api/health"

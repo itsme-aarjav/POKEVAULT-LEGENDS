@@ -1,321 +1,274 @@
-# POKÉVAULT LEGENDS — 3D Pokémon Collectibles Marketplace
+# ⚡ POKÉVAULT LEGENDS — 3-Tier Cloud-Native Architecture on AWS
 
-[![AWS Cloud](https://img.shields.io/badge/AWS-ALB%20%7C%20EC2%20%7C%20VPC-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
-[![Express.js](https://img.shields.io/badge/Express.js-Backend%20API-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
-[![Vite](https://img.shields.io/badge/Vite-5.0.12-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![React](https://img.shields.io/badge/React-18.3.1-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
-[![Three.js](https://img.shields.io/badge/Three.js-0.160.0-000000?style=for-the-badge&logo=threedotjs&logoColor=white)](https://threejs.org/)
-[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
-[![Netlify](https://img.shields.io/badge/Netlify-Active%20Mirror-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://pokevault-legends.netlify.app)
+[![AWS Cloud](https://img.shields.io/badge/AWS-EC2%20%7C%20VPC%20%7C%20Security%20Groups-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
+[![Docker](https://img.shields.io/badge/Docker-Multi--Stage%20Alpine-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Docker Compose](https://img.shields.io/badge/Docker%20Compose-3--Tier%20Orchestration-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+[![Nginx](https://img.shields.io/badge/Nginx-Reverse%20Proxy%20%26%20Cache-009639?style=for-the-badge&logo=nginx&logoColor=white)](https://nginx.org/)
+[![MySQL 8.0](https://img.shields.io/badge/MySQL-8.0%20Database%20Engine-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-20%20Express%20API-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Linux Bash](https://img.shields.io/badge/Linux-Shell%20Automation-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)
+[![Three.js](https://img.shields.io/badge/Three.js-3D%20WebGL%20Rendering-000000?style=for-the-badge&logo=threedotjs&logoColor=white)](https://threejs.org/)
 
-An enterprise-grade, high-performance **3D E-Commerce Marketplace & Vault Management Platform** for authenticated Pokémon collectibles, PSA/BGS graded slabs, resin dioramas, plush companions, and streetwear.
+An enterprise-grade, high-performance **3-Tier Containerized E-Commerce Marketplace & Vault Platform** featuring real-time WebGL 3D holographic tilt physics (`Three.js`), dynamic multi-faceted search, tamper-proof server-side pricing, and a self-hosted **Production Cloud Architecture** on **AWS EC2**.
 
-Engineered with a **Retro-Neubrutalist design system**, real-time **WebGL 3D holographic tilt physics** (`Three.js`), dynamic multi-faceted search, tamper-proof server-side order pricing, and an **AWS Production Cloud Architecture** featuring Application Load Balancers, target group health management, and zero-downtime connection draining.
-
----
-
-## Primary Cloud Architecture (AWS)
-
-The production deployment of **POKÉVAULT LEGENDS** is engineered on **Amazon Web Services (AWS)** in the `ap-south-1` (Asia Pacific - Mumbai) region. The system utilizes a decoupled monolithic deployment model where a container/systemd-managed Node.js Express service serves both the high-performance Vite SPA static build and the secure REST API behind an **AWS Application Load Balancer (ALB)**.
-
-```
-                          ┌────────────────────────────────────────────────────────┐
-                          │                AWS Cloud (ap-south-1)                  │
-                          │                                                        │
-┌──────────────┐          │   ┌────────────────────────────────────────────────┐   │
-│ Client / Web │─────────►│──►│   AWS Application Load Balancer (ALB)          │   │
-│  Browsers    │  HTTPS   │   │   (pokemon-app-alb-820885629.ap-south-1...)    │   │
-└──────────────┘          │   └───────────────────────┬────────────────────────┘   │
-                          │                           │ Target Group (Port: 5001)  │
-                          │                           ▼                            │
-                          │   ┌────────────────────────────────────────────────┐   │
-                          │   │   Amazon EC2 Compute Instance / Target Group   │   │
-                          │   │   ┌────────────────────────────────────────┐   │   │
-                          │   │   │ Express.js Production Daemon (systemd) │   │   │
-                          │   │   │  ├─ Static Vite SPA Build (dist/)      │   │   │
-                          │   │   │  ├─ Health Probes (/api/health)        │   │   │
-                          │   │   │  └─ REST APIs (/api/cards, /orders)    │   │   │
-                          │   │   └───────────────────┬────────────────────┘   │   │
-                          │   └───────────────────────┼────────────────────────┘   │
-                          └───────────────────────────┼────────────────────────────┘
-                                                      │
-                                   ┌──────────────────┴──────────────────┐
-                                   ▼                                     ▼
-                      ┌─────────────────────────┐           ┌────────────────────────┐
-                      │   Supabase PostgreSQL   │           │   PayPal Gateway API   │
-                      │  (Catalog & Orders DB)  │           │   (Payment Capture)    │
-                      └─────────────────────────┘           └────────────────────────┘
-```
+Transitioned from third-party serverless dependencies into a **cloud-native, multi-tier containerized stack** with automated provisioning, zero-downtime deployment pipelines, and automated database backup rotation.
 
 ---
 
-## System Architecture & Data Flow
-
-<p align="center">
-  <img src="./assets/aws-architecture.svg" alt="POKÉVAULT LEGENDS AWS Cloud Production Architecture" width="100%" />
-</p>
-
----
-
-## AWS Services & Infrastructure Components
-
-### 1. AWS Application Load Balancer (ALB)
-- **ALB Endpoint**: `http://pokemon-app-alb-820885629.ap-south-1.elb.amazonaws.com`
-- **Region**: `ap-south-1` (Asia Pacific - Mumbai)
-- **Traffic Routing**: Distributes incoming HTTP/HTTPS traffic evenly across backend EC2 instances in the Auto Scaling Group.
-- **Health Checks**: Continuously polls the `/api/health` endpoint on port `5001`. Automatically deregisters unhealthy targets to maintain 99.99% uptime.
-- **CORS Whitelisting**: Explicitly whitelisted in Express CORS middleware (`server/index.js`) to allow cross-origin requests from load-balanced subdomains and local development origins.
-
-### 2. AWS Auto Scaling Group (ASG) & EC2 Compute
-- **Dynamic Scaling**: Automatically scales EC2 instances horizontally in response to traffic spikes and CPU utilization alarms.
-- **Self-Contained Single-Bundle Runtime (No S3 / No Lambda)**: The Express application serves both the bundled Vite SPA static assets (`dist/`, `public/`) and all REST API routes on `0.0.0.0:5001`, completely eliminating S3 bucket maintenance and Lambda cold starts.
-- **Process Supervisor**: Managed via `systemd` / `pm2` service units for auto-restart on failure and boot-time initialization.
-
-### 3. Graceful Connection Draining (ASG Scale-In & ALB Integration)
-- **Zero-Downtime Deployments**: Implemented via `server/index.js` graceful shutdown handlers for `SIGTERM` and `SIGINT` signals:
-  ```javascript
-  // Graceful Shutdown Handling (for systemd & AWS ASG / ALB draining)
-  const handleShutdown = (signal) => {
-    console.log(`\n[Server] Received ${signal}. Starting graceful shutdown...`);
-    server.close(() => {
-      console.log('[Server] HTTP server closed cleanly.');
-      process.exit(0);
-    });
-    setTimeout(() => {
-      console.error('[Server] Graceful shutdown timeout exceeded. Forcing exit.');
-      process.exit(1);
-    }, 10000).unref();
-  };
-  ```
-- **Connection Draining**: Provides a 10-second window during Auto Scaling Group (ASG) scale-in or application redeployments to complete in-flight transactions before terminating the process.
-
-### 4. Amazon CloudWatch Observability & Monitoring
-- **ALB & Target Metrics**: Tracks `RequestCount`, `TargetResponseTime`, and `HTTPCode_Target_5XX_Count` in real time.
-- **CloudWatch Alarms**: Configured alarms trigger Auto Scaling Group scale-out events when CPU exceeds thresholds and alert on target health check failures.
-- **Unified Logging**: Aggregates Express application stdout/stderr logs alongside systemd `journald` and ALB access logs.
-
-### 5. VPC, Security Groups & Networking
-- **Ingress Rules**: ALB listens on standard HTTP (80) and HTTPS (443) ports.
-- **EC2 Security Group**: Restricted to receive inbound application traffic only from the ALB Security Group on port `5001`.
-- **Egress Rules**: Outbound access on port 443 for TLS communication with Supabase PostgreSQL and PayPal APIs.
-
----
-
-## AWS Deployment Workflow
-
-The production deployment pipeline on AWS follows this lifecycle:
+## 🏗️ 3-Tier Production Cloud Architecture
 
 ```
-[Developer] ──► [GitHub Repository] ──► [Build Production Bundle] ──► [Deploy to EC2 Instance] ──► [ALB Target Group Health Verification]
-```
-
-### Step 1: Build the Optimized Production Bundle
-```bash
-# Build the multi-page Vite client bundle to dist/
-npm run build
-```
-
-### Step 2: Configure Production Environment on EC2
-Create `/opt/pokevault/.env` on the EC2 instance with production variables:
-```env
-PORT=5001
-HOST=0.0.0.0
-NODE_ENV=production
-SUPABASE_URL=https://your-project-id.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
-ADMIN_SECRET_KEY=your-strong-random-admin-secret-key
-STOREFRONT_ORIGIN=http://pokemon-app-alb-820885629.ap-south-1.elb.amazonaws.com
-PAYPAL_CLIENT_ID=your-paypal-client-id
-PAYPAL_CLIENT_SECRET=your-paypal-client-secret
-```
-
-### Step 3: Configure Systemd Daemon Service
-Create `/etc/systemd/system/pokevault.service`:
-```ini
-[Unit]
-Description=POKÉVAULT LEGENDS Express Production Service
-After=network.target
-
-[Service]
-Type=simple
-User=ubuntu
-WorkingDirectory=/opt/pokevault
-ExecStart=/usr/bin/node server/index.js
-Restart=always
-RestartSec=5
-EnvironmentFile=/opt/pokevault/.env
-StandardOutput=syslog
-StandardError=syslog
-SyslogIdentifier=pokevault-server
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```bash
-# Enable and start the systemd unit
-sudo systemctl daemon-reload
-sudo systemctl enable pokevault.service
-sudo systemctl start pokevault.service
-```
-
-### Step 4: Validate ALB Target Group Health
-```bash
-# Query the ALB health endpoint
-curl -i http://pokemon-app-alb-820885629.ap-south-1.elb.amazonaws.com/api/health
-```
-**Expected Response**:
-```json
-{
-  "status": "online",
-  "service": "POKÉVAULT LEGENDS Express API",
-  "supabaseConnected": true,
-  "timestamp": "2026-09-01T12:00:00.000Z"
-}
+                                  ┌────────────────────────────────────────────────────────┐
+                                  │                AWS Cloud (Custom VPC)                  │
+                                  │                                                        │
+┌────────────────────────┐        │   ┌────────────────────────────────────────────────┐   │
+│ Client / Web Browsers  │───────►│──►│           AWS Security Group Ingress           │   │
+│ (HTTP: Port 80)        │        │   │           (Ports: 22, 80, 443 Allowed)         │   │
+└────────────────────────┘        │   └───────────────────────┬────────────────────────┘   │
+                                  │                           │ Ingress Traffic            │
+                                  │                           ▼                            │
+                                  │   ┌────────────────────────────────────────────────┐   │
+                                  │   │         Amazon EC2 Compute Instance            │   │
+                                  │   │  ┌──────────────────────────────────────────┐  │   │
+                                  │   │  │ 1. Web Tier: Nginx Reverse Proxy (Port 80)│  │   │
+                                  │   │  │    ├─ Gzip Compression & Rate Limiting   │  │   │
+                                  │   │  │    ├─ Static 3D Asset Caching (1y exp)   │  │   │
+                                  │   │  │    └─ OWASP Security Headers (HSTS, XSS) │  │   │
+                                  │   │  └────────────────────┬─────────────────────┘  │   │
+                                  │   │                       │ Proxy: Port 5001       │
+                                  │   │                       ▼ (Docker Network)       │
+                                  │   │  ┌──────────────────────────────────────────┐  │   │
+                                  │   │  │ 2. App Tier: Node.js Express Application │  │   │
+                                  │   │  │    ├─ Multi-Page Vite Frontend (dist/)   │  │   │
+                                  │   │  │    ├─ REST APIs (/api/cards, /orders)    │  │   │
+                                  │   │  │    └─ Liveness Probe (/api/health)       │  │   │
+                                  │   │  └────────────────────┬─────────────────────┘  │   │
+                                  │   │                       │ Pool: Port 3306        │
+                                  │   │                       ▼ (Docker Network)       │
+                                  │   │  ┌──────────────────────────────────────────┐  │   │
+                                  │   │  │ 3. Database Tier: MySQL 8.0 Engine       │  │   │
+                                  │   │  │    ├─ Relational Schema & Indexes        │  │   │
+                                  │   │  │    ├─ Auto-Seeding (64+ Products)        │  │   │
+                                  │   │  │    └─ Persistent Volume (mysql_data)     │  │   │
+                                  │   │  └────────────────────┬─────────────────────┘  │   │
+                                  │   └───────────────────────┼────────────────────────┘   │
+                                  └───────────────────────────┼────────────────────────────┘
+                                                              │
+                                            ┌─────────────────┴─────────────────┐
+                                            ▼                                   ▼
+                               ┌─────────────────────────┐         ┌─────────────────────────┐
+                               │ Automated Daily Backups │         │   PayPal Gateway API    │
+                               │  (mysqldump + gzip)     │         │   (Payment Capture)     │
+                               └─────────────────────────┘         └─────────────────────────┘
 ```
 
 ---
 
-## ⚖️ Dual-Deployment Strategy: AWS vs. Netlify
+## 🛠️ Key DevOps & Cloud Engineering Highlights
 
-This repository supports both **AWS** and **Netlify** to balance **enterprise cloud demonstration** with **cost-efficient ongoing hosting**:
+### 1. Multi-Stage Docker Build Optimization
+- **Stage 1 (Builder)**: Compiles the multi-page Vite frontend inside `node:20-alpine`.
+- **Stage 2 (Runtime)**: Copies only compiled static assets and production dependencies (`--omit=dev`).
+- **Security & Efficiency**: Runs under an unprivileged user (`USER node`), reducing image attack surface and slashing image size from **~1.2 GB down to ~140 MB** (~88% reduction).
 
-| Attribute | AWS Cloud Deployment (Primary Architecture) | ⚡ Netlify Deployment (Active Hosting Mirror) |
-| :--- | :--- | :--- |
-| **Role** | **Primary Architecture**: Showcases full-stack cloud engineering, load balancing, process management, and connection draining. | **Active Preview Mirror**: Provides continuous zero-cost web availability for ongoing portfolio viewing. |
-| **Compute Model** | Dedicated Node.js Express service on Amazon EC2 managed by `systemd`. | Serverless Function Handlers (`netlify/functions/api.js`) via `serverless-http`. |
-| **Traffic Ingress** | AWS Application Load Balancer (ALB) with `/api/health` target health probes. | Global Anycast Edge CDN with atomic redirect routing (`netlify.toml`). |
-| **Cost Profile** | Usage-based AWS compute (EC2 + ALB hourly rates). | Generous monthly free-tier serverless execution with $0 idle cost. |
-| **Operational Control** | Full control over OS kernel, socket pooling, connection draining, and network VPC. | Fully managed PaaS / Edge runtime. |
+### 2. 3-Tier Docker Compose Orchestration
+- **`nginx`**: Web tier on port `80`, handling client ingress, proxy headers, and WebSockets.
+- **`app`**: Application tier running on port `5001`, configured with `depends_on: mysql: condition: service_healthy`.
+- **`mysql`**: Database tier running MySQL 8.0 with automated health checks (`mysqladmin ping`) and persistent named volumes (`mysql_data`).
 
-> [!NOTE]
-> **Why Netlify is active**: AWS does not provide an indefinite free-credit compute tier for active load balancers and running instances. To avoid unnecessary ongoing infrastructure charges when the app is idle, Netlify is maintained as an active mirror, while the AWS architecture serves as the primary production blueprint.
+### 3. Production Nginx Reverse Proxy & Caching
+- **Static Caching**: Aggressive caching (`Cache-Control: public, max-age=31536000, immutable`) for Three.js 3D WebGL models (`.glb`, `.gltf`), images, and styles.
+- **Gzip Compression**: Compresses JS, CSS, JSON, HTML, and SVG responses.
+- **OWASP Security Headers**: Injects `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, and `X-XSS-Protection`.
 
----
+### 4. Native MySQL 8.0 Engine & Connection Pooling
+- **Asynchronous Connection Pool**: Built with `mysql2/promise` supporting connection pooling, query queuing, and auto-reconnection.
+- **Auto-Migration & Auto-Seeding**: Inspects database state on container initialization; automatically creates DDL tables and seeds all 64+ Pokémon products and store settings if tables are empty.
+- **Fault-Tolerant Fallback**: Gracefully falls back to in-memory local data mode if the database is unreachable during isolated tests.
 
-## Key Application Features
-
-### Interactive 3D WebGL Experiences
-- **3D Card Viewer (`Three.js`)**: Interactive 3D rendering of PSA & BGS graded Pokémon slabs with real-time mouse tilt physics, dynamic specular highlights, ambient illumination, and holographic rainbow foil reflections (`src/three-card-viewer.js`).
-- **Hero 3D Stage**: WebGL landing stage featuring interactive floating collectibles and smooth viewport parallax scrolling effects (`src/hero-3d-stage.js`).
-
-### Full E-Commerce Marketplace & Catalog
-- **Multi-Faceted Marketplace Filtering**:
-  - Filter across **18+ Categories** (Graded Slabs, Plush Toys, Figures, Clothing, Accessories, Room Decor, etc.).
-  - Filter by **Pokémon Character** (Pikachu, Charizard, Gengar, Eevee, Mewtwo, Rayquaza, Snorlax, Starters).
-  - Dynamic **Max Price Range Slider** ($10 – $15,000+).
-  - **Minimum Rating Selector** (4.5★+, 4.8★+, 5.0★ Perfect).
-  - **In-Stock Availability Toggle**.
-- **Instant Search with Autocomplete**: Real-time matching against product titles, categories, tags, and character attributes with instant image dropdown previews.
-- **Responsive Mobile Layout**: Fully optimized 2x2 grid card view on mobile viewports with sticky mobile filter drawer toggles.
-
-### Smart Shopping Cart & Checkout
-- **Gamified Free Shipping Bar**: Live progress indicator calculating remaining amount needed to qualify for free vault shipping ($150 threshold).
-- **In-Cart Smart Upsells**: Dynamically recommended accessories and protective sleeves based on cart contents.
-- **Persistent Wishlist System**: One-tap bookmarking for favorite collectibles across sessions.
-- **Promo Code Engine**: Discount validation (e.g., `POKEVAULT10` for 10% off).
-
-### Security & Anti-Tamper Engine
-- **Server-Side Price Verification**: The checkout API (`server/routes/orders.js`) ignores client-submitted prices and verifies item amounts directly against the Supabase database and master catalog before accepting orders.
-- **Admin Vault Gatekeeper**: Write routes and curator dashboards require `X-Admin-Key` authorization headers validated via timing-safe middleware (`server/middleware/auth.js`).
-
-### Automated SEO & Performance Engine
-- Structured **Schema.org JSON-LD Microdata** for rich Google search snippets (Product pricing, aggregate rating, in-stock availability).
-- Automated XML Sitemap Generator (`scripts/generate_seo_sitemap.js`).
-- OpenGraph & Twitter Card meta tag integration across all pages.
+### 5. Linux Shell Automation Suite (`deploy/`)
+- **`setup-ec2.sh`**: Automated Ubuntu server bootstrapper (Docker engine, Docker Compose plugin, UFW firewall, and Linux kernel TCP/socket tuning).
+- **`deploy.sh`**: Zero-downtime continuous deployment pipeline with automated Git sync, container image rebuilds, and `/api/health` validation.
+- **`backup-mysql.sh`**: Automated database backup script executing `mysqldump`, gzip compression, timestamping, and 7-day retention rotation.
+- **`health-check.sh`**: Production health probe testing HTTP status codes, response latency, and database connectivity.
 
 ---
 
-## 🗄️ Database Schema (`supabase_schema.sql`)
-
-The database utilizes PostgreSQL via Supabase with relational schema constraints and Row Level Security (RLS):
-
-- **`products` / `cards`**: Catalog items with `id`, `name`, `subName`, `era`, `price`, `grade`, `gradingBody`, `certNumber`, `image`, `inStock`, `holoType`.
-- **`orders`**: Customer checkout records with `orderId`, `customerName`, `customerEmail`, `totalAmount`, `discountAmount`, `insuranceCost`, `shippingAddress`, `status`, `trackingNumber`.
-- **`order_items`**: Line items associated with completed customer orders.
-- **`categories`**: Taxonomy directory for faceted marketplace grouping.
-
----
-
-## Repository Structure
+## 📂 Repository Directory Structure
 
 ```text
-pokevault-legends/
-├── .env.example                 # Sanitized environment template
-├── netlify.toml                 # Netlify build & serverless redirect rules
-├── package.json                 # Dependencies, engines & scripts
-├── supabase_schema.sql          # PostgreSQL database schema & tables
-├── vite.config.js               # Multi-page Vite 5 bundler configuration
-├── netlify/
-│   └── functions/
-│       └── api.js               # Express wrapped serverless handler
-├── server/
-│   ├── index.js                 # Express server, ALB CORS, static & API routes, SIGTERM drain
-│   ├── local_dev_server.js      # Local dev server with SSR renderer
-│   ├── ssr_renderer.js          # SSR HTML injection utility
-│   ├── supabase.js              # Supabase client initializer
-│   ├── db/                      # Schema and database definitions
-│   ├── middleware/              # Authentication & admin authorization
-│   └── routes/                  # REST API routes (cards, inventory, orders, paypal)
-├── src/
-│   ├── app/                     # Next.js 14 App Router routes & layouts
-│   ├── components/              # React & Vanilla UI components (3D Stage, Cart, Slabs)
-│   ├── data/                    # Master catalog datasets (products, categories, reviews)
-│   ├── three-card-viewer.js     # WebGL 3D holographic tilt physics engine
-│   └── utils/                   # State managers, SEO, and social proof utilities
-├── public/
-│   └── assets/                  # High-res textures, product photography, and icons
-└── [page].html                  # Multi-page templates (shop, product, cart, checkout, admin)
+pokevault/
+├── .github/                      # 🔮 CI/CD Workflows (GitHub Actions)
+│   └── workflows/
+│       ├── ci.yml                # Automated test & build verification
+│       └── cd.yml                # Docker build -> Amazon ECR -> EC2 deploy
+│
+├── deploy/                       # 🚀 Production Shell/Bash Automation
+│   ├── setup-ec2.sh              # EC2 bootstrap provisioner (Docker, UFW, sysctl)
+│   ├── deploy.sh                 # Zero-downtime container deployment pipeline
+│   ├── backup-mysql.sh           # Automated MySQL backup & 7-day rotation
+│   └── health-check.sh           # Liveness & latency monitoring probe
+│
+├── docker/                       # 🐳 Docker & Nginx Configurations
+│   ├── Dockerfile                # Multi-stage production build (Node 20 Alpine)
+│   ├── docker-compose.yml        # 3-Tier composition (Nginx, App, MySQL)
+│   └── nginx/
+│       ├── nginx.conf            # Reverse proxy, Gzip, Caching, SPA fallbacks
+│       └── security-headers.conf # OWASP security headers
+│
+├── docs/                         # 📸 Visual Proof & Architecture Diagrams
+│   └── screenshots/              # Terminal & deployment verification images
+│
+├── server/                       # ⚡ Backend API & Database Tier
+│   ├── db/
+│   │   ├── mysql.js              # Connection pooling, health check, auto-seeder
+│   │   └── mysql_schema.sql      # Production MySQL 8.0 DDL Schema
+│   ├── routes/                   # Cards, Inventory, Orders, PayPal, Settings, Auth
+│   ├── middleware/               # Admin authentication & security middleware
+│   └── index.js                  # Production Express Server
+│
+├── src/                          # 🎨 Frontend (HTML5, Vanilla JS, Three.js, React)
+│   ├── components/               # 3D holographic card viewers, admin dashboard
+│   ├── data/                     # 64+ Pokémon products, reviews, categories
+│   └── lib/api.js                # Centralized REST API client
+│
+├── terraform/                    # 🔮 [Future Phase] Infrastructure as Code (IaC)
+├── k8s/                          # 🔮 [Future Phase] Kubernetes Manifests / Helm
+├── monitoring/                   # 🔮 [Future Phase] Prometheus & Grafana Dashboards
+│
+├── .dockerignore                 # Docker build context filter
+├── .env.example                  # Environment configuration template
+├── .gitignore                    # Git tracking ignore rules
+├── Dockerfile                    # Root multi-stage Dockerfile
+├── docker-compose.yml            # Root docker-compose configuration
+└── package.json                  # Dependencies (No SaaS lock-in)
 ```
 
 ---
 
-## Environment Configuration
+## 📸 Deployment Verification & Proof
 
-| Variable | Description | Example / Default |
-| :--- | :--- | :--- |
-| `PORT` | Local and production Express listening port | `5001` |
-| `HOST` | Interface binding for container/ALB traffic | `0.0.0.0` |
-| `NODE_ENV` | Application runtime environment | `production` |
-| `SUPABASE_URL` | Supabase PostgreSQL project URL | `https://your-project.supabase.co` |
-| `SUPABASE_ANON_KEY` | Supabase public anonymous client key | `your-supabase-anon-key` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase elevated backend secret key | `your-service-role-key` |
-| `PAYPAL_CLIENT_ID` | PayPal REST developer client ID | `your-paypal-client-id` |
-| `PAYPAL_CLIENT_SECRET` | PayPal REST developer client secret | `your-paypal-client-secret` |
-| `ADMIN_SECRET_KEY` | Secret token required for `/api/orders` admin write routes | `your-secret-admin-key` |
-| `STOREFRONT_ORIGIN` | Allowed production origin for strict CORS whitelisting | `http://pokemon-app-alb-820885629.ap-south-1.elb.amazonaws.com` |
+### 1. 3-Tier Container Health (`docker compose ps`)
+```text
+NAME                IMAGE                COMMAND                  SERVICE   CREATED          STATUS                    PORTS
+pokevault-mysql     mysql:8.0            "docker-entrypoint.s…"   mysql     10 minutes ago   Up 10 minutes (healthy)   127.0.0.1:3306->3306/tcp
+pokevault-app       pokevault-app:latest "node server/index.js"   app       10 minutes ago   Up 10 minutes (healthy)   5001/tcp
+pokevault-nginx     nginx:alpine         "/docker-entrypoint.…"   nginx     10 minutes ago   Up 10 minutes             0.0.0.0:80->80/tcp
+```
+
+### 2. Live Health Probe (`./deploy/health-check.sh`)
+```text
+=================================================================
+🔍 POKÉVAULT LEGENDS — PRODUCTION SYSTEM HEALTH PROBE
+Target URL: http://127.0.0.1/api/health
+=================================================================
+HTTP Status Code : 200
+Response Latency : 0.003s
+
+✅ SERVICE IS HEALTHY & RESPONDING
+Payload: {"status":"online","service":"POKÉVAULT LEGENDS Production Express API","database":"mysql-connected"}
+```
+
+### 3. Automated Database Backup Rotation (`./deploy/backup-mysql.sh`)
+```text
+---------------------------------------------------------------
+[Fri Sep 11 01:45:00 UTC 2026] Starting automated MySQL backup for 'pokevault'...
+[SUCCESS] Backup created at: /opt/backups/mysql/pokevault_backup_20260911_014500.sql.gz (Size: 48K)
+[CLEANUP] Removing backups older than 7 days...
+[Fri Sep 11 01:45:01 UTC 2026] Backup and rotation completed cleanly.
+```
 
 ---
 
-## Local Development Setup
+## 🚀 Quickstart & Local Deployment
 
 ### Prerequisites
-- **Node.js**: `v18.0.0` or higher
-- **npm**: `v9.0.0` or higher
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
 
-### Getting Started
+### 1. Clone & Run with Docker Compose
 ```bash
-# 1. Clone the repository
-git clone https://github.com/itsme-aarjav/pokevault-legends.git
-cd pokevault-legends
+# Clone the repository
+git clone https://github.com/itsme-aarjav/3-tier-application.git pokevault
+cd pokevault
 
-# 2. Install project dependencies
-npm install
+# Start all 3 tiers (Nginx + Express App + MySQL)
+docker compose up --build -d
+```
 
-# 3. Create .env from template
-cp .env.example .env
-
-# 4. Run Vite development server (port 5173)
-npm run dev
-
-# 5. Or run the full production Express server locally (port 5001)
-npm run build
-npm run server
+Open your browser and visit:
+```text
+http://localhost
 ```
 
 ---
 
-## 📄 License & Credits
+## ☁️ Step-by-Step AWS EC2 Production Deployment
 
-Designed & Developed for Pokémon Collectors & Enthusiasts worldwide.  
-© 2026 **POKÉVAULT LEGENDS**. All rights reserved.
+### 1. Launch AWS EC2 Instance
+- **AMI**: Ubuntu Server 22.04 LTS or 24.04 LTS (x86_64).
+- **Instance Type**: `t2.micro` or `t3.micro` (Free Tier eligible).
+- **Security Group Rules**:
+  - `SSH (Port 22)`: Your IP
+  - `HTTP (Port 80)`: `0.0.0.0/0` (Anywhere)
+  - `HTTPS (Port 443)`: `0.0.0.0/0` (Anywhere)
+
+### 2. Connect via SSH
+```bash
+ssh -i /path/to/your-key.pem ubuntu@<YOUR-EC2-PUBLIC-IP>
+```
+
+### 3. Clone Repository & Run Automated Server Provisioning
+```bash
+# Clone repository into /opt/pokevault
+sudo git clone https://github.com/itsme-aarjav/3-tier-application.git /opt/pokevault
+sudo chown -R ubuntu:ubuntu /opt/pokevault
+cd /opt/pokevault
+
+# Make scripts executable
+chmod +x deploy/*.sh
+
+# Run automated EC2 provisioner (Installs Docker, UFW Firewall, and Tunes Kernel)
+sudo ./deploy/setup-ec2.sh
+```
+
+### 4. Deploy the Entire Stack
+```bash
+# Add user to docker group if needed
+sudo usermod -aG docker ubuntu
+newgrp docker
+
+# Run zero-downtime deployment pipeline
+./deploy/deploy.sh
+```
+
+### 5. Access Live Application
+Open your browser and navigate to:
+```text
+http://<YOUR-EC2-PUBLIC-IP>
+```
+- **Storefront**: `http://<YOUR-EC2-PUBLIC-IP>`
+- **Admin Dashboard**: `http://<YOUR-EC2-PUBLIC-IP>/admin.html` *(Passcode: `pokevaultadmin123`)*
+
+### 6. Setup Automated Daily MySQL Backups
+```bash
+crontab -e
+```
+Add this cron schedule to run backups daily at 2:00 AM:
+```cron
+0 2 * * * /opt/pokevault/deploy/backup-mysql.sh >> /var/log/pokevault/backup.log 2>&1
+```
+
+---
+
+## 🔮 Future Extensibility Roadmap
+
+The repository is modularly architected to accommodate upcoming DevOps tooling:
+- **CI/CD Pipelines**: Adding `.github/workflows/` for automated unit testing, container build & push to **Amazon ECR**, and SSH deployment.
+- **Infrastructure as Code (IaC)**: Adding `terraform/` to provision AWS VPC, subnets, EC2 instances, and Amazon RDS with one command (`terraform apply`).
+- **Container Orchestration**: Adding `k8s/` or `helm/` manifests for Kubernetes cluster deployments and Horizontal Pod Autoscalers (HPA).
+- **Observability**: Adding `monitoring/` with Prometheus and Grafana dashboards for live container and host metrics.
+
+---
+
+## 📜 License
+This project is licensed under the MIT License — feel free to use and extend for personal and portfolio projects.

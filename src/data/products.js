@@ -1693,14 +1693,67 @@ export const ALL_PRODUCTS = [
   ...MERCHANDISE_PRODUCTS
 ];
 
-// Helper Functions
-export const getAllProducts = () => ALL_PRODUCTS;
+// Live Stock Overrides Helper (Browser Storage & Cross-Tab Sync)
+export const getLiveInventoryOverrides = () => {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem('pokevault_inventory_overrides');
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+};
 
-export const getProductById = (id) => ALL_PRODUCTS.find(p => p.id === id);
+export const setLiveInventoryOverride = (cardId, stock) => {
+  if (typeof window === 'undefined') return;
+  try {
+    const overrides = getLiveInventoryOverrides();
+    const safeStock = Math.max(0, Number(stock) || 0);
+    overrides[cardId] = safeStock;
+    localStorage.setItem('pokevault_inventory_overrides', JSON.stringify(overrides));
+    window.dispatchEvent(new CustomEvent('pv-inventory-updated', { detail: { cardId, stock: safeStock } }));
+  } catch (e) {
+    console.error('Error saving inventory override:', e);
+  }
+};
+
+// Helper Functions
+export const getAllProducts = () => {
+  const overrides = getLiveInventoryOverrides();
+  return ALL_PRODUCTS.map(p => {
+    if (overrides[p.id] !== undefined) {
+      const s = Number(overrides[p.id]);
+      return {
+        ...p,
+        inStock: s,
+        in_stock: s,
+        availability: s > 0 ? "In Stock" : "Out of Stock"
+      };
+    }
+    return p;
+  });
+};
+
+export const getProductById = (id) => {
+  const overrides = getLiveInventoryOverrides();
+  const p = ALL_PRODUCTS.find(item => item.id === id);
+  if (!p) return undefined;
+  if (overrides[id] !== undefined) {
+    const s = Number(overrides[id]);
+    return {
+      ...p,
+      inStock: s,
+      in_stock: s,
+      availability: s > 0 ? "In Stock" : "Out of Stock"
+    };
+  }
+  return p;
+};
 
 export const getProductsByCategory = (categorySlug) => {
-  if (!categorySlug || categorySlug === 'all') return ALL_PRODUCTS;
-  return ALL_PRODUCTS.filter(p => p.category === categorySlug);
+  const list = getAllProducts();
+  if (!categorySlug || categorySlug === 'all') return list;
+  return list.filter(p => p.category === categorySlug);
 };
 
 const TYPO_MAP = {
@@ -1724,11 +1777,12 @@ const TYPO_MAP = {
 };
 
 export const searchProducts = (query) => {
-  if (!query) return ALL_PRODUCTS;
+  const list = getAllProducts();
+  if (!query) return list;
   let q = query.toLowerCase().trim();
   if (TYPO_MAP[q]) q = TYPO_MAP[q];
 
-  return ALL_PRODUCTS.filter(p => 
+  return list.filter(p => 
     p.name.toLowerCase().includes(q) ||
     p.categoryName.toLowerCase().includes(q) ||
     p.pokemon.toLowerCase().includes(q) ||
@@ -1747,12 +1801,12 @@ export const filterProducts = ({
   badge = 'all',
   sortBy = 'featured'
 }) => {
-  let list = ALL_PRODUCTS.filter(p => {
+  let list = getAllProducts().filter(p => {
     if (category !== 'all' && p.category !== category) return false;
     if (pokemon !== 'all' && p.pokemon.toLowerCase() !== pokemon.toLowerCase()) return false;
     if (p.price < minPrice || p.price > maxPrice) return false;
     if (p.rating < rating) return false;
-    if (inStockOnly && p.inStock <= 0) return false;
+    if (inStockOnly && (p.inStock <= 0 || p.in_stock <= 0)) return false;
     if (badge !== 'all' && p.badge !== badge) return false;
     return true;
   });

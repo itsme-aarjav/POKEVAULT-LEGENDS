@@ -7,7 +7,7 @@ import { renderNavbar, initNavbarEvents } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
 import { renderCartDrawer, initCartDrawerEvents } from './components/cart-drawer.js';
 import { renderProductCard, bindProductCardEvents } from './components/product-card.js';
-import { getAllProducts, getProductById } from './data/products.js';
+import { getAllProducts, getProductById, getLiveInventoryOverrides } from './data/products.js';
 import { getReviewsForProduct } from './data/reviews.js';
 import { addToCart, toggleWishlist, isInWishlist } from './utils/store.js';
 import { injectProductSeo } from './utils/seo.js';
@@ -18,12 +18,24 @@ const confetti = confettiModule?.default || confettiModule || ((typeof window !=
 
 class ProductPage {
   constructor() {
-    this.allProducts = getAllProducts();
     const params = new URLSearchParams(window.location.search);
     const cardId = params.get('id');
+    this.allProducts = getAllProducts();
     this.product = getProductById(cardId) || this.allProducts[0];
     this.reviews = getReviewsForProduct(this.product.id);
-    const initStock = this.product.in_stock !== undefined ? Number(this.product.in_stock) : (this.product.inStock !== undefined ? Number(this.product.inStock) : 10);
+
+    const overrides = getLiveInventoryOverrides();
+    let initStock = this.product.in_stock !== undefined ? Number(this.product.in_stock) : (this.product.inStock !== undefined ? Number(this.product.inStock) : 10);
+    if (overrides[this.product.id] !== undefined) {
+      initStock = Number(overrides[this.product.id]);
+      this.product = {
+        ...this.product,
+        in_stock: initStock,
+        inStock: initStock,
+        availability: initStock > 0 ? "In Stock" : "Out of Stock"
+      };
+    }
+
     this.selectedQty = initStock > 0 ? 1 : 0;
 
     // Inject Rich Schema.org Product, Offer, AggregateRating, Review & Breadcrumb JSON-LD
@@ -31,6 +43,22 @@ class ProductPage {
 
     this.initLayout();
     this.renderProductDetails();
+
+    // Listen for live inventory changes across tabs or admin panel
+    window.addEventListener('pv-inventory-updated', (e) => {
+      if (e.detail && e.detail.cardId === this.product.id) {
+        const newStock = Number(e.detail.stock);
+        this.product = {
+          ...this.product,
+          in_stock: newStock,
+          inStock: newStock,
+          availability: newStock > 0 ? "In Stock" : "Out of Stock"
+        };
+        this.selectedQty = newStock > 0 ? Math.min(Math.max(1, this.selectedQty), newStock) : 0;
+        this.renderProductDetails();
+      }
+    });
+
     if (cardId) {
       this.fetchLiveProductData(cardId);
     }
@@ -38,26 +66,56 @@ class ProductPage {
 
   async fetchLiveProductData(cardId) {
     try {
-      const res = await fetch(`/api/cards/${cardId}`);
-      if (res.ok) {
-        const json = await res.json();
-        if (json && json.success && json.data) {
-          const live = json.data;
-          const liveStock = live.in_stock !== undefined ? Number(live.in_stock) : (live.inStock !== undefined ? Number(live.inStock) : (live.stock_quantity !== undefined ? Number(live.stock_quantity) : 0));
-          this.product = {
-            ...this.product,
-            ...live,
-            in_stock: liveStock,
-            inStock: liveStock,
-            availability: liveStock > 0 ? "In Stock" : "Out of Stock"
-          };
-          if (liveStock <= 0) {
-            this.selectedQty = 0;
-          } else if (this.selectedQty === 0) {
-            this.selectedQty = 1;
+      let liveStock = null;
+      let liveData = null;
+
+      // 1. Fetch from /api/cards/:id
+      try {
+        const res = await fetch(`/api/cards/${cardId}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json && json.success && json.data) {
+            liveData = json.data;
+            const s = liveData.in_stock !== undefined ? Number(liveData.in_stock) : (liveData.inStock !== undefined ? Number(liveData.inStock) : null);
+            if (s !== null) liveStock = s;
           }
-          this.renderProductDetails();
         }
+      } catch (e) {}
+
+      // 2. Fetch from /api/inventory/:cardId as secondary validation
+      try {
+        const invRes = await fetch(`/api/inventory/${cardId}`);
+        if (invRes.ok) {
+          const invJson = await invRes.json();
+          if (invJson && invJson.success && invJson.data) {
+            const invStock = invJson.data.stock_quantity !== undefined ? Number(invJson.data.stock_quantity) : (invJson.data.stockQuantity !== undefined ? Number(invJson.data.stockQuantity) : null);
+            if (invStock !== null) liveStock = invStock;
+          }
+        }
+      } catch (e) {}
+
+      // 3. Fallback to browser local overrides
+      const overrides = getLiveInventoryOverrides();
+      if (overrides[cardId] !== undefined) {
+        liveStock = Number(overrides[cardId]);
+      }
+
+      if (liveStock !== null) {
+        this.product = {
+          ...this.product,
+          ...(liveData || {}),
+          in_stock: liveStock,
+          inStock: liveStock,
+          availability: liveStock > 0 ? "In Stock" : "Out of Stock"
+        };
+        if (liveStock <= 0) {
+          this.selectedQty = 0;
+        } else if (this.selectedQty === 0) {
+          this.selectedQty = 1;
+        } else {
+          this.selectedQty = Math.min(this.selectedQty, liveStock);
+        }
+        this.renderProductDetails();
       }
     } catch (e) {
       console.warn('Live product stock fetch error:', e);

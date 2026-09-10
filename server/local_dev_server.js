@@ -35,13 +35,14 @@ const server = http.createServer(async (req, res) => {
 
   // API Endpoints
   if (reqUrl === '/api/cards' || reqUrl === '/api/products') {
+    const list = getAllProducts();
     res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-    return res.end(JSON.stringify({ success: true, count: ALL_PRODUCTS.length, data: ALL_PRODUCTS }));
+    return res.end(JSON.stringify({ success: true, count: list.length, data: list }));
   }
 
   if (reqUrl.startsWith('/api/cards/')) {
     const id = reqUrl.replace('/api/cards/', '');
-    const found = ALL_PRODUCTS.find(p => p.id === id);
+    const found = getProductById(id);
     if (found) {
       res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
       return res.end(JSON.stringify({ success: true, data: found }));

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { dbQuery, isMySQLConfigured, pool } from '../db/mysql.js';
 import { ALL_PRODUCTS } from '../../src/data/products.js';
+import { memoryInventory } from './inventory.js';
 import { requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
@@ -171,6 +172,26 @@ router.post('/', async (req, res) => {
     }
 
     // Local In-Memory Fallback
+    // 0. Validate stock availability in memory
+    for (const line of lineItems) {
+      if (memoryInventory && memoryInventory[line.card_id] !== undefined) {
+        if (memoryInventory[line.card_id].stockQuantity <= 0) {
+          return res.status(400).json({
+            success: false,
+            message: `Product "${line.card_name}" is currently out of stock and cannot be purchased.`
+          });
+        }
+      }
+    }
+
+    // 1. Decrement in-memory stock
+    for (const line of lineItems) {
+      if (memoryInventory && memoryInventory[line.card_id] !== undefined) {
+        memoryInventory[line.card_id].stockQuantity = Math.max(0, memoryInventory[line.card_id].stockQuantity - line.quantity);
+        memoryInventory[line.card_id].isInStock = memoryInventory[line.card_id].stockQuantity > 0;
+      }
+    }
+
     const orderRecord = {
       id: orderId,
       order_id: orderId,

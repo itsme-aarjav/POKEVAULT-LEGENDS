@@ -8,6 +8,7 @@ import { renderNavbar, initNavbarEvents } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
 import { renderCartDrawer, initCartDrawerEvents } from './components/cart-drawer.js';
 import { getCart, getCartSubtotal, getPromoState, applyPromoCode, removePromoCode, clearCart } from './utils/store.js';
+import { getLiveInventoryOverrides } from './data/products.js';
 
 class CheckoutPage {
   constructor() {
@@ -313,10 +314,14 @@ class CheckoutPage {
     };
 
     // Check for any out-of-stock items in cart
+    const overrides = getLiveInventoryOverrides();
     const outOfStockItem = this.cart.find(item => {
       const p = item.product;
       if (!p) return false;
-      const stock = p.in_stock !== undefined ? Number(p.in_stock) : (p.inStock !== undefined ? Number(p.inStock) : 10);
+      const itemId = p.id || item.id;
+      const stock = overrides[itemId] !== undefined
+        ? Number(overrides[itemId])
+        : (p.in_stock !== undefined ? Number(p.in_stock) : (p.inStock !== undefined ? Number(p.inStock) : 10));
       return stock <= 0;
     });
 

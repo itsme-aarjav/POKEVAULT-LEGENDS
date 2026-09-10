@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { dbQuery, isMySQLConfigured } from '../db/mysql.js';
 import { ALL_PRODUCTS } from '../../src/data/products.js';
+import { memoryInventory } from './inventory.js';
 import { requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
@@ -72,8 +73,19 @@ router.get('/', async (req, res) => {
       }
     }
 
-    // Fallback to master ALL_PRODUCTS catalog
-    let list = [...ALL_PRODUCTS];
+    // Fallback to master ALL_PRODUCTS catalog with synchronized live stock
+    let list = ALL_PRODUCTS.map(c => {
+      const stock = memoryInventory && memoryInventory[c.id] !== undefined
+        ? Number(memoryInventory[c.id].stockQuantity)
+        : (c.inStock !== undefined ? Number(c.inStock) : (c.in_stock !== undefined ? Number(c.in_stock) : 10));
+      return {
+        ...c,
+        in_stock: stock,
+        inStock: stock,
+        availability: stock > 0 ? 'In Stock' : 'Out of Stock'
+      };
+    });
+
     if (category && category !== 'all') list = list.filter(c => c.category === category);
     if (pokemon && pokemon !== 'all') list = list.filter(c => c.pokemon.toLowerCase() === pokemon.toLowerCase());
     if (era && era !== 'all') list = list.filter(c => c.eraCode === era);
@@ -123,7 +135,19 @@ router.get('/:id', async (req, res) => {
 
     const product = ALL_PRODUCTS.find(c => c.id === id);
     if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
-    return res.json({ success: true, data: product, source: 'local' });
+    
+    const stock = memoryInventory && memoryInventory[id] !== undefined
+      ? Number(memoryInventory[id].stockQuantity)
+      : (product.inStock !== undefined ? Number(product.inStock) : (product.in_stock !== undefined ? Number(product.in_stock) : 10));
+
+    const formattedProduct = {
+      ...product,
+      in_stock: stock,
+      inStock: stock,
+      availability: stock > 0 ? 'In Stock' : 'Out of Stock'
+    };
+
+    return res.json({ success: true, data: formattedProduct, source: 'local' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -135,6 +159,18 @@ router.post('/', requireAdmin, async (req, res) => {
     const p = req.body;
     if (!p.id || !p.name || !p.price) {
       return res.status(400).json({ success: false, message: 'id, name, and price are required' });
+    }
+
+    const stock = p.inStock !== undefined ? Number(p.inStock) : (p.in_stock !== undefined ? Number(p.in_stock) : 10);
+    if (memoryInventory) {
+      memoryInventory[p.id] = {
+        cardId: p.id,
+        stockQuantity: stock,
+        reservedQuantity: 0,
+        lowStockThreshold: 1,
+        isInStock: stock > 0,
+        lastRestockedAt: new Date().toISOString()
+      };
     }
 
     if (isMySQLConfigured()) {

@@ -1,24 +1,25 @@
 import { Router } from 'express';
 import { dbQuery, isMySQLConfigured } from '../db/mysql.js';
-import { CARDS_DATA } from '../../src/data/cards.js';
+import { ALL_PRODUCTS } from '../../src/data/products.js';
 import { requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
 
-// In-memory fallback stock database
-const memoryInventory = {};
-CARDS_DATA.forEach(c => {
+// In-memory fallback stock database for all catalog products
+export const memoryInventory = {};
+ALL_PRODUCTS.forEach(c => {
+  const stock = c.inStock !== undefined ? Number(c.inStock) : (c.in_stock !== undefined ? Number(c.in_stock) : 10);
   memoryInventory[c.id] = {
     cardId: c.id,
-    stockQuantity: c.inStock || 10,
+    stockQuantity: stock,
     reservedQuantity: 0,
     lowStockThreshold: 1,
-    isInStock: (c.inStock || 10) > 0,
+    isInStock: stock > 0,
     lastRestockedAt: new Date().toISOString()
   };
 });
 
-// GET /api/inventory — Get stock levels for all cards
+// GET /api/inventory — Get stock levels for all products
 router.get('/', async (req, res) => {
   try {
     if (isMySQLConfigured()) {
@@ -38,7 +39,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/inventory/:cardId — Get stock level for a single card
+// GET /api/inventory/:cardId — Get stock level for a single card/product
 router.get('/:cardId', async (req, res) => {
   try {
     const { cardId } = req.params;
@@ -53,12 +54,21 @@ router.get('/:cardId', async (req, res) => {
       if (rows && rows.length > 0) {
         return res.json({ success: true, data: rows[0], source: 'mysql' });
       }
-      return res.status(404).json({ success: false, message: 'Inventory record not found' });
     }
 
-    const item = memoryInventory[cardId];
-    if (!item) return res.status(404).json({ success: false, message: 'Card inventory not found' });
-    return res.json({ success: true, data: item, source: 'local' });
+    if (!memoryInventory[cardId]) {
+      const p = ALL_PRODUCTS.find(c => c.id === cardId);
+      const stock = p ? (p.inStock !== undefined ? Number(p.inStock) : 10) : 10;
+      memoryInventory[cardId] = {
+        cardId,
+        stockQuantity: stock,
+        reservedQuantity: 0,
+        lowStockThreshold: 1,
+        isInStock: stock > 0,
+        lastRestockedAt: new Date().toISOString()
+      };
+    }
+    return res.json({ success: true, data: memoryInventory[cardId], source: 'local' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

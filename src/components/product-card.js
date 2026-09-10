@@ -4,11 +4,15 @@
  */
 
 import { isInWishlist, toggleWishlist, addToCart } from '../utils/store.js';
+import { getLiveInventoryOverrides } from '../data/products.js';
 
 export function renderProductCard(product) {
   const isWishlisted = isInWishlist(product.id);
   const starsHtml = '★'.repeat(Math.floor(product.rating)) + (product.rating % 1 !== 0 ? '½' : '');
-  const stock = product.in_stock !== undefined ? Number(product.in_stock) : (product.inStock !== undefined ? Number(product.inStock) : 10);
+  const overrides = getLiveInventoryOverrides();
+  const stock = overrides[product.id] !== undefined
+    ? Number(overrides[product.id])
+    : (product.in_stock !== undefined ? Number(product.in_stock) : (product.inStock !== undefined ? Number(product.inStock) : 10));
   const isOutOfStock = stock <= 0;
   const isLowStock = !isOutOfStock && stock <= 3;
 

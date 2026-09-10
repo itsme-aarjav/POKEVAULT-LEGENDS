@@ -1,0 +1,267 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 820" width="100%" height="100%" style="background:#ffffff; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <!-- Shadows & Gradients -->
+    <filter id="box-shadow" x="-4%" y="-4%" width="108%" height="108%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.06"/>
+    </filter>
+    <filter id="elevated-shadow" x="-6%" y="-6%" width="112%" height="112%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.09"/>
+    </filter>
+    <linearGradient id="aws-header-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#232F3E"/>
+      <stop offset="100%" stop-color="#131A22"/>
+    </linearGradient>
+    <linearGradient id="alb-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8C4FFF"/>
+      <stop offset="100%" stop-color="#6B21A8"/>
+    </linearGradient>
+    <linearGradient id="ec2-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FF9900"/>
+      <stop offset="100%" stop-color="#EC7211"/>
+    </linearGradient>
+    <linearGradient id="cw-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E11D48"/>
+      <stop offset="100%" stop-color="#BE123C"/>
+    </linearGradient>
+    <linearGradient id="db-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <!-- Arrowhead Markers -->
+    <marker id="arrow-solid" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1E293B"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284C7"/>
+    </marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#EA580C"/>
+    </marker>
+    <marker id="arrow-pink" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#BE123C"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-dashed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748B"/>
+    </marker>
+  </defs>
+
+  <!-- ========================================== -->
+  <!-- 1. TOP CLIENTS BAR -->
+  <!-- ========================================== -->
+  <g transform="translate(420, 25)" filter="url(#elevated-shadow)">
+    <rect width="440" height="60" rx="8" fill="#FFFFFF" stroke="#0EA5E9" stroke-width="2"/>
+    <rect x="0" y="0" width="440" height="6" rx="3" fill="#0EA5E9"/>
+    <text x="220" y="32" text-anchor="middle" font-size="14" font-weight="700" fill="#0F172A">🌐 Global Users &amp; Web Browsers</text>
+    <text x="220" y="49" text-anchor="middle" font-size="11" font-weight="500" fill="#64748B">Desktop &amp; Mobile Clients (Worldwide Traffic)</text>
+  </g>
+
+  <!-- NETLIFY ACTIVE MIRROR (Top Left) -->
+  <g transform="translate(35, 25)" filter="url(#elevated-shadow)">
+    <rect width="320" height="85" rx="8" fill="#F0FDFA" stroke="#0D9488" stroke-width="1.5"/>
+    <rect x="0" y="0" width="320" height="6" rx="3" fill="#0D9488"/>
+    <text x="160" y="26" text-anchor="middle" font-size="12" font-weight="700" fill="#0F766E">⚡ Netlify Global CDN (Active Mirror)</text>
+    <text x="160" y="44" text-anchor="middle" font-size="11" font-weight="600" fill="#134E4A">Static Assets + Serverless API</text>
+    <text x="160" y="62" text-anchor="middle" font-size="10" font-weight="500" fill="#0D9488">Zero-Idle-Cost Continuous Live Demo</text>
+    <text x="160" y="76" text-anchor="middle" font-size="9" font-family="monospace" fill="#64748B">pokevault-legends.netlify.app</text>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- 2. MAIN AWS CLOUD CONTAINER -->
+  <!-- ========================================== -->
+  <g transform="translate(35, 140)" filter="url(#elevated-shadow)">
+    <!-- AWS Box Outline -->
+    <rect width="1210" height="520" rx="12" fill="#F8FAFC" stroke="#232F3E" stroke-width="2"/>
+    
+    <!-- Header Banner -->
+    <path d="M 0 12 Q 0 0 12 0 L 1198 0 Q 1210 0 1210 12 L 1210 38 L 0 38 Z" fill="url(#aws-header-grad)"/>
+    <text x="20" y="24" font-size="13" font-weight="800" fill="#FF9900" letter-spacing="0.5">☁️ AWS PRODUCTION CLOUD INFRASTRUCTURE</text>
+    <text x="350" y="24" font-size="11" font-weight="600" fill="#94A3B8">|  Region: ap-south-1 (Asia Pacific - Mumbai)</text>
+
+    <!-- ========================================== -->
+    <!-- 2A. AMAZON VPC -->
+    <!-- ========================================== -->
+    <g transform="translate(20, 50)">
+      <rect width="760" height="450" rx="8" fill="#FFFFFF" stroke="#0284C7" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <rect x="0" y="0" width="760" height="26" rx="4" fill="#E0F2FE"/>
+      <text x="15" y="17" font-size="11" font-weight="700" fill="#0369A1">🛡️ Amazon Virtual Private Cloud (VPC)</text>
+      <text x="310" y="17" font-size="10" font-weight="500" fill="#0284C7">CIDR: 10.0.0.0/16  |  Security Groups &amp; Network ACLs</text>
+
+      <!-- PUBLIC SUBNET (ALB) -->
+      <g transform="translate(20, 38)">
+        <rect width="720" height="110" rx="6" fill="#FAF5FF" stroke="#9333EA" stroke-width="1.2"/>
+        <text x="12" y="18" font-size="11" font-weight="700" fill="#7E22CE">Public Ingress Subnets (Multi-AZ)</text>
+
+        <!-- ALB CARD -->
+        <g transform="translate(15, 26)" filter="url(#box-shadow)">
+          <rect width="690" height="72" rx="6" fill="#FFFFFF" stroke="#A855F7" stroke-width="1.5"/>
+          <rect x="0" y="0" width="6" height="72" rx="2" fill="url(#alb-grad)"/>
+          <text x="20" y="22" font-size="13" font-weight="700" fill="#581C87">⚖️ AWS Application Load Balancer (ALB)</text>
+          <text x="340" y="22" font-size="10" font-family="monospace" font-weight="700" fill="#9333EA">pokemon-app-alb-820885629.ap-south-1.elb.amazonaws.com</text>
+          <text x="20" y="42" font-size="11" font-weight="500" fill="#475569">• HTTP (80) &amp; HTTPS (443) Ingress Listeners with SSL/TLS Termination</text>
+          <text x="20" y="58" font-size="11" font-weight="500" fill="#475569">• Target Group Health Probes: <tspan font-family="monospace" font-weight="600" fill="#7E22CE">GET /api/health</tspan> (5s Interval)  |  Cross-Zone Load Balancing</text>
+        </g>
+      </g>
+
+      <!-- APPLICATION SUBNETS (ASG & EC2) -->
+      <g transform="translate(20, 165)">
+        <rect width="720" height="270" rx="6" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1.2"/>
+        <text x="12" y="18" font-size="11" font-weight="700" fill="#B45309">Application Compute Subnets (Target Group: Port 5001)</text>
+
+        <!-- ASG WRAPPER -->
+        <g transform="translate(15, 26)" filter="url(#box-shadow)">
+          <rect width="690" height="230" rx="6" fill="#FFFFFF" stroke="#EA580C" stroke-width="1.5"/>
+          <rect x="0" y="0" width="6" height="230" rx="2" fill="url(#ec2-grad)"/>
+          
+          <text x="20" y="24" font-size="13" font-weight="800" fill="#9A3412">🔄 AWS Auto Scaling Group (ASG)</text>
+          <text x="280" y="24" font-size="11" font-weight="600" fill="#EA580C">|  Amazon EC2 Compute Instances (Ubuntu LTS / Node.js 18+)</text>
+          
+          <rect x="20" y="36" width="650" height="1" fill="#FED7AA"/>
+
+          <!-- Express Box Details -->
+          <text x="20" y="56" font-size="12" font-weight="700" fill="#0F172A">⚡ POKÉVAULT Production Express.js Service</text>
+          <text x="320" y="56" font-size="11" font-family="monospace" font-weight="600" fill="#EA580C">Host: 0.0.0.0 | Port: 5001 | Daemon: systemd</text>
+
+          <g transform="translate(20, 70)">
+            <rect width="310" height="65" rx="4" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+            <text x="10" y="18" font-size="11" font-weight="700" fill="#0F172A">📁 Vite SPA Static Server</text>
+            <text x="10" y="34" font-size="10" font-weight="500" fill="#475569">Directly serves production <tspan font-family="monospace" font-weight="600">dist/</tspan> &amp; <tspan font-family="monospace" font-weight="600">public/</tspan></text>
+            <text x="10" y="50" font-size="10" font-weight="600" fill="#16A34A">✓ Self-Contained Monolith (Zero S3 Dependency)</text>
+          </g>
+
+          <g transform="translate(345, 70)">
+            <rect width="325" height="65" rx="4" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+            <text x="10" y="18" font-size="11" font-weight="700" fill="#0F172A">🔌 Express REST API Router</text>
+            <text x="10" y="34" font-size="10" font-family="monospace" fill="#475569">/api/cards, /api/orders, /api/paypal</text>
+            <text x="10" y="50" font-size="10" font-weight="600" fill="#16A34A">✓ Dedicated Node Runtime (Zero Lambda Cold-Starts)</text>
+          </g>
+
+          <g transform="translate(20, 145)">
+            <rect width="310" height="70" rx="4" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1"/>
+            <text x="10" y="18" font-size="11" font-weight="700" fill="#166534">🛡️ Server-Side Price Verification</text>
+            <text x="10" y="34" font-size="10" font-weight="500" fill="#14532D">Recalculates cart subtotals server-side</text>
+            <text x="10" y="50" font-size="10" font-weight="500" fill="#14532D">Prevents client-side price tampering</text>
+          </g>
+
+          <g transform="translate(345, 145)">
+            <rect width="325" height="70" rx="4" fill="#FFF1F2" stroke="#FDA4AF" stroke-width="1"/>
+            <text x="10" y="18" font-size="11" font-weight="700" fill="#9F1239">🛑 SIGTERM Connection Draining</text>
+            <text x="10" y="34" font-size="10" font-weight="500" fill="#881337">10-second graceful shutdown window</text>
+            <text x="10" y="50" font-size="10" font-weight="500" fill="#881337">Zero-downtime ASG scale-in &amp; redeploys</text>
+          </g>
+        </g>
+      </g>
+    </g>
+
+    <!-- ========================================== -->
+    <!-- 2B. CLOUDWATCH OBSERVABILITY -->
+    <!-- ========================================== -->
+    <g transform="translate(805, 50)">
+      <rect width="385" height="450" rx="8" fill="#FFF1F2" stroke="#E11D48" stroke-width="1.5"/>
+      <rect x="0" y="0" width="385" height="26" rx="4" fill="#FFE4E6"/>
+      <text x="15" y="17" font-size="11" font-weight="700" fill="#9F1239">📊 Amazon CloudWatch Observability &amp; Alarms</text>
+
+      <!-- ALARMS BOX -->
+      <g transform="translate(15, 38)" filter="url(#box-shadow)">
+        <rect width="355" height="95" rx="6" fill="#FFFFFF" stroke="#E11D48" stroke-width="1.2"/>
+        <rect x="0" y="0" width="6" height="95" rx="2" fill="url(#cw-grad)"/>
+        <text x="18" y="20" font-size="12" font-weight="700" fill="#9F1239">🚨 CloudWatch Alarms &amp; Auto-Scaling</text>
+        <text x="18" y="38" font-size="10" font-weight="500" fill="#475569">• <tspan font-weight="700">High CPU Utilization Alarm</tspan> (&gt; 75%)</text>
+        <text x="18" y="54" font-size="10" font-weight="600" fill="#E11D48">  ➔ Automatically triggers ASG Scale-Out</text>
+        <text x="18" y="70" font-size="10" font-weight="500" fill="#475569">• <tspan font-weight="700">Target Health Failure Alert</tspan> (&gt; 1 Unhealthy)</text>
+        <text x="18" y="86" font-size="10" font-weight="500" fill="#475569">• High Latency Alert (TargetResponseTime &gt; 500ms)</text>
+      </g>
+
+      <!-- METRICS BOX -->
+      <g transform="translate(15, 145)" filter="url(#box-shadow)">
+        <rect width="355" height="135" rx="6" fill="#FFFFFF" stroke="#F43F5E" stroke-width="1.2"/>
+        <rect x="0" y="0" width="6" height="135" rx="2" fill="#F43F5E"/>
+        <text x="18" y="20" font-size="12" font-weight="700" fill="#9F1239">📈 Real-Time CloudWatch Metrics</text>
+        <text x="18" y="38" font-size="10" font-weight="600" fill="#0F172A">ALB Telemetry:</text>
+        <text x="24" y="52" font-size="10" font-family="monospace" fill="#475569">• RequestCount &amp; ActiveConnectionCount</text>
+        <text x="24" y="66" font-size="10" font-family="monospace" fill="#475569">• TargetResponseTime (P95 / P99)</text>
+        <text x="24" y="80" font-size="10" font-family="monospace" fill="#475569">• HTTPCode_Target_4XX &amp; 5XX_Count</text>
+        <text x="18" y="98" font-size="10" font-weight="600" fill="#0F172A">EC2 Instance Telemetry:</text>
+        <text x="24" y="112" font-size="10" font-family="monospace" fill="#475569">• CPUUtilization &amp; MemoryUsage</text>
+        <text x="24" y="126" font-size="10" font-family="monospace" fill="#475569">• NetworkIn &amp; NetworkOut Throughput</text>
+      </g>
+
+      <!-- LOGS BOX -->
+      <g transform="translate(15, 292)" filter="url(#box-shadow)">
+        <rect width="355" height="95" rx="6" fill="#FFFFFF" stroke="#FDA4AF" stroke-width="1.2"/>
+        <rect x="0" y="0" width="6" height="95" rx="2" fill="#FDA4AF"/>
+        <text x="18" y="20" font-size="12" font-weight="700" fill="#9F1239">📜 CloudWatch Logs &amp; journald</text>
+        <text x="18" y="38" font-size="10" font-weight="500" fill="#475569">• Node.js Express stdout / stderr streaming</text>
+        <text x="18" y="54" font-size="10" font-weight="500" fill="#475569">• systemd <tspan font-family="monospace">pokevault.service</tspan> daemon logs</text>
+        <text x="18" y="70" font-size="10" font-weight="500" fill="#475569">• ALB Access Logs with Client IP &amp; User Agent</text>
+        <text x="18" y="86" font-size="10" font-weight="500" fill="#475569">• Log retention policies with CloudWatch Insights</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- 3. EXTERNAL SERVICES CONTAINER (Bottom) -->
+  <!-- ========================================== -->
+  <g transform="translate(35, 680)" filter="url(#elevated-shadow)">
+    <rect width="1210" height="110" rx="8" fill="#F0FDF4" stroke="#16A34A" stroke-width="1.5"/>
+    <rect x="0" y="0" width="1210" height="24" rx="4" fill="#DCFCE7"/>
+    <text x="20" y="16" font-size="11" font-weight="700" fill="#15803D">🗄️ EXTERNAL MANAGED DATA &amp; PAYMENT GATEWAYS</text>
+
+    <!-- SUPABASE DB -->
+    <g transform="translate(20, 32)" filter="url(#box-shadow)">
+      <rect width="570" height="65" rx="6" fill="#FFFFFF" stroke="#10B981" stroke-width="1.5"/>
+      <rect x="0" y="0" width="6" height="65" rx="2" fill="url(#db-grad)"/>
+      <text x="20" y="22" font-size="12" font-weight="700" fill="#065F46">🗄️ Supabase PostgreSQL Database (Managed Cloud)</text>
+      <text x="20" y="38" font-size="10" font-weight="500" fill="#334155">• Tables: <tspan font-family="monospace" font-weight="600">products</tspan>, <tspan font-family="monospace" font-weight="600">cards</tspan>, <tspan font-family="monospace" font-weight="600">orders</tspan>, <tspan font-family="monospace" font-weight="600">order_items</tspan>, <tspan font-family="monospace" font-weight="600">categories</tspan></text>
+      <text x="20" y="52" font-size="10" font-weight="600" fill="#059669">• TLS Encrypted SQL Queries  |  Row Level Security (RLS)  |  Connection Pooling</text>
+    </g>
+
+    <!-- PAYPAL API -->
+    <g transform="translate(620, 32)" filter="url(#box-shadow)">
+      <rect width="570" height="65" rx="6" fill="#FFFFFF" stroke="#0284C7" stroke-width="1.5"/>
+      <rect x="0" y="0" width="6" height="65" rx="2" fill="#0284C7"/>
+      <text x="20" y="22" font-size="12" font-weight="700" fill="#075985">💳 PayPal REST Developer API</text>
+      <text x="20" y="38" font-size="10" font-weight="500" fill="#334155">• Endpoints: <tspan font-family="monospace">/v2/checkout/orders</tspan> &amp; <tspan font-family="monospace">/v2/checkout/orders/{id}/capture</tspan></text>
+      <text x="20" y="52" font-size="10" font-weight="600" fill="#0284C7">• Server-to-Server OAuth 2.0 Auth  |  Instant Payment Capture Verification</text>
+    </g>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- 4. CONNECTING FLOW ARROWS -->
+  <!-- ========================================== -->
+  <!-- User to ALB -->
+  <path d="M 640 85 L 640 220" stroke="#0284C7" stroke-width="2.5" fill="none" marker-end="url(#arrow-blue)"/>
+  <rect x="560" y="105" width="160" height="22" rx="4" fill="#FFFFFF" stroke="#0284C7" stroke-width="1"/>
+  <text x="640" y="120" text-anchor="middle" font-size="10" font-weight="700" fill="#0369A1">HTTPS / HTTP (443 / 80)</text>
+
+  <!-- User to Netlify -->
+  <path d="M 420 55 L 355 55" stroke="#0D9488" stroke-width="2" stroke-dasharray="4 4" fill="none" marker-end="url(#arrow-dashed)"/>
+
+  <!-- ALB to ASG Target Group -->
+  <path d="M 420 295 L 420 380" stroke="#EA580C" stroke-width="2.5" fill="none" marker-end="url(#arrow-orange)"/>
+  <rect x="300" y="325" width="240" height="22" rx="4" fill="#FFFFFF" stroke="#EA580C" stroke-width="1"/>
+  <text x="420" y="340" text-anchor="middle" font-size="10" font-weight="700" fill="#C2410C">Forward Traffic to Port 5001</text>
+
+  <!-- Health Probes ALB to API -->
+  <path d="M 640 295 L 640 380" stroke="#9333EA" stroke-width="2" stroke-dasharray="5 3" fill="none" marker-end="url(#arrow-dashed)"/>
+  <rect x="550" y="325" width="180" height="22" rx="4" fill="#FFFFFF" stroke="#9333EA" stroke-width="1"/>
+  <text x="640" y="340" text-anchor="middle" font-size="9" font-weight="700" fill="#7E22CE">GET /api/health Probes</text>
+
+  <!-- EC2 to Supabase DB -->
+  <path d="M 220 635 L 220 710" stroke="#059669" stroke-width="2.5" fill="none" marker-end="url(#arrow-green)"/>
+
+  <!-- EC2 to PayPal API -->
+  <path d="M 720 635 L 720 670 L 900 670 L 900 710" stroke="#0284C7" stroke-width="2" fill="none" marker-end="url(#arrow-blue)"/>
+
+  <!-- CloudWatch Alarms to ASG -->
+  <path d="M 840 230 L 745 230 L 745 420" stroke="#BE123C" stroke-width="2" stroke-dasharray="5 3" fill="none" marker-end="url(#arrow-pink)"/>
+  <rect x="760" y="270" width="170" height="20" rx="4" fill="#FFFFFF" stroke="#BE123C" stroke-width="1"/>
+  <text x="845" y="284" text-anchor="middle" font-size="9" font-weight="700" fill="#9F1239">Trigger Scale In / Out</text>
+
+  <!-- Telemetry to CloudWatch -->
+  <path d="M 745 490 L 840 490" stroke="#F43F5E" stroke-width="1.5" stroke-dasharray="4 3" fill="none" marker-end="url(#arrow-pink)"/>
+
+</svg>

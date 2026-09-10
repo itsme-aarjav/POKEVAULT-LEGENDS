@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Primary Meta Tags -->
+  <title>Your Saved Vault Wishlist — POKÉVAULT LEGENDS</title>
+  <meta name="description" content="View and manage your saved Pokémon collector items and graded slabs in your PokéVault wishlist." />
+  <meta name="keywords" content="pokemon wishlist, saved pokemon items" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="canonical" href="https://pokevault-legends.com/wishlist.html" />
+
+  <!-- OpenGraph / Facebook Meta Tags -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pokevault-legends.com/wishlist.html" />
+  <meta property="og:site_name" content="POKÉVAULT LEGENDS" />
+  <meta property="og:title" content="Your Saved Vault Wishlist — POKÉVAULT LEGENDS" />
+  <meta property="og:description" content="View and manage your saved Pokémon collector items and graded slabs in your PokéVault wishlist." />
+  <meta property="og:image" content="https://pokevault-legends.com/assets/mew.png" />
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://pokevault-legends.com/wishlist.html" />
+  <meta name="twitter:title" content="Your Saved Vault Wishlist — POKÉVAULT LEGENDS" />
+  <meta name="twitter:description" content="View and manage your saved Pokémon collector items and graded slabs in your PokéVault wishlist." />
+  <meta name="twitter:image" content="https://pokevault-legends.com/assets/mew.png" />
+
+  <meta name="description" content="View your saved Pokémon cards, plushies, figures, and merchandise collectibles." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Global Stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Native Browser Import Map for Three.js & Confetti -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "canvas-confetti": "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/+esm"
+    }
+  }
+  </script>
+
+</head>
+<body>
+  <div class="halftone-overlay"></div>
+
+  <!-- Shared Navbar Root -->
+  <div id="navbarRoot"></div>
+
+  <!-- WISHLIST HERO -->
+  <header class="page-hero-banner" style="background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%); color:#FFF;">
+    <div class="page-hero-container">
+      <div class="breadcrumb-nav">
+        <a href="index.html" style="color:#FFF;">Home</a> <span style="color:#FFF;">/</span> <span class="current" style="color:#FFF;">My Saved Wishlist</span>
+      </div>
+      <h1 class="page-title" style="color:#FFF;">MY SAVED VAULT WISHLIST</h1>
+      <p class="page-subtitle" style="color:#FFF;">Keep track of your favorite Pokémon collectibles and 1-click move them to your cart.</p>
+    </div>
+  </header>
+
+  <!-- WISHLIST CONTENT -->
+  <main class="page-container" style="padding: 3rem 2rem 6rem;">
+    <div class="shop-toolbar" style="margin-bottom: 2rem;">
+      <div class="results-count" id="wishlistCountText">0 Saved Items</div>
+      <a href="shop.html" class="btn-inspect" style="text-decoration:none;">Explore Marketplace →</a>
+    </div>
+
+    <!-- WISHLIST GRID -->
+    <div class="cards-grid" id="wishlistGrid">
+      <!-- Rendered dynamically -->
+    </div>
+  </main>
+
+  <!-- Shared Cart Drawer -->
+  <div id="cartDrawerRoot"></div>
+
+  <!-- Shared Footer Root -->
+  <div id="footerRoot"></div>
+
+  <script type="module" src="src/wishlist-page.js"></script>
+</body>
+</html>

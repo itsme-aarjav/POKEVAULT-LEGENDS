@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>The PokéVault Journal — Pokémon TCG Market Analysis, Pop Culture &amp; Grading Guides</title>
+  <meta name="description" content="Explore expert Pokémon card market analysis, vintage PSA 10 price guides, authentication masterclasses, Japanese Pokémon Center drops, and celebrity pop culture collecting." />
+  <meta name="keywords" content="pokemon card blog, pokemon tcg market analysis, psa grading guide, vintage charizard price guide, pokemon pop culture" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="canonical" href="https://pokevault-legends.com/blog.html" />
+
+  <!-- OpenGraph Meta Tags -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pokevault-legends.com/blog.html" />
+  <meta property="og:title" content="The PokéVault Journal — Pokémon TCG Market Analysis &amp; Pop Culture" />
+  <meta property="og:description" content="Expert market analysis, grading guides, and vintage Pokémon card trends." />
+  <meta property="og:image" content="https://pokevault-legends.com/assets/charizard.png" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="halftone-overlay"></div>
+
+  <!-- Shared Navbar Root -->
+  <div id="navbarRoot"></div>
+
+  <main class="blog-catalog-wrap">
+    <!-- HERO BANNER -->
+    <header class="portal-hero-banner" style="background: linear-gradient(135deg, #FFF056 0%, #FF914D 100%);">
+      <div style="font-family:var(--font-mono); font-weight:900; color:var(--accent-red); font-size:0.85rem; letter-spacing:1.5px; margin-bottom:6px;">
+        INSIGHTS, MARKET INTEL &amp; POP CULTURE
+      </div>
+      <h1 class="portal-hero-title">📰 THE POKÉVAULT JOURNAL</h1>
+      <p class="portal-hero-subtitle">
+        Deeply researched vintage market analyses, forensic slab authentication masterclasses, and Tokyo pop culture chronicles from our master appraisal curators.
+      </p>
+
+      <!-- CATEGORY PILL FILTERS -->
+      <div class="blog-filter-pills" id="blogCategoryFilters">
+        <button class="blog-filter-btn active" data-cat="all">All Articles</button>
+        <button class="blog-filter-btn" data-cat="Market Analysis">📈 Market Analysis</button>
+        <button class="blog-filter-btn" data-cat="Appraisal & Trust">🔍 Appraisal &amp; Trust</button>
+        <button class="blog-filter-btn" data-cat="Pop Culture & Merch">🌸 Tokyo Pop Culture</button>
+        <button class="blog-filter-btn" data-cat="Pop Culture & Celebrities">🎙️ Celebrity &amp; Fine Art</button>
+        <button class="blog-filter-btn" data-cat="Grading & Valuation">🏆 Grading Masterclass</button>
+      </div>
+    </header>
+
+    <!-- FEATURED HERO ARTICLE & BLOG GRID -->
+    <div id="blogCatalogContainer">
+      <!-- Injected by src/blog.js -->
+    </div>
+  </main>
+
+  <!-- Shared Cart Drawer & Footer -->
+  <div id="cartDrawerRoot"></div>
+  <div id="footerRoot"></div>
+
+  <script type="module" src="src/blog.js"></script>
+</body>
+</html>

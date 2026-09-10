@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Article Reader — The PokéVault Journal</title>
+  <meta name="description" content="Expert insights on Pokémon cards, PSA grading, pop culture trends, and collectibles." />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Schema.org Article JSON-LD will be injected dynamically by src/blog-post.js -->
+</head>
+<body>
+  <div class="halftone-overlay"></div>
+
+  <!-- Shared Navbar Root -->
+  <div id="navbarRoot"></div>
+
+  <main class="blog-article-wrap">
+    <div id="blogArticleContainer">
+      <!-- Injected dynamically by src/blog-post.js -->
+    </div>
+  </main>
+
+  <!-- Shared Cart Drawer & Footer -->
+  <div id="cartDrawerRoot"></div>
+  <div id="footerRoot"></div>
+
+  <script type="module" src="src/blog-post.js"></script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Primary Meta Tags -->
+  <title>Shopping Cart — POKÉVAULT LEGENDS Secure Vault Dispatch</title>
+  <meta name="description" content="Review items in your shopping cart and proceed to secure armored checkout with vault shipping guarantee." />
+  <meta name="keywords" content="pokemon cart, checkout pokevault" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="canonical" href="https://pokevault-legends.com/cart.html" />
+
+  <!-- OpenGraph / Facebook Meta Tags -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pokevault-legends.com/cart.html" />
+  <meta property="og:site_name" content="POKÉVAULT LEGENDS" />
+  <meta property="og:title" content="Shopping Cart — POKÉVAULT LEGENDS Secure Vault Dispatch" />
+  <meta property="og:description" content="Review items in your shopping cart and proceed to secure armored checkout with vault shipping guarantee." />
+  <meta property="og:image" content="https://pokevault-legends.com/assets/charizard.png" />
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://pokevault-legends.com/cart.html" />
+  <meta name="twitter:title" content="Shopping Cart — POKÉVAULT LEGENDS Secure Vault Dispatch" />
+  <meta name="twitter:description" content="Review items in your shopping cart and proceed to secure armored checkout with vault shipping guarantee." />
+  <meta name="twitter:image" content="https://pokevault-legends.com/assets/charizard.png" />
+
+  <meta name="description" content="Review items in your vault cart, apply promo codes, choose vault insurance, and proceed to checkout." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Global Stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Native Browser Import Map for Three.js & Confetti -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "canvas-confetti": "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/+esm"
+    }
+  }
+  </script>
+
+</head>
+<body>
+  <div class="halftone-overlay"></div>
+
+  <!-- Shared Navbar Root -->
+  <div id="navbarRoot"></div>
+
+  <!-- CART HERO BANNER -->
+  <header class="page-hero-banner" style="background: linear-gradient(135deg, #FFF056 0%, #FFD700 100%);">
+    <div class="page-hero-container">
+      <div class="breadcrumb-nav">
+        <a href="index.html">Home</a> <span>/</span> <span class="current">Shopping Cart</span>
+      </div>
+      <h1 class="page-title">YOUR VAULT SHOPPING CART</h1>
+      <p class="page-subtitle">Review your selected Pokémon merchandise items, apply promo discounts, and prepare for vault dispatch.</p>
+    </div>
+  </header>
+
+  <!-- CART MAIN CONTENT -->
+  <main class="page-container" style="padding: 3rem 2rem 6rem;">
+    <div class="cart-page-layout">
+      <!-- LEFT: CART ITEMS TABLE / LIST -->
+      <div class="cart-items-section">
+        <div class="table-card">
+          <div class="table-toolbar">
+            <span style="font-family:var(--font-title); font-weight:900; font-size:1.1rem;">VAULT CART ITEMS</span>
+            <button class="btn-inspect" id="clearCartPageBtn" style="padding:4px 12px; font-size:0.8rem;">Clear Entire Cart</button>
+          </div>
+          <div id="cartPageItemsTable">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: ORDER SUMMARY & PROMO CODES -->
+      <aside class="cart-summary-sidebar">
+        <div class="cart-summary-box">
+          <h3 class="summary-title">ORDER SUMMARY</h3>
+
+          <div class="summary-row">
+            <span>Items Subtotal:</span>
+            <span id="cartSubtotalText">$0.00</span>
+          </div>
+
+          <div class="summary-row" id="discountRow" style="display:none; color:var(--accent-red); font-weight:700;">
+            <span>Discount Applied:</span>
+            <span id="cartDiscountText">-$0.00</span>
+          </div>
+
+          <!-- Vault Insurance Option -->
+          <div class="summary-insurance-box">
+            <label class="filter-checkbox-label" style="font-size:0.85rem; font-weight:700;">
+              <input type="checkbox" id="insuranceCheckbox" checked />
+              <span>⚡ Vault Insured Express Shipping (+$9.99)</span>
+            </label>
+            <p style="font-size:0.75rem; color:#666; margin-top:4px; margin-left:24px;">Full loss &amp; damage protection with armored bubble wrapping.</p>
+          </div>
+
+          <div class="summary-row" style="margin-top:1rem;">
+            <span>Vault Shipping:</span>
+            <span id="shippingText">$9.99</span>
+          </div>
+
+          <div class="summary-total-row">
+            <span>ESTIMATED TOTAL:</span>
+            <span id="cartTotalText">$0.00</span>
+          </div>
+
+          <!-- PROMO CODE FORM -->
+          <div class="cart-promo-form-box">
+            <label style="display:block; font-family:var(--font-mono); font-size:0.8rem; font-weight:700; margin-bottom:6px;">PROMO / DISPATCH CODE</label>
+            <form id="cartPagePromoForm" style="display:flex; gap:6px;">
+              <input type="text" id="cartPagePromoInput" placeholder="Try POKEVAULT10" class="promo-input" style="flex:1; padding:8px 12px; font-family:var(--font-mono); font-size:0.85rem; border:2px solid #000; text-transform:uppercase;" />
+              <button type="submit" class="btn-inspect">Apply</button>
+            </form>
+            <div id="cartPagePromoStatus" style="font-family:var(--font-mono); font-size:0.8rem; margin-top:6px; font-weight:700;"></div>
+          </div>
+
+          <a href="checkout.html" class="btn-pill" style="width:100%; text-align:center; display:block; text-decoration:none; margin-top:1.5rem; font-size:1.1rem; padding:14px;">
+            Proceed to Checkout &amp; Dispatch →
+          </a>
+
+          <a href="shop.html" style="display:block; text-align:center; margin-top:1rem; font-family:var(--font-mono); font-size:0.85rem; color:#000; font-weight:700;">
+            ← Continue Shopping Marketplace
+          </a>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Shared Cart Drawer -->
+  <div id="cartDrawerRoot"></div>
+
+  <!-- Shared Footer Root -->
+  <div id="footerRoot"></div>
+
+  <script type="module" src="src/cart-page.js"></script>
+</body>
+</html>

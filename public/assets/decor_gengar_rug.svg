@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="100%" height="100%">
+  <defs>
+    <radialGradient id="rugShadow" cx="50%" cy="50%" r="50%">
+      <stop offset="70%" stop-color="#3B0764"/>
+      <stop offset="95%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#0F172A" stop-opacity="0.8"/>
+    </radialGradient>
+    <radialGradient id="portalGlow" cx="50%" cy="50%" r="45%">
+      <stop offset="0%" stop-color="#7E22CE"/>
+      <stop offset="70%" stop-color="#581C87"/>
+      <stop offset="100%" stop-color="#3B0764"/>
+    </radialGradient>
+    <filter id="softPlush" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="3" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+
+  <!-- Background Studio Floor -->
+  <rect width="600" height="600" fill="#0F172A"/>
+
+  <!-- Circular Rug Outer Boundary & Stitching -->
+  <circle cx="300" cy="300" r="245" fill="none" stroke="#1E1B4B" stroke-width="20" opacity="0.4"/>
+  <circle cx="300" cy="300" r="235" fill="url(#portalGlow)" stroke="#A855F7" stroke-width="6" filter="url(#softPlush)"/>
+  <circle cx="300" cy="300" r="230" fill="none" stroke="#C084FC" stroke-width="2" stroke-dasharray="8,6"/>
+
+  <!-- Gengar Shadow Face Design -->
+  <g transform="translate(0, 10)">
+    <!-- Ears -->
+    <path d="M 120 180 Q 90 100 160 130 Z" fill="#6B21A8"/>
+    <path d="M 480 180 Q 510 100 440 130 Z" fill="#6B21A8"/>
+
+    <!-- Eyes -->
+    <path d="M 170 230 Q 230 210 250 250 Q 200 270 170 230 Z" fill="#DC2626" stroke="#991B1B" stroke-width="4"/>
+    <path d="M 430 230 Q 370 210 350 250 Q 400 270 430 230 Z" fill="#DC2626" stroke="#991B1B" stroke-width="4"/>
+    
+    <circle cx="215" cy="242" r="8" fill="#FFFFFF"/>
+    <circle cx="385" cy="242" r="8" fill="#FFFFFF"/>
+
+    <!-- Sinister Teeth Smile -->
+    <path d="M 180 320 Q 300 420 420 320 Q 300 370 180 320 Z" fill="#FFFFFF" stroke="#3B0764" stroke-width="6"/>
+    <path d="M 220 338 L 220 365" stroke="#3B0764" stroke-width="4"/>
+    <path d="M 260 348 L 260 380" stroke="#3B0764" stroke-width="4"/>
+    <path d="M 300 352 L 300 384" stroke="#3B0764" stroke-width="4"/>
+    <path d="M 340 348 L 340 380" stroke="#3B0764" stroke-width="4"/>
+    <path d="M 380 338 L 380 365" stroke="#3B0764" stroke-width="4"/>
+  </g>
+
+  <!-- Tag Label Overlay -->
+  <rect x="220" y="490" width="160" height="32" rx="6" fill="#000" stroke="#FFF056" stroke-width="2"/>
+  <text x="300" y="511" font-family="monospace" font-weight="900" font-size="12" fill="#FFF056" text-anchor="middle">GENGAR PORTAL RUG</text>
+</svg>

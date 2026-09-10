@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Confirmation — POKÉVAULT LEGENDS</title>
+  <meta name="description" content="Thank you for your order! Your Pokémon merchandise order receipt and tracking details." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Global Stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Native Browser Import Map for Three.js & Confetti -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "canvas-confetti": "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/+esm"
+    }
+  }
+  </script>
+
+</head>
+<body>
+  <div class="halftone-overlay"></div>
+
+  <!-- Shared Navbar Root -->
+  <div id="navbarRoot"></div>
+
+  <!-- CONFIRMATION HERO -->
+  <header class="page-hero-banner" style="background: linear-gradient(135deg, #DCFCE7 0%, #166534 100%); color:#FFF;">
+    <div class="page-hero-container">
+      <div style="font-size:3rem; margin-bottom:0.5rem;">🎉</div>
+      <h1 class="page-title" style="color:#FFF;">ORDER CONFIRMED &amp; DISPATCHED!</h1>
+      <p class="page-subtitle" style="color:#DCFCE7;">Thank you for your order! Your Vault items have been logged for armored courier dispatch.</p>
+    </div>
+  </header>
+
+  <!-- RECEIPT MAIN CONTENT -->
+  <main class="page-container" style="padding: 3rem 2rem 6rem; max-width: 800px; margin:0 auto;">
+    <div class="table-card" style="padding: 2rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #000; padding-bottom:1rem; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+        <div>
+          <div style="font-family:var(--font-mono); font-size:0.8rem; color:#666;">ORDER RECEIPT NUMBER</div>
+          <div style="font-family:var(--font-title); font-weight:900; font-size:1.4rem; color:var(--accent-red);" id="receiptOrderId">ORD-PENDING</div>
+        </div>
+        <button class="btn-inspect" onclick="window.print()" style="padding:8px 16px;">🖨️ Print Receipt</button>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:2rem; font-family:var(--font-mono); font-size:0.85rem;">
+        <div>
+          <strong>CUSTOMER DETAILS:</strong>
+          <div id="receiptCustName">Vault Collector</div>
+          <div id="receiptCustEmail">collector@pokevault.com</div>
+        </div>
+        <div>
+          <strong>SHIPPING DESTINATION:</strong>
+          <div id="receiptAddress">Pallet Town, Kanto</div>
+          <div style="color:#166534; font-weight:700; margin-top:4px;" id="receiptTracking">Tracking: TRK-90123847</div>
+        </div>
+      </div>
+
+      <h4 style="font-family:var(--font-title); font-size:1.1rem; border-bottom:2px solid #000; padding-bottom:6px; margin-bottom:1rem;">ITEMS IN DISPATCH PACKAGE</h4>
+      
+      <div id="receiptItemsList" style="margin-bottom:1.5rem;">
+        <!-- Injected dynamically -->
+      </div>
+
+      <div style="border-top:2px solid #000; padding-top:1rem; display:flex; flex-direction:column; gap:6px; font-family:var(--font-mono); font-size:0.9rem;">
+        <div style="display:flex; justify-content:space-between;">
+          <span>Subtotal:</span>
+          <span id="receiptSubtotal">$0.00</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; color:#166534; font-weight:700;">
+          <span>Vault Insured Shipping:</span>
+          <span id="receiptShipping">$9.99</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-family:var(--font-title); font-weight:900; font-size:1.3rem; margin-top:8px; border-top:2px dashed #000; padding-top:8px;">
+          <span>TOTAL PAID:</span>
+          <span id="receiptTotal">$0.00</span>
+        </div>
+      </div>
+
+      <div style="margin-top:2.5rem; text-align:center; display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+        <a href="shop.html" class="btn-pill" style="text-decoration:none; padding:12px 24px;">Shop More Pokémon Merch →</a>
+        <a href="index.html" class="btn-inspect" style="text-decoration:none; padding:12px 24px;">Return to Homepage</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Shared Cart Drawer -->
+  <div id="cartDrawerRoot"></div>
+
+  <!-- Shared Footer Root -->
+  <div id="footerRoot"></div>
+
+  <script type="module" src="src/order-confirmation.js"></script>
+</body>
+</html>

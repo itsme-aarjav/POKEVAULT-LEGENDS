@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Primary Meta Tags -->
+  <title>Search Catalog — POKÉVAULT LEGENDS Marketplace</title>
+  <meta name="description" content="Search 64+ Pokémon merchandise products, cards, plushies, apparel, and figures across the PokéVault catalog." />
+  <meta name="keywords" content="search pokemon store, pokemon catalog search" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="canonical" href="https://pokevault-legends.com/search.html" />
+
+  <!-- OpenGraph / Facebook Meta Tags -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pokevault-legends.com/search.html" />
+  <meta property="og:site_name" content="POKÉVAULT LEGENDS" />
+  <meta property="og:title" content="Search Catalog — POKÉVAULT LEGENDS Marketplace" />
+  <meta property="og:description" content="Search 64+ Pokémon merchandise products, cards, plushies, apparel, and figures across the PokéVault catalog." />
+  <meta property="og:image" content="https://pokevault-legends.com/assets/rayquaza.png" />
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://pokevault-legends.com/search.html" />
+  <meta name="twitter:title" content="Search Catalog — POKÉVAULT LEGENDS Marketplace" />
+  <meta name="twitter:description" content="Search 64+ Pokémon merchandise products, cards, plushies, apparel, and figures across the PokéVault catalog." />
+  <meta name="twitter:image" content="https://pokevault-legends.com/assets/rayquaza.png" />
+
+  <meta name="description" content="Search Pokémon merchandise, plush toys, cards, figures, and apparel." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Global Stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Native Browser Import Map for Three.js & Confetti -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "canvas-confetti": "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/+esm"
+    }
+  }
+  </script>
+
+</head>
+<body>
+  <div class="halftone-overlay"></div>
+
+  <!-- Shared Navbar Root -->
+  <div id="navbarRoot"></div>
+
+  <!-- SEARCH HERO BANNER -->
+  <header class="page-hero-banner" style="background: linear-gradient(135deg, #FFDE59 0%, #FF914D 100%);">
+    <div class="page-hero-container">
+      <div class="breadcrumb-nav">
+        <a href="index.html">Home</a> <span>/</span> <span class="current">Search Marketplace</span>
+      </div>
+      <h1 class="page-title">SEARCH RESULTS FOR "<span id="searchQueryTitle">...</span>"</h1>
+      <p class="page-subtitle" id="searchQuerySubtitle">Browsing catalog matches across all 18 Pokémon departments.</p>
+    </div>
+  </header>
+
+  <!-- SEARCH RESULTS CONTENT -->
+  <main class="page-container" style="padding: 2.5rem 2rem 5rem;">
+    <div class="shop-toolbar" style="margin-bottom: 2rem;">
+      <div class="results-count" id="searchResultsCount">Found 0 Matching Items</div>
+      <a href="shop.html" class="btn-inspect" style="text-decoration: none;">View Full Catalog →</a>
+    </div>
+
+    <!-- MATCHING PRODUCTS GRID -->
+    <div class="cards-grid" id="searchResultsGrid">
+      <!-- Rendered dynamically -->
+    </div>
+  </main>
+
+  <!-- Shared Cart Drawer -->
+  <div id="cartDrawerRoot"></div>
+
+  <!-- Shared Footer Root -->
+  <div id="footerRoot"></div>
+
+  <script type="module" src="src/search.js"></script>
+</body>
+</html>

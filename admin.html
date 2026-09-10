@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚡ POKEVAULT CONTROL CENTER — Admin Dashboard</title>
+  <meta name="description" content="Production-ready Admin Dashboard for PokeVault Legends." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN (for utility classes used in admin components) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Global Stylesheet -->
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body style="background-color: #09090b; color: #ffffff; min-height: 100vh; margin: 0; font-family: 'Inter', sans-serif;">
+  <!-- React Mount Point -->
+  <div id="adminRoot"></div>
+
+  <!-- Vite-bundled ES Module Entry -->
+  <script type="module" src="/src/admin.jsx"></script>
+</body>
+</html>

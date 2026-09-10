@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Primary Meta Tags -->
+  <title>Marketplace Shop — Buy 64+ Authentic Pokémon Items | POKÉVAULT LEGENDS</title>
+  <meta name="description" content="Browse the complete Pokémon marketplace: graded 1st Edition PSA slabs, plush toys, resin statues, vintage clothing, and gifts. Free vault archival shipping." />
+  <meta name="keywords" content="pokemon shop, buy pokemon merchandise, graded cards marketplace, vintage pokemon store" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="canonical" href="https://pokevault-legends.com/shop.html" />
+
+  <!-- OpenGraph / Facebook Meta Tags -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pokevault-legends.com/shop.html" />
+  <meta property="og:site_name" content="POKÉVAULT LEGENDS" />
+  <meta property="og:title" content="Marketplace Shop — Buy 64+ Authentic Pokémon Items | POKÉVAULT LEGENDS" />
+  <meta property="og:description" content="Browse the complete Pokémon marketplace: graded 1st Edition PSA slabs, plush toys, resin statues, vintage clothing, and gifts. Free vault archival shipping." />
+  <meta property="og:image" content="https://pokevault-legends.com/assets/charizard.png" />
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://pokevault-legends.com/shop.html" />
+  <meta name="twitter:title" content="Marketplace Shop — Buy 64+ Authentic Pokémon Items | POKÉVAULT LEGENDS" />
+  <meta name="twitter:description" content="Browse the complete Pokémon marketplace: graded 1st Edition PSA slabs, plush toys, resin statues, vintage clothing, and gifts. Free vault archival shipping." />
+  <meta name="twitter:image" content="https://pokevault-legends.com/assets/charizard.png" />
+
+  <meta name="description" content="Explore over 60+ authenticated Pokémon cards, plush toys, figures, apparel, home decor, and collector gifts." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Global Stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Native Browser Import Map for Three.js & Confetti -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "canvas-confetti": "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/+esm"
+    }
+  }
+  </script>
+
+</head>
+<body>
+  <!-- Halftone Overlay -->
+  <div class="halftone-overlay"></div>
+
+  <!-- Shared Navbar Root -->
+  <div id="navbarRoot"></div>
+
+  <!-- SHOP HEADER HERO -->
+  <header class="page-hero-banner" style="background: linear-gradient(135deg, #FFF056 0%, #FFD700 100%);">
+    <div class="page-hero-container">
+      <div class="breadcrumb-nav">
+        <a href="index.html">Home</a> <span>/</span> <span class="current">Shop All Products</span>
+      </div>
+      <h1 class="page-title">POKÉMON MERCHANDISE MARKETPLACE</h1>
+      <p class="page-subtitle">Browse 60+ authenticated graded slabs, plush companions, resin statues, streetwear apparel, and room decor.</p>
+    </div>
+  </header>
+
+  <!-- MAIN SHOP CONTENT WRAPPER -->
+  <main class="shop-page-layout">
+    <!-- MOBILE FILTER TOGGLE BUTTON -->
+    <button class="mobile-filter-toggle-btn" id="mobileFilterToggleBtn">
+      <span>⚡ Filter &amp; Sort Products</span>
+      <span style="font-size:1.1rem;">▼</span>
+    </button>
+
+    <!-- FILTER SIDEBAR -->
+    <aside class="shop-sidebar" id="shopSidebar">
+      <div class="sidebar-header">
+        <h3 class="sidebar-title">🔍 FILTER MARKETPLACE</h3>
+        <button class="btn-clear-filters" id="clearFiltersBtn">Reset All</button>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="filter-group">
+        <h4 class="filter-group-title">CATEGORIES</h4>
+        <ul class="filter-category-list" id="filterCategoryList">
+          <!-- Injected dynamically -->
+        </ul>
+      </div>
+
+      <!-- Pokémon Character Filter -->
+      <div class="filter-group">
+        <h4 class="filter-group-title">POKÉMON CHARACTER</h4>
+        <select class="filter-select" id="filterPokemonSelect">
+          <option value="all">All Pokémon Characters</option>
+          <option value="pikachu">Pikachu</option>
+          <option value="charizard">Charizard</option>
+          <option value="gengar">Gengar</option>
+          <option value="eevee">Eevee / Eevolutions</option>
+          <option value="mew">Mew / Mewtwo</option>
+          <option value="rayquaza">Rayquaza / Dragon</option>
+          <option value="snorlax">Snorlax</option>
+          <option value="bulbasaur">Bulbasaur / Starters</option>
+          <option value="lucario">Lucario</option>
+        </select>
+      </div>
+
+      <!-- Price Range Filter -->
+      <div class="filter-group">
+        <h4 class="filter-group-title">MAX PRICE: <span id="priceValueDisplay">$15,000</span></h4>
+        <input type="range" id="priceRangeInput" min="10" max="15000" step="10" value="15000" class="price-slider" />
+        <div class="price-range-labels">
+          <span>$10</span>
+          <span>$15,000+</span>
+        </div>
+      </div>
+
+      <!-- Minimum Rating Filter -->
+      <div class="filter-group">
+        <h4 class="filter-group-title">MINIMUM RATING</h4>
+        <div class="rating-filter-options">
+          <label class="filter-radio-label"><input type="radio" name="ratingFilter" value="0" checked /> Any Rating</label>
+          <label class="filter-radio-label"><input type="radio" name="ratingFilter" value="4.5" /> 4.5★ &amp; Above</label>
+          <label class="filter-radio-label"><input type="radio" name="ratingFilter" value="4.8" /> 4.8★ &amp; Above</label>
+          <label class="filter-radio-label"><input type="radio" name="ratingFilter" value="5.0" /> 5.0★ Perfect</label>
+        </div>
+      </div>
+
+      <!-- Availability Filter -->
+      <div class="filter-group">
+        <label class="filter-checkbox-label">
+          <input type="checkbox" id="inStockCheckbox" /> In Stock Items Only
+        </label>
+      </div>
+    </aside>
+
+    <!-- SHOP PRODUCTS GRID & TOOLBAR -->
+    <section class="shop-main-content">
+      <div class="shop-toolbar">
+        <div class="results-count" id="resultsCount">Showing 60 Products</div>
+
+        <div class="toolbar-controls">
+          <label for="sortBySelect" style="font-family:var(--font-mono); font-size:0.85rem; font-weight:700;">Sort By:</label>
+          <select id="sortBySelect" class="filter-select" style="width: auto;">
+            <option value="featured">Featured Items</option>
+            <option value="popular">Most Popular</option>
+            <option value="newest">New Arrivals</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="rating">Highest Rated</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- PRODUCTS GRID -->
+      <div class="cards-grid" id="shopProductsGrid">
+        <!-- Rendered dynamically by shop.js -->
+      </div>
+
+      <!-- LOAD MORE / PAGINATION -->
+      <div class="load-more-wrap" id="loadMoreWrap">
+        <button class="btn-pill" id="loadMoreBtn" style="padding: 12px 32px;">Load More Products</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Shared Cart Drawer -->
+  <div id="cartDrawerRoot"></div>
+
+  <!-- Shared Footer Root -->
+  <div id="footerRoot"></div>
+
+  <!-- Shop Controller Script -->
+  <script type="module" src="src/shop.js"></script>
+</body>
+</html>

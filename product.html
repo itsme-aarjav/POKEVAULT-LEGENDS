@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Details — POKÉVAULT LEGENDS</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- ES Module Import Map for Three.js and confetti -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "canvas-confetti": "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/+esm"
+      }
+    }
+  </script>
+
+  <!-- PayPal JS SDK -->
+  <script src="https://www.paypal.com/sdk/js?client-id=BAAI1ARqLtN3ehKqXDzCGokMdJn8pF_K1QcUtpIcCmIvyRZ8Y-I7KELzdTo0ES3iJnOjk8ZaThVlwAzhO8&currency=USD"></script>
+</head>
+<body>
+  <!-- Halftone Overlay -->
+  <div class="halftone-overlay"></div>
+
+  <!-- Shared Navbar Root -->
+  <div id="navbarRoot"></div>
+
+  <!-- PRODUCT PAGE CONTENT (injected by product.js) -->
+  <main class="product-page-wrap" id="productPageRoot">
+    <div style="text-align:center; padding: 6rem 2rem; font-family: var(--font-mono); color: #999;">
+      Loading vault product record...
+    </div>
+  </main>
+
+  <!-- Shared Cart Drawer Root -->
+  <div id="cartDrawerRoot"></div>
+
+  <!-- Shared Footer Root -->
+  <div id="footerRoot"></div>
+
+  <script type="module" src="src/product.js"></script>
+</body>
+</html>

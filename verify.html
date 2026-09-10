@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Vault Slab &amp; Certificate Verification Portal — POKÉVAULT LEGENDS</title>
+  <meta name="description" content="Verify PSA and BGS graded card slabs, serialized holograms, and official vault authenticity certificates." />
+  <meta name="keywords" content="verify pokemon card, psa cert verification, bgs lookup, pokevault authenticity verification" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://pokevault-legends.com/verify.html" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="halftone-overlay"></div>
+
+  <!-- Shared Navbar Root -->
+  <div id="navbarRoot"></div>
+
+  <main class="verify-portal-wrap">
+    <!-- HERO -->
+    <section class="portal-hero-banner">
+      <div style="font-family:var(--font-mono); font-weight:900; color:var(--accent-red); font-size:0.85rem; letter-spacing:1.5px; margin-bottom:6px;">
+        OFFICIAL POKÉVAULT LEDGER
+      </div>
+      <h1 class="portal-hero-title">🔍 VAULT SLAB VERIFICATION</h1>
+      <p class="portal-hero-subtitle">
+        Enter any PSA/BGS Certification Number or Vault Registry ID to verify genuine tamper-proof serialization and population reports.
+      </p>
+
+      <form class="cert-search-box" id="certSearchForm">
+        <input type="text" id="certSearchInput" class="cert-search-input" placeholder="e.g. 47318042, 58921473, 10293847" required />
+        <button type="submit" class="cert-search-btn">VERIFY SLAB</button>
+      </form>
+
+      <div style="margin-top:12px; font-family:var(--font-mono); font-size:0.75rem; color:#475569;">
+        Try sample certs: 
+        <button type="button" class="sample-cert-btn" data-cert="47318042" style="background:none; border:none; text-decoration:underline; font-weight:800; cursor:pointer; color:#000;">#47318042 (Charizard)</button> • 
+        <button type="button" class="sample-cert-btn" data-cert="58921473" style="background:none; border:none; text-decoration:underline; font-weight:800; cursor:pointer; color:#000;">#58921473 (Gengar)</button> • 
+        <button type="button" class="sample-cert-btn" data-cert="99302148" style="background:none; border:none; text-decoration:underline; font-weight:800; cursor:pointer; color:#000;">#99302148 (Pikachu)</button>
+      </div>
+    </section>
+
+    <!-- CERTIFICATE RESULT CONTAINER -->
+    <div id="certResultContainer">
+      <!-- Injected by src/verify.js -->
+    </div>
+  </main>
+
+  <!-- Shared Cart Drawer & Footer -->
+  <div id="cartDrawerRoot"></div>
+  <div id="footerRoot"></div>
+
+  <script type="module" src="src/verify.js"></script>
+</body>
+</html>

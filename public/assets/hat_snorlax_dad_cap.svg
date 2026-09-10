@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <defs>
+    <!-- Studio Radial Background Light -->
+    <radialGradient id="studioBg" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#F8FAFC"/>
+      <stop offset="60%" stop-color="#E2E8F0"/>
+      <stop offset="100%" stop-color="#CBD5E1"/>
+    </radialGradient>
+
+    <!-- Real Fabric Lighting Shading -->
+    <radialGradient id="capDomeGrad" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#14B8A6"/>
+      <stop offset="40%" stop-color="#0D9488"/>
+      <stop offset="85%" stop-color="#0F766E"/>
+      <stop offset="100%" stop-color="#115E59"/>
+    </radialGradient>
+
+    <!-- Visor Brim 3D Lighting -->
+    <linearGradient id="visorBrimGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#14B8A6"/>
+      <stop offset="25%" stop-color="#0D9488"/>
+      <stop offset="70%" stop-color="#0F766E"/>
+      <stop offset="100%" stop-color="#044E46"/>
+    </linearGradient>
+
+    <!-- Soft Contact Shadow Underneath -->
+    <radialGradient id="contactShadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0F172A" stop-opacity="0.6"/>
+      <stop offset="50%" stop-color="#334155" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#64748B" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- 3D Raised Embroidery Glow -->
+    <filter id="embroidery3D" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Studio Background -->
+  <rect width="800" height="800" fill="url(#studioBg)"/>
+
+  <!-- Soft Table Shadow -->
+  <ellipse cx="400" cy="620" rx="280" ry="45" fill="url(#contactShadow)"/>
+
+  <!-- REALISTIC STUDIO CAP ASSEMBLY -->
+  <g transform="translate(40, 20)">
+
+    <!-- CAP CROWN DOME -->
+    <path d="M 220 380 Q 200 210 400 180 Q 600 210 580 380 Z" fill="url(#capDomeGrad)"/>
+
+    <!-- Fine Panel Seam Stitching -->
+    <path d="M 400 180 Q 400 280 400 380" fill="none" stroke="#044E46" stroke-width="2.5" stroke-dasharray="3,3" opacity="0.7"/>
+    <path d="M 400 180 Q 300 260 230 375" fill="none" stroke="#044E46" stroke-width="2" stroke-dasharray="3,3" opacity="0.6"/>
+    <path d="M 400 180 Q 500 260 570 375" fill="none" stroke="#044E46" stroke-width="2" stroke-dasharray="3,3" opacity="0.6"/>
+
+    <!-- Top Button (Squatcho) -->
+    <ellipse cx="400" cy="180" rx="16" ry="10" fill="#0F766E"/>
+    <ellipse cx="400" cy="178" rx="14" ry="8" fill="#14B8A6"/>
+
+    <!-- Embroidered Eyelets -->
+    <circle cx="310" cy="245" r="7" fill="#0F766E" stroke="#044E46" stroke-width="2"/>
+    <circle cx="490" cy="245" r="7" fill="#0F766E" stroke="#044E46" stroke-width="2"/>
+
+    <!-- CURVED BRIM / VISOR -->
+    <path d="M 160 380 C 150 365 650 365 640 380 C 660 455 140 455 160 380 Z" fill="url(#visorBrimGrad)"/>
+
+    <!-- Brim Rows of Stitching -->
+    <path d="M 180 390 Q 400 425 620 390" fill="none" stroke="#044E46" stroke-width="2" stroke-dasharray="4,2" opacity="0.8"/>
+    <path d="M 195 400 Q 400 435 605 400" fill="none" stroke="#044E46" stroke-width="2" stroke-dasharray="4,2" opacity="0.8"/>
+    <path d="M 210 410 Q 400 445 590 410" fill="none" stroke="#044E46" stroke-width="2" stroke-dasharray="4,2" opacity="0.8"/>
+
+    <!-- REAL EMBROIDERED SNORLAX PATCH -->
+    <g transform="translate(400, 310)" filter="url(#embroidery3D)">
+      <!-- Outer Oval Felt Patch -->
+      <ellipse cx="0" cy="0" rx="55" ry="38" fill="#0F766E" stroke="#044E46" stroke-width="3"/>
+      <!-- Inner Cream Face Patch -->
+      <ellipse cx="0" cy="3" rx="42" ry="28" fill="#FEF3C7" stroke="#D97706" stroke-width="1.5"/>
+
+      <!-- Sleeping Eyes -->
+      <path d="M -24 -2 Q -15 -10 -6 -2" fill="none" stroke="#1E293B" stroke-width="4" stroke-linecap="round"/>
+      <path d="M 6 -2 Q 15 -10 24 -2" fill="none" stroke="#1E293B" stroke-width="4" stroke-linecap="round"/>
+
+      <!-- Cute Smile & Teeth -->
+      <path d="M -12 8 Q 0 16 12 8" fill="none" stroke="#1E293B" stroke-width="3.5" stroke-linecap="round"/>
+      <polygon points="-6,8 -2,12 0,8" fill="#FFFFFF"/>
+      <polygon points="2,8 4,12 8,8" fill="#FFFFFF"/>
+
+      <!-- Zzz Thread Embroidery -->
+      <g fill="#F59E0B" stroke="#B45309" stroke-width="1">
+        <text x="48" y="-12" font-family="'Arial Black', sans-serif" font-size="28" font-weight="900">Z</text>
+        <text x="68" y="-32" font-family="'Arial Black', sans-serif" font-size="20" font-weight="900">z</text>
+        <text x="82" y="-48" font-family="'Arial Black', sans-serif" font-size="14" font-weight="900">z</text>
+      </g>
+    </g>
+
+  </g>
+</svg>

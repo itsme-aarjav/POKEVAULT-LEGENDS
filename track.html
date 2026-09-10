@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Track My Vault Dispatch — POKÉVAULT LEGENDS</title>
+  <meta name="description" content="Live real-time order tracking portal with BlueDart priority air tracking milestones and armored transit verification." />
+  <meta name="keywords" content="track pokemon order, pokevault delivery tracking, bluedart air tracker" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://pokevault-legends.com/track.html" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="halftone-overlay"></div>
+
+  <!-- Shared Navbar Root -->
+  <div id="navbarRoot"></div>
+
+  <main class="track-portal-wrap">
+    <!-- HERO -->
+    <section class="portal-hero-banner">
+      <div style="font-family:var(--font-mono); font-weight:900; color:var(--accent-red); font-size:0.85rem; letter-spacing:1.5px; margin-bottom:6px;">
+        GPS VAULT DISPATCH MONITOR
+      </div>
+      <h1 class="portal-hero-title">📦 TRACK MY VAULT DISPATCH</h1>
+      <p class="portal-hero-subtitle">
+        Enter your Order ID (e.g. <code>PVL-10248</code>) or registered trainer email to track armored transit progress in real-time.
+      </p>
+
+      <form class="cert-search-box" id="trackSearchForm">
+        <input type="text" id="trackSearchInput" class="cert-search-input" placeholder="e.g. PVL-10248, PVL-88392" required />
+        <button type="submit" class="cert-search-btn">TRACK PACKAGE</button>
+      </form>
+
+      <div style="margin-top:12px; font-family:var(--font-mono); font-size:0.75rem; color:#475569;">
+        Try sample orders: 
+        <button type="button" class="sample-track-btn" data-order="PVL-10248" style="background:none; border:none; text-decoration:underline; font-weight:800; cursor:pointer; color:#000;">#PVL-10248 (In Air Transit)</button> • 
+        <button type="button" class="sample-track-btn" data-order="PVL-88392" style="background:none; border:none; text-decoration:underline; font-weight:800; cursor:pointer; color:#000;">#PVL-88392 (Out for Delivery)</button>
+      </div>
+    </section>
+
+    <!-- LIVE TRACKING TIMELINE DISPLAY -->
+    <div id="trackResultContainer">
+      <!-- Injected by src/track.js -->
+    </div>
+  </main>
+
+  <!-- Shared Cart Drawer & Footer -->
+  <div id="cartDrawerRoot"></div>
+  <div id="footerRoot"></div>
+
+  <script type="module" src="src/track.js"></script>
+</body>
+</html>

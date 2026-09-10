@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trainer's Vault Checkout — POKÉVAULT LEGENDS</title>
+  <meta name="description" content="Complete your Pokémon merchandise order with secure vault shipping and payment." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Global Stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- PayPal SDK -->
+  <script src="https://www.paypal.com/sdk/js?client-id=BAAI1ARqLtN3ehKqXDzCGokMdJn8pF_K1QcUtpIcCmIvyRZ8Y-I7KELzdTo0ES3iJnOjk8ZaThVlwAzhO8&currency=USD"></script>
+
+  <!-- Native Browser Import Map for Three.js & Confetti -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "canvas-confetti": "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/+esm"
+    }
+  }
+  </script>
+</head>
+<body class="checkout-body">
+  <div class="halftone-overlay"></div>
+
+  <!-- Shared Navbar Root -->
+  <div id="navbarRoot"></div>
+
+  <main class="co-main-wrap">
+    <!-- PAGE TITLE HEADER & STEPPER -->
+    <header class="co-header">
+      <h1 class="co-page-title">TRAINER'S VAULT CHECKOUT</h1>
+      <div class="co-stepper-row">
+        <div class="co-step-item active">
+          <span class="co-step-icon">🧢</span>
+        </div>
+        <div class="co-step-line"></div>
+        <div class="co-step-item active">
+          <span class="co-step-icon">🔑</span>
+        </div>
+        <div class="co-step-line"></div>
+        <div class="co-step-item">
+          <span class="co-step-icon">👑</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- CHECKOUT MASTER FORM & GRID -->
+    <form id="checkoutMasterForm">
+      <div class="co-grid">
+        <!-- LEFT COLUMN: SHIPPING & PAYMENT -->
+        <div class="co-left-col">
+          <!-- 1. SHIPPING DESTINATION -->
+          <section class="co-section-card">
+            <h2 class="co-section-title">1. SHIPPING DESTINATION</h2>
+            
+            <div class="co-form-row col-2">
+              <div class="co-input-group">
+                <div class="co-label-row">
+                  <label for="custName">FULL NAME ★</label>
+                  <span class="co-exp-badge">EXP★</span>
+                </div>
+                <input type="text" id="custName" class="co-input" placeholder="e.g. Red Ketchum" required />
+              </div>
+              <div class="co-input-group">
+                <div class="co-label-row">
+                  <label for="custEmail">EMAIL ADDRESS ★</label>
+                  <span class="co-exp-badge">EXP★</span>
+                </div>
+                <input type="email" id="custEmail" class="co-input" placeholder="trainer@pokevault.com" required />
+              </div>
+            </div>
+
+            <div class="co-form-row col-3">
+              <div class="co-input-group span-street">
+                <div class="co-label-row">
+                  <label for="custStreet">STREET ADDRESS ★</label>
+                  <span class="co-exp-badge">EXP★</span>
+                </div>
+                <input type="text" id="custStreet" class="co-input" placeholder="102 Pallet Town Way, S" required />
+              </div>
+              <div class="co-input-group">
+                <div class="co-label-row">
+                  <label for="custState">STATE/REGION ★</label>
+                </div>
+                <input type="text" id="custState" class="co-input" placeholder="Kanto" required />
+              </div>
+              <div class="co-input-group">
+                <div class="co-label-row">
+                  <label for="custZip">ZIP/POSTAL CODE ★</label>
+                </div>
+                <input type="text" id="custZip" class="co-input" placeholder="90210" required />
+              </div>
+            </div>
+
+            <div class="co-form-row col-1">
+              <div class="co-input-group">
+                <div class="co-label-row">
+                  <label for="custCity">CITY ★</label>
+                  <span class="co-exp-badge">EXP★</span>
+                </div>
+                <input type="text" id="custCity" class="co-input" placeholder="Celadon City" required />
+              </div>
+            </div>
+
+            <div class="co-checkbox-row">
+              <label class="co-checkbox-label">
+                <input type="checkbox" id="saveAddress" checked />
+                <span class="co-custom-checkbox"></span>
+                Save this address <img src="assets/pokeball-emoji.png" alt="Pokéball" class="pokeball-emoji" />
+              </label>
+            </div>
+          </section>
+
+          <!-- 2. VAULT DISPATCH SPEED & 3. PAYMENT METHOD GRID -->
+          <div class="co-bottom-sections-row">
+            <!-- 2. VAULT DISPATCH SPEED -->
+            <section class="co-section-subcard dispatch-speed-section">
+              <h2 class="co-section-title">2. VAULT DISPATCH SPEED</h2>
+              
+              <div class="co-dispatch-options">
+                <!-- ARMORED EXPRESS (SELECTED DEFAULT) -->
+                <label class="co-dispatch-card active" id="cardArmoredExpress">
+                  <input type="radio" name="dispatchSpeed" value="express" checked class="co-radio-hidden" />
+                  <div class="co-dispatch-check-icon">✓</div>
+                  <div class="co-dispatch-icon">⚡</div>
+                  <div class="co-dispatch-name">ARMORED EXPRESS</div>
+                  <div class="co-dispatch-divider"></div>
+                  <div class="co-dispatch-days">2-3 Business Days</div>
+                  <div class="co-dispatch-price">$9.99</div>
+                </label>
+
+                <!-- STANDARD POSTAL GROUND -->
+                <label class="co-dispatch-card" id="cardStandardGround">
+                  <input type="radio" name="dispatchSpeed" value="standard" class="co-radio-hidden" />
+                  <div class="co-dispatch-check-icon" style="display:none;">✓</div>
+                  <div class="co-dispatch-icon">📦</div>
+                  <div class="co-dispatch-name">STANDARD POSTAL GROUND</div>
+                  <div class="co-dispatch-divider"></div>
+                  <div class="co-dispatch-days">5-7 Business Days</div>
+                  <div class="co-dispatch-price">FREE</div>
+                </label>
+              </div>
+            </section>
+
+            <!-- 3. PAYMENT METHOD -->
+            <section class="co-section-subcard payment-method-section">
+              <h2 class="co-section-title">3. PAYMENT METHOD</h2>
+
+              <div class="co-input-group">
+                <label for="ccNumber" class="co-simple-label">Card Number</label>
+                <input type="text" id="ccNumber" class="co-input" placeholder="4532 •••••• 8921" />
+              </div>
+
+              <div class="co-form-row col-2 gap-sm" style="margin-top:8px;">
+                <div class="co-input-group">
+                  <label for="ccExpiry" class="co-simple-label">Expiry (MM/YY)</label>
+                  <input type="text" id="ccExpiry" class="co-input" placeholder="12/28" />
+                </div>
+                <div class="co-input-group">
+                  <label for="ccCvc" class="co-simple-label">CVC/CVV</label>
+                  <input type="text" id="ccCvc" class="co-input" placeholder="382" />
+                </div>
+              </div>
+
+              <div class="co-payment-badges-row">
+                <span class="pay-badge visa">VISA</span>
+                <span class="pay-badge mc">mastercard</span>
+                <span class="pay-badge amex">AMEX</span>
+                <span class="pay-badge disc">DISCOVER</span>
+                <span class="pay-badge gpay">G Pay</span>
+              </div>
+
+              <div class="co-encryption-text">
+                🔒 Secure &amp; Encrypted
+              </div>
+
+              <div class="co-or-divider">
+                <span>OR</span>
+              </div>
+
+              <!-- PAYPAL BUTTON CONTAINER / FALLBACK -->
+              <div id="paypalCheckoutContainer" class="co-paypal-wrap"></div>
+
+              <button type="button" id="paypalExpressBtnFallback" class="co-paypal-express-btn">
+                <span class="pp-logo"><i>Pay</i><i>Pal</i></span>
+                <span class="pp-subtext">Express Checkout</span>
+              </button>
+            </section>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: ORDER SUMMARY SIDEBAR -->
+        <aside class="co-right-col">
+          <div class="co-order-summary-card">
+            <h2 class="co-summary-header-title">ORDER SUMMARY</h2>
+            
+            <div id="checkoutItemsList" class="co-items-list">
+              <!-- Dynamically injected items -->
+            </div>
+
+            <div class="co-summary-line">
+              <span>Subtotal:</span>
+              <span id="coSubtotal">$0.00</span>
+            </div>
+
+            <div class="co-summary-line" id="coDiscountRow" style="display:none; color:var(--accent-red); font-weight:700;">
+              <span>Discount:</span>
+              <span id="coDiscount">-$0.00</span>
+            </div>
+
+            <div class="co-summary-line">
+              <span>Shipping:</span>
+              <span id="coShipping">$9.99</span>
+            </div>
+
+            <div class="co-summary-divider"></div>
+
+            <div class="co-summary-total-line">
+              <span>TOTAL TO PAY:</span>
+              <span id="coTotal">$0.00</span>
+            </div>
+
+            <div class="co-trust-pill-box">
+              <div class="trust-item">
+                <span class="trust-icon"><img src="assets/pokeball-emoji.png" alt="Pokéball" class="pokeball-emoji" />🔒</span>
+                <span>Guaranteed Safe &amp; Secure</span>
+              </div>
+              <div class="trust-item points">
+                <span class="trust-icon">⭐</span>
+                <span id="coPointsText">Earn 230 Vault Points!</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- MASTER BOTTOM COMPLETE ORDER BUTTON -->
+      <div class="co-master-submit-row">
+        <button type="submit" id="directPayBtn" class="co-master-submit-btn">
+          <img src="assets/pokeball-emoji.png" alt="Pokéball" class="pokeball-emoji-lg" /> COMPLETE VAULT DISPATCH ORDER →
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <!-- Shared Cart Drawer -->
+  <div id="cartDrawerRoot"></div>
+
+  <!-- Shared Footer Root -->
+  <div id="footerRoot"></div>
+
+  <script type="module" src="src/checkout.js"></script>
+</body>
+</html>

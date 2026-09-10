@@ -1,12 +1,12 @@
 /**
  * POKÉVAULT LEGENDS — Standalone Full Cart Page Controller
- * Manages cart items table, promo discounts, insurance, and summary calculations.
+ * Manages cart items table, multi-item price calculations, promo discounts, insurance, and summary calculations.
  */
 
 import { renderNavbar, initNavbarEvents } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
 import { renderCartDrawer, initCartDrawerEvents } from './components/cart-drawer.js';
-import { getCart, updateCartQty, removeFromCart, clearCart, getCartSubtotal, applyPromoCode, getPromoState, setInsurance, getInsuranceState } from './utils/store.js';
+import { getCart, updateCartQty, removeFromCart, clearCart, getCartSubtotal, applyPromoCode, removePromoCode, getPromoState, setInsurance, getInsuranceState } from './utils/store.js';
 
 class CartPage {
   constructor() {
@@ -15,6 +15,7 @@ class CartPage {
     this.bindCartPageEvents();
 
     window.addEventListener('pv-cart-updated', () => this.renderCartTable());
+    window.addEventListener('pv-promo-updated', () => this.renderCartTable());
   }
 
   initLayout() {
@@ -30,6 +31,7 @@ class CartPage {
     const tableContainer = document.getElementById('cartPageItemsTable');
     const subtotalText = document.getElementById('cartSubtotalText');
     const discountRow = document.getElementById('discountRow');
+    const discountLabel = document.getElementById('cartDiscountLabel');
     const discountText = document.getElementById('cartDiscountText');
     const shippingText = document.getElementById('shippingText');
     const totalText = document.getElementById('cartTotalText');
@@ -45,24 +47,27 @@ class CartPage {
           <a href="shop.html" class="btn-pill" style="text-decoration: none;">Browse Pokémon Marketplace →</a>
         </div>
       `;
-      if (subtotalText) subtotalText.textContent = '$0.00';
+      if (subtotalText) subtotalText.textContent = '₹0';
       if (discountRow) discountRow.style.display = 'none';
-      if (shippingText) shippingText.textContent = '$0.00';
-      if (totalText) totalText.textContent = '$0.00';
+      if (shippingText) shippingText.textContent = '₹0';
+      if (totalText) totalText.textContent = '₹0';
       return;
     }
 
-    const subtotal = getCartSubtotal();
+    const subtotalUSD = getCartSubtotal();
+    const inrSubtotal = Math.round(subtotalUSD * 83);
     const promo = getPromoState();
     const insuranceIncluded = getInsuranceState();
-    const shippingCost = insuranceIncluded ? 9.99 : 0;
+    const inrShipping = (insuranceIncluded && !promo.freeShipping) ? 150 : 0;
 
-    let discountAmount = 0;
-    if (promo.discountPercent > 0) {
-      discountAmount = (subtotal * promo.discountPercent) / 100;
+    let inrDiscount = 0;
+    if (promo.type === 'fixed' && promo.fixedINR) {
+      inrDiscount = Math.min(inrSubtotal, promo.fixedINR);
+    } else if (promo.discountPercent > 0) {
+      inrDiscount = Math.round((inrSubtotal * promo.discountPercent) / 100);
     }
 
-    const grandTotal = Math.max(0, subtotal - discountAmount + shippingCost);
+    const grandTotal = Math.max(0, inrSubtotal - inrDiscount + inrShipping);
 
     tableContainer.innerHTML = `
       <table class="admin-table">
@@ -80,7 +85,8 @@ class CartPage {
           ${cart.map(item => {
             const p = item.product;
             if (!p) return '';
-            const itemTotal = p.price * item.quantity;
+            const unitPriceINR = Math.round(p.price * 83);
+            const itemTotalINR = unitPriceINR * item.quantity;
             return `
               <tr>
                 <td style="display:flex; align-items:center; gap:12px;">
@@ -91,7 +97,7 @@ class CartPage {
                   </div>
                 </td>
                 <td style="font-weight:700;">${p.categoryName}</td>
-                <td style="font-weight:700;">$${p.price.toFixed(2)}</td>
+                <td style="font-weight:700;">₹${unitPriceINR.toLocaleString('en-IN')}</td>
                 <td>
                   <div class="qty-control-box">
                     <button class="btn-qty page-qty-dec" data-id="${p.id}">-</button>
@@ -99,7 +105,7 @@ class CartPage {
                     <button class="btn-qty page-qty-inc" data-id="${p.id}">+</button>
                   </div>
                 </td>
-                <td style="font-weight:900; color:var(--accent-red);">$${itemTotal.toFixed(2)}</td>
+                <td style="font-weight:900; color:var(--accent-red);">₹${itemTotalINR.toLocaleString('en-IN')}</td>
                 <td>
                   <button class="btn-inspect page-remove-item" data-id="${p.id}" style="padding:4px 10px; font-size:0.75rem; color:var(--accent-red);">✕ Remove</button>
                 </td>
@@ -110,19 +116,46 @@ class CartPage {
       </table>
     `;
 
-    if (subtotalText) subtotalText.textContent = `$${subtotal.toFixed(2)}`;
-    if (shippingText) shippingText.textContent = insuranceIncluded ? '$9.99' : 'FREE';
+    if (subtotalText) subtotalText.textContent = `₹${inrSubtotal.toLocaleString('en-IN')}`;
+    if (shippingText) shippingText.textContent = inrShipping > 0 ? '₹150' : 'FREE';
 
     if (discountRow) {
-      if (discountAmount > 0) {
+      if (inrDiscount > 0) {
         discountRow.style.display = 'flex';
-        if (discountText) discountText.textContent = `-$${discountAmount.toFixed(2)}`;
+        if (discountLabel) discountLabel.textContent = `Discount Applied (${promo.code}):`;
+        if (discountText) discountText.textContent = `-₹${inrDiscount.toLocaleString('en-IN')}`;
       } else {
         discountRow.style.display = 'none';
       }
     }
 
-    if (totalText) totalText.textContent = `$${grandTotal.toFixed(2)}`;
+    if (totalText) totalText.textContent = `₹${grandTotal.toLocaleString('en-IN')}`;
+
+    // Update Promo Box in Cart Page
+    const activeBadge = document.getElementById('cartPageActivePromoBadge');
+    const promoForm = document.getElementById('cartPagePromoForm');
+    const appliedRow = document.getElementById('cartPageAppliedPromoRow');
+    const appliedText = document.getElementById('cartPageAppliedPromoText');
+    const promoInput = document.getElementById('cartPagePromoInput');
+
+    if (promo && promo.code) {
+      if (activeBadge) {
+        activeBadge.textContent = promo.code;
+        activeBadge.style.display = 'inline-block';
+      }
+      if (promoForm) promoForm.style.display = 'none';
+      if (appliedRow) {
+        appliedRow.style.display = 'flex';
+        if (appliedText) {
+          appliedText.innerHTML = `✓ <strong>${promo.code}</strong> — ${promo.description || 'Discount Applied'}`;
+        }
+      }
+    } else {
+      if (activeBadge) activeBadge.style.display = 'none';
+      if (promoForm) promoForm.style.display = 'flex';
+      if (appliedRow) appliedRow.style.display = 'none';
+      if (promoInput) promoInput.value = '';
+    }
 
     // Bind Table Controls
     tableContainer.querySelectorAll('.page-qty-dec').forEach(btn => {
@@ -153,6 +186,7 @@ class CartPage {
     const clearBtn = document.getElementById('clearCartPageBtn');
     const insuranceCheckbox = document.getElementById('insuranceCheckbox');
     const promoForm = document.getElementById('cartPagePromoForm');
+    const removePromoBtn = document.getElementById('cartPageRemovePromoBtn');
 
     clearBtn?.addEventListener('click', () => {
       if (confirm('Are you sure you want to clear your cart?')) {
@@ -173,6 +207,16 @@ class CartPage {
       if (status) {
         status.textContent = res.message;
         status.style.color = res.success ? '#166534' : 'var(--accent-red)';
+      }
+      this.renderCartTable();
+    });
+
+    removePromoBtn?.addEventListener('click', () => {
+      const res = removePromoCode();
+      const status = document.getElementById('cartPagePromoStatus');
+      if (status) {
+        status.textContent = res.message;
+        status.style.color = '#64748B';
       }
       this.renderCartTable();
     });

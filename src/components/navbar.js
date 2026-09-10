@@ -203,7 +203,7 @@ export function initNavbarEvents() {
             <img src="${item.image}" alt="${item.name}" loading="lazy" width="40" height="40" />
             <div>
               <div class="search-item-title">${item.name}</div>
-              <div class="search-item-meta">${item.categoryName} • ₹${Math.round(item.price > 500 ? item.price : item.price * 83).toLocaleString('en-IN')}</div>
+              <div class="search-item-meta">${item.categoryName} • ₹${Math.round(item.price * 83).toLocaleString('en-IN')}</div>
             </div>
           </a>
         `).join('') + `<a href="search.html?q=${encodeURIComponent(q)}" class="search-view-all">View all results for "${q}" →</a>`;

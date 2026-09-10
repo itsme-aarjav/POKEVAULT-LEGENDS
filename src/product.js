@@ -77,13 +77,13 @@ class ProductPage {
 
     const initialCoins = Math.floor(p.price * 10);
     const initialRewardsVal = (initialCoins / 100).toFixed(2);
-    const unitPriceINR = Math.round(p.price > 500 ? p.price : p.price * 83);
+    const unitPriceINR = Math.round(p.price * 83);
 
     // Bundle Items Calculation
     const bundleItem1 = related[0] || this.allProducts[1];
     const bundleItem2 = related[1] || this.allProducts[2];
-    const b1PriceINR = Math.round(bundleItem1.price > 500 ? bundleItem1.price : bundleItem1.price * 83);
-    const b2PriceINR = Math.round(bundleItem2.price > 500 ? bundleItem2.price : bundleItem2.price * 83);
+    const b1PriceINR = Math.round((bundleItem1?.price || 49.99) * 83);
+    const b2PriceINR = Math.round((bundleItem2?.price || 29.99) * 83);
     const rawBundleTotal = unitPriceINR + b1PriceINR + b2PriceINR;
     const discountedBundleTotal = Math.round(rawBundleTotal * 0.85);
     const bundleSavings = rawBundleTotal - discountedBundleTotal;
@@ -152,7 +152,7 @@ class ProductPage {
           <div class="pd-price-box">
             <div class="pd-price-row">
               <div class="pd-price-main">₹${unitPriceINR.toLocaleString('en-IN')}</div>
-              ${p.originalPrice ? `<div class="pd-price-original">₹${Math.round(p.originalPrice > 500 ? p.originalPrice : p.originalPrice * 83).toLocaleString('en-IN')}</div>` : ''}
+              ${p.originalPrice ? `<div class="pd-price-original">₹${Math.round(p.originalPrice * 83).toLocaleString('en-IN')}</div>` : ''}
               ${p.discountPercent ? `<span class="pd-discount-badge">SAVE ${p.discountPercent}%</span>` : ''}
             </div>
 
@@ -623,8 +623,8 @@ class ProductPage {
       const rewardsVal = (totalCoins / 100).toFixed(2);
 
       if (coinsCount) coinsCount.textContent = totalCoins.toLocaleString('en-US');
-      if (coinsValue) coinsValue.textContent = `$${rewardsVal}`;
-      if (stickyPriceVal) stickyPriceVal.textContent = `$${(p.price * this.selectedQty).toFixed(2)}`;
+      if (coinsValue) coinsValue.textContent = `₹${Math.round(rewardsVal * 83 || 150)}`;
+      if (stickyPriceVal) stickyPriceVal.textContent = `₹${(unitPriceINR * this.selectedQty).toLocaleString('en-IN')}`;
     };
 
     document.getElementById('pdQtyDec')?.addEventListener('click', () => updateQtyAndPrices(this.selectedQty - 1));

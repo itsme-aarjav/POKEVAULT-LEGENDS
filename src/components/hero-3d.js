@@ -1,6 +1,7 @@
 /**
  * POKÉVAULT LEGENDS — High-Performance 3D WebGL Holographic Slab Engine (Three.js)
- * Features realistic acrylic glass refraction, custom rainbow foil shader, and smooth mouse/touch physics.
+ * Features realistic acrylic glass refraction, authentic card textures, PSA header label,
+ * and smooth interactive physics.
  */
 
 import * as THREE from 'three';
@@ -48,11 +49,12 @@ export class Hero3DSlab {
     this.clock = new THREE.Clock();
     this.isDragging = false;
     this.prevPointerPos = { x: 0, y: 0 };
-    this.dragRotation = { x: 0, y: 0 };
+    this.dragRotation = { x: 0.05, y: -0.15 };
+    this.textureLoader = new THREE.TextureLoader();
 
     this.initScene();
-    this.buildSlabMesh();
     this.initLights();
+    this.buildSlabMesh();
     this.initEvents();
     this.animate();
   }
@@ -60,10 +62,10 @@ export class Hero3DSlab {
   initScene() {
     this.scene = new THREE.Scene();
 
-    const w = this.container.clientWidth || 450;
-    const h = this.container.clientHeight || 550;
+    const w = this.container.clientWidth || 460;
+    const h = this.container.clientHeight || 580;
 
-    this.camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 100);
+    this.camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100);
     this.camera.position.set(0, 0, 7.2);
 
     this.renderer = new THREE.WebGLRenderer({
@@ -88,23 +90,29 @@ export class Hero3DSlab {
 
   initLights() {
     // Ambient soft studio light
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.8);
     this.scene.add(ambientLight);
 
-    // Key directional light for foil gleam
-    this.keyLight = new THREE.DirectionalLight(0xffffff, 2.5);
-    this.keyLight.position.set(3, 5, 5);
+    // Key directional light for foil gleam & acrylic specular highlights
+    this.keyLight = new THREE.DirectionalLight(0xffffff, 3.2);
+    this.keyLight.position.set(4, 6, 6);
     this.scene.add(this.keyLight);
 
     // Dynamic rainbow spotlight that follows cursor
-    this.spotLight = new THREE.PointLight(0xffeedd, 3.5, 12);
-    this.spotLight.position.set(0, 0, 4);
+    this.spotLight = new THREE.PointLight(0xffeedd, 3.5, 14);
+    this.spotLight.position.set(0, 0, 5);
     this.scene.add(this.spotLight);
 
-    // Soft colored rim light from bottom
-    this.rimLight = new THREE.PointLight(0xff9900, 2.0, 8);
-    this.rimLight.position.set(-3, -4, 2);
+    // Soft colored rim light from bottom left
+    const data = this.cardData[this.currentKey];
+    this.rimLight = new THREE.PointLight(data?.lightColor || 0xff9900, 2.8, 10);
+    this.rimLight.position.set(-4, -4, 3);
     this.scene.add(this.rimLight);
+
+    // Subtle blue rim light from top right for comic/pulp depth
+    const blueRimLight = new THREE.PointLight(0x00ccff, 2.0, 8);
+    blueRimLight.position.set(4, -3, -2);
+    this.scene.add(blueRimLight);
   }
 
   createPsaLabelCanvas(data) {
@@ -163,30 +171,63 @@ export class Hero3DSlab {
     this.slabGroup = new THREE.Group();
     const data = this.cardData[this.currentKey];
 
-    // --- 1. ACRYLIC CASE (Transparent Polycarbonate) ---
-    const caseWidth = 3.2;
-    const caseHeight = 4.8;
-    const caseDepth = 0.22;
+    // =========================================================================
+    // 1. INNER CARD MESH (Front & Back Authentic Card)
+    // =========================================================================
+    const cardWidth = 2.75;
+    const cardHeight = 3.4;
+    const cardThickness = 0.035;
 
-    const caseGeo = new THREE.BoxGeometry(caseWidth, caseHeight, caseDepth, 4, 4, 4);
-    const caseMat = new THREE.MeshPhysicalMaterial({
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.35,
-      roughness: 0.05,
-      metalness: 0.1,
-      transmission: 0.9,
-      ior: 1.52, // Optical acrylic refraction index
-      thickness: 0.4,
-      specularIntensity: 1.0,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.05
+    // Load Card Front Texture
+    const frontTexture = this.textureLoader.load(data.frontImg);
+    frontTexture.colorSpace = THREE.SRGBColorSpace;
+    frontTexture.generateMipmaps = true;
+
+    // Load Card Back Texture
+    const backTexture = this.textureLoader.load('/assets/card_back.png');
+    backTexture.colorSpace = THREE.SRGBColorSpace;
+    backTexture.generateMipmaps = true;
+
+    // Card Core Box Material (6 sides: Right, Left, Top, Bottom, Front, Back)
+    const cardStockEdgeMat = new THREE.MeshStandardMaterial({
+      color: 0xE8ECF0,
+      roughness: 0.6,
+      metalness: 0.1
     });
 
-    this.acrylicCase = new THREE.Mesh(caseGeo, caseMat);
-    this.slabGroup.add(this.acrylicCase);
+    const frontCardMat = new THREE.MeshStandardMaterial({
+      map: frontTexture,
+      roughness: 0.18,
+      metalness: 0.22,
+      bumpScale: 0.02
+    });
 
-    // --- 2. PSA TOP LABEL ---
+    const backCardMat = new THREE.MeshStandardMaterial({
+      map: backTexture,
+      roughness: 0.35,
+      metalness: 0.1
+    });
+
+    const cardMaterials = [
+      cardStockEdgeMat, // right
+      cardStockEdgeMat, // left
+      cardStockEdgeMat, // top
+      cardStockEdgeMat, // bottom
+      frontCardMat,     // front (+Z)
+      backCardMat       // back (-Z)
+    ];
+
+    const cardGeo = new THREE.BoxGeometry(cardWidth, cardHeight, cardThickness);
+    this.cardMesh = new THREE.Mesh(cardGeo, cardMaterials);
+    this.cardMesh.position.set(0, -0.55, 0);
+    this.cardMesh.castShadow = true;
+    this.cardMesh.receiveShadow = true;
+    this.cardMesh.renderOrder = 1;
+    this.slabGroup.add(this.cardMesh);
+
+    // =========================================================================
+    // 2. PSA TOP HEADER LABEL
+    // =========================================================================
     const labelCanvas = this.createPsaLabelCanvas(data);
     const labelTexture = new THREE.CanvasTexture(labelCanvas);
     labelTexture.colorSpace = THREE.SRGBColorSpace;
@@ -194,94 +235,63 @@ export class Hero3DSlab {
     const labelGeo = new THREE.PlaneGeometry(2.85, 0.95);
     const labelMat = new THREE.MeshBasicMaterial({
       map: labelTexture,
-      toneMapped: false
+      toneMapped: false,
+      side: THREE.DoubleSide
     });
     const labelMesh = new THREE.Mesh(labelGeo, labelMat);
-    labelMesh.position.set(0, 1.7, 0.015);
+    labelMesh.position.set(0, 1.7, 0.01);
+    labelMesh.renderOrder = 2;
     this.slabGroup.add(labelMesh);
 
-    // --- 3. INNER CARD MESH WITH HOLOGRAPHIC FOIL ---
-    const textureLoader = new THREE.TextureLoader();
-    const cardTexture = textureLoader.load(data.frontImg);
-    cardTexture.colorSpace = THREE.SRGBColorSpace;
-
-    const cardGeo = new THREE.PlaneGeometry(2.75, 3.4);
-    
-    // Custom Holographic Foil Shader Material
-    this.foilMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        tCard: { value: cardTexture },
-        uTime: { value: 0.0 },
-        uMouse: { value: new THREE.Vector2(0.5, 0.5) },
-        uFoilColor: { value: new THREE.Color(data.foilColor) }
-      },
-      vertexShader: `
-        varying vec2 vUv;
-        varying vec3 vNormal;
-        varying vec3 vViewPosition;
-
-        void main() {
-          vUv = uv;
-          vNormal = normalize(normalMatrix * normal);
-          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          vViewPosition = -mvPosition.xyz;
-          gl_Position = projectionMatrix * mvPosition;
-        }
-      `,
-      fragmentShader: `
-        uniform sampler2D tCard;
-        uniform float uTime;
-        uniform vec2 uMouse;
-        uniform vec3 uFoilColor;
-        varying vec2 vUv;
-        varying vec3 vNormal;
-        varying vec3 vViewPosition;
-
-        vec3 rainbow(float t) {
-          vec3 a = vec3(0.5, 0.5, 0.5);
-          vec3 b = vec3(0.5, 0.5, 0.5);
-          vec3 c = vec3(1.0, 1.0, 1.0);
-          vec3 d = vec3(0.0, 0.33, 0.67);
-          return a + b * cos(6.28318 * (c * t + d));
-        }
-
-        void main() {
-          vec4 cardColor = texture2D(tCard, vUv);
-          vec3 viewDir = normalize(vViewPosition);
-          float angle = dot(vNormal, viewDir);
-
-          // Rainbow Iridescent Gradient calculation
-          float foilWave = sin((vUv.x + vUv.y) * 8.0 + uTime * 1.5 + (uMouse.x * 2.0));
-          vec3 rainbowFoil = rainbow(foilWave * 0.5 + 0.5);
-
-          // Specular shimmer reflection
-          float spec = pow(max(0.0, angle), 8.0) * 0.45;
-          vec3 finalColor = cardColor.rgb + (rainbowFoil * 0.28 * cardColor.a) + (spec * uFoilColor * 0.25);
-
-          gl_FragColor = vec4(finalColor, cardColor.a);
-        }
-      `,
+    // =========================================================================
+    // 3. PSA SLAB INTERNAL FROSTED BORDER / INNER RAILS
+    // =========================================================================
+    const railMat = new THREE.MeshStandardMaterial({
+      color: 0xF1F5F9,
+      roughness: 0.4,
+      metalness: 0.15,
       transparent: true,
-      side: THREE.FrontSide
+      opacity: 0.65
     });
 
-    this.cardMesh = new THREE.Mesh(cardGeo, this.foilMaterial);
-    this.cardMesh.position.set(0, -0.55, 0.012);
-    this.slabGroup.add(this.cardMesh);
+    // Top Header Inset Box
+    const headerBorderGeo = new THREE.BoxGeometry(2.95, 1.05, 0.04);
+    const headerBorderMesh = new THREE.Mesh(headerBorderGeo, railMat);
+    headerBorderMesh.position.set(0, 1.7, 0);
+    headerBorderMesh.renderOrder = 1;
+    this.slabGroup.add(headerBorderMesh);
 
-    // --- 4. BACK OF CARD (Pocket Monsters Card Back) ---
-    const backTexture = textureLoader.load('/assets/pokeball-emoji.png');
-    const backGeo = new THREE.PlaneGeometry(2.75, 3.4);
-    const backMat = new THREE.MeshStandardMaterial({
-      color: 0x1a237e,
-      roughness: 0.6,
-      metalness: 0.2,
-      side: THREE.BackSide
+    // Card Window Inset Rail Frame
+    const cardBorderGeo = new THREE.BoxGeometry(2.85, 3.5, 0.04);
+    const cardBorderMesh = new THREE.Mesh(cardBorderGeo, railMat);
+    cardBorderMesh.position.set(0, -0.55, -0.005);
+    cardBorderMesh.renderOrder = 1;
+    this.slabGroup.add(cardBorderMesh);
+
+    // =========================================================================
+    // 4. CRYSTAL CLEAR ACRYLIC CASING (Outer Glass Slab)
+    // =========================================================================
+    const caseWidth = 3.25;
+    const caseHeight = 4.85;
+    const caseDepth = 0.18;
+
+    const caseGeo = new THREE.BoxGeometry(caseWidth, caseHeight, caseDepth);
+    const caseMat = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.28,
+      roughness: 0.05,
+      metalness: 0.05,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.05,
+      ior: 1.5,
+      depthWrite: false, // Ensures card textures inside are never occluded
+      side: THREE.DoubleSide
     });
-    const backMesh = new THREE.Mesh(backGeo, backMat);
-    backMesh.position.set(0, -0.55, -0.012);
-    backMesh.rotation.y = Math.PI;
-    this.slabGroup.add(backMesh);
+
+    this.acrylicCase = new THREE.Mesh(caseGeo, caseMat);
+    this.acrylicCase.renderOrder = 10;
+    this.slabGroup.add(this.acrylicCase);
 
     this.scene.add(this.slabGroup);
   }
@@ -293,7 +303,9 @@ export class Hero3DSlab {
     this.buildSlabMesh();
 
     const data = this.cardData[cardKey];
-    this.rimLight.color.setHex(data.lightColor);
+    if (this.rimLight) {
+      this.rimLight.color.setHex(data.lightColor);
+    }
   }
 
   initEvents() {
@@ -306,10 +318,6 @@ export class Hero3DSlab {
 
       this.mouse.targetX = normX * 0.75;
       this.mouse.targetY = normY * 0.75;
-
-      if (this.foilMaterial) {
-        this.foilMaterial.uniforms.uMouse.value.set(normX + 0.5, normY + 0.5);
-      }
     });
 
     // Touch / Mobile Gyroscope / Drag
@@ -349,7 +357,7 @@ export class Hero3DSlab {
       }, { passive: true });
     }
 
-    // Window Resize Handler with Perfect Aspect-Ratio Containment
+    // Window Resize Handler with Aspect-Ratio Containment
     window.addEventListener('resize', () => {
       if (!this.container) return;
       const w = this.container.clientWidth;
@@ -388,19 +396,15 @@ export class Hero3DSlab {
         this.slabGroup.rotation.z = floatRotZ;
 
         // Dampen drag rotation over time
-        this.dragRotation.x *= 0.95;
-        this.dragRotation.y *= 0.95;
+        this.dragRotation.x *= 0.96;
+        this.dragRotation.y *= 0.96;
       }
     }
 
-    // Update Spotlight and Shader Uniforms
+    // Update Spotlight Position for Dynamic Sheen Effect
     if (this.spotLight) {
       this.spotLight.position.x = this.mouse.x * 4;
       this.spotLight.position.y = -this.mouse.y * 4 + 1;
-    }
-
-    if (this.foilMaterial) {
-      this.foilMaterial.uniforms.uTime.value = elapsedTime;
     }
 
     this.renderer.render(this.scene, this.camera);

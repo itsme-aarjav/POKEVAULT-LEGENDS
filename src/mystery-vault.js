@@ -66,7 +66,7 @@ class MysterySimulator {
       }
 
       const wonItem = pool[Math.floor(Math.random() * pool.length)] || this.allProducts[0];
-      const wonPriceINR = Math.round(wonItem.price > 500 ? wonItem.price : wonItem.price * 83);
+      const wonPriceINR = Math.round(wonItem.price * 83);
 
       confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
 

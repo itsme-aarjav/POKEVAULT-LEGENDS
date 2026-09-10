@@ -3,10 +3,8 @@
  * Includes Gamified Free Shipping Bar, In-Cart Upsells, SSL Security Badges, and Micro-Copy Trust Signals.
  */
 
-import { getCart, updateCartQty, removeFromCart, getCartSubtotal, applyPromoCode, getPromoState, addToCart } from '../utils/store.js';
+import { getCart, updateCartQty, removeFromCart, getCartSubtotal, applyPromoCode, removePromoCode, getPromoState, addToCart } from '../utils/store.js';
 import { getAllProducts } from '../data/products.js';
-
-const FREE_SHIPPING_THRESHOLD = 100;
 
 export function renderCartDrawer() {
   return `
@@ -45,11 +43,18 @@ export function renderCartDrawer() {
 
       <!-- PROMO CODE SECTION -->
       <div class="cart-promo-box" style="padding: 0.75rem 1rem; border-bottom: 2px solid #000; background: #FFF;">
-        <div style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; margin-bottom: 6px;">PROMO / VIP DISCOUNT CODE</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;">PROMO / VIP DISCOUNT CODE</div>
+          <span id="drawerPromoBadge" style="display:none; font-family:var(--font-mono); font-size:0.7rem; font-weight:800; background:#DCFCE7; color:#166534; padding:2px 6px; border-radius:4px; border:1px solid #86EFAC;"></span>
+        </div>
         <form id="cartDrawerPromoForm" style="display:flex; gap:6px;">
           <input type="text" id="cartPromoInput" placeholder="e.g. POKEVAULT10" style="flex:1; padding:6px 10px; font-family:var(--font-mono); font-size:0.8rem; border:2px solid #000; text-transform:uppercase;" />
           <button type="submit" class="btn-inspect" style="padding:6px 12px; font-size:0.75rem;">Apply</button>
         </form>
+        <div id="drawerAppliedPromoRow" style="display:none; align-items:center; justify-content:space-between; background:#F8FAFC; border:1px solid #CBD5E1; padding:6px 10px; border-radius:4px; margin-top:4px;">
+          <span id="drawerAppliedPromoText" style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700; color:#000;"></span>
+          <button type="button" id="drawerRemovePromoBtn" style="background:none; border:none; color:var(--accent-red); font-family:var(--font-mono); font-size:0.72rem; font-weight:800; cursor:pointer; text-decoration:underline;">✕ Remove</button>
+        </div>
         <div id="cartPromoMsg" style="font-family:var(--font-mono); font-size:0.75rem; margin-top:4px; font-weight:700;"></div>
       </div>
 
@@ -57,11 +62,11 @@ export function renderCartDrawer() {
       <div class="cart-footer">
         <div class="cart-subtotal-row" style="margin-top: 0.25rem;">
           <span>SUBTOTAL:</span>
-          <span id="drawerCartSubtotal">$0.00</span>
+          <span id="drawerCartSubtotal">₹0</span>
         </div>
         <div id="drawerCartDiscountRow" style="display:none; justify-content:space-between; font-family:var(--font-mono); font-size:0.85rem; color:var(--accent-red); margin-bottom:0.5rem; font-weight:700;">
-          <span>DISCOUNT:</span>
-          <span id="drawerCartDiscount">-$0.00</span>
+          <span id="drawerDiscountLabel">DISCOUNT:</span>
+          <span id="drawerCartDiscount">-₹0</span>
         </div>
 
         <a href="checkout.html" class="btn-pill" id="drawerCheckoutBtn" style="width: 100%; text-align:center; display:block; text-decoration:none; box-sizing:border-box; font-size:1.05rem; padding:14px;">
@@ -71,7 +76,7 @@ export function renderCartDrawer() {
         <!-- MICRO-COPY TRUST SIGNALS -->
         <div style="margin-top:10px; text-align:center; font-family:var(--font-mono); font-size:0.72rem; color:#475569; display:flex; flex-direction:column; gap:4px; align-items:center;">
           <div style="font-weight:700; color:#1E293B;">🔒 256-Bit SSL Encrypted Vault Checkout</div>
-          <div style="color:#64748B;">💳 Visa • Mastercard • PayPal • Apple Pay • Google Pay</div>
+          <div style="color:#64748B;">💳 Visa • Mastercard • PayPal • Apple Pay • Google Pay • UPI</div>
           <div style="color:#059669; font-weight:800;"><img src="assets/pokeball-emoji.png" alt="Pokéball" class="pokeball-emoji-sm" /> Earn PokéCoins Rewards on this order</div>
         </div>
       </div>
@@ -83,6 +88,7 @@ export function updateCartDrawerUI() {
   const container = document.getElementById('cartItemsContainer');
   const subtotalEl = document.getElementById('drawerCartSubtotal');
   const discountRow = document.getElementById('drawerCartDiscountRow');
+  const discountLabel = document.getElementById('drawerDiscountLabel');
   const discountEl = document.getElementById('drawerCartDiscount');
   const freeMsg = document.getElementById('freeShippingMsg');
   const freeProgress = document.getElementById('freeShippingProgress');
@@ -91,10 +97,10 @@ export function updateCartDrawerUI() {
 
   const cart = getCart();
   const subtotal = getCartSubtotal();
+  const inrSubtotal = Math.round(subtotal * 83);
 
-  // Update Free Shipping Progress Bar (India BlueDart: ₹999 threshold)
-  const FREE_SHIPPING_INR = 999;
-  const inrSubtotal = subtotal > 500 ? subtotal : subtotal * 83;
+  // Update Free Shipping Progress Bar (India BlueDart: ₹2,500 threshold)
+  const FREE_SHIPPING_INR = 2500;
 
   if (inrSubtotal === 0) {
     if (freeMsg) freeMsg.innerHTML = `Add items to qualify for <strong>FREE BlueDart Express Delivery (India)</strong>!`;
@@ -105,7 +111,7 @@ export function updateCartDrawerUI() {
   } else {
     const diff = FREE_SHIPPING_INR - inrSubtotal;
     const pct = Math.min(100, Math.round((inrSubtotal / FREE_SHIPPING_INR) * 100));
-    if (freeMsg) freeMsg.innerHTML = `Add <strong>₹${Math.round(diff).toLocaleString('en-IN')}</strong> more for <strong>FREE BlueDart Express Delivery</strong>!`;
+    if (freeMsg) freeMsg.innerHTML = `Add <strong>₹${diff.toLocaleString('en-IN')}</strong> more for <strong>FREE BlueDart Express Delivery</strong>!`;
     if (freeProgress) freeProgress.style.width = `${pct}%`;
   }
 
@@ -120,21 +126,24 @@ export function updateCartDrawerUI() {
 
   const promo = getPromoState();
   let discountAmount = 0;
-  if (promo.discountPercent > 0) {
-    discountAmount = (inrSubtotal * promo.discountPercent) / 100;
+  if (promo.type === 'fixed' && promo.fixedINR) {
+    discountAmount = Math.min(inrSubtotal, promo.fixedINR);
+  } else if (promo.discountPercent > 0) {
+    discountAmount = Math.round((inrSubtotal * promo.discountPercent) / 100);
   }
 
   container.innerHTML = cart.map(item => {
     const p = item.product;
     if (!p) return '';
-    const itemPriceINR = Math.round(p.price > 500 ? p.price : p.price * 83);
+    const itemPriceINR = Math.round(p.price * 83);
+    const itemTotalINR = itemPriceINR * item.quantity;
     return `
       <div class="cart-item-row" data-id="${p.id}">
         <img src="${p.image}" class="cart-item-thumb" alt="${p.name}" loading="lazy" />
         <div class="cart-item-details">
           <div class="cart-item-title">${p.name}</div>
-          <div class="cart-item-meta">${p.categoryName}</div>
-          <div class="cart-item-price">₹${(itemPriceINR * item.quantity).toLocaleString('en-IN')}</div>
+          <div class="cart-item-meta">${p.categoryName} • ₹${itemPriceINR.toLocaleString('en-IN')} each</div>
+          <div class="cart-item-price">₹${itemTotalINR.toLocaleString('en-IN')}</div>
           <div class="cart-qty-row" style="margin-top:6px; display:flex; align-items:center; gap:6px;">
             <button class="btn-qty drawer-qty-dec" data-id="${p.id}">-</button>
             <span style="font-family:var(--font-mono); font-weight:700; font-size:0.85rem;">${item.quantity}</span>
@@ -153,7 +162,7 @@ export function updateCartDrawerUI() {
     const suggested = all.filter(p => !cartIds.has(p.id)).slice(0, 3);
 
     upsellsList.innerHTML = suggested.map(p => {
-      const upsellPriceINR = Math.round(p.price > 500 ? p.price : p.price * 83);
+      const upsellPriceINR = Math.round(p.price * 83);
       return `
       <div style="background:#FFF; border:2px solid #000; border-radius:6px; padding:6px 10px; display:flex; align-items:center; gap:8px; min-width:210px; flex-shrink:0;">
         <img src="${p.image}" style="width:40px; height:40px; object-fit:contain;" alt="${p.name}" />
@@ -177,11 +186,44 @@ export function updateCartDrawerUI() {
   if (discountRow) {
     if (discountAmount > 0) {
       discountRow.style.display = 'flex';
-      if (discountEl) discountEl.textContent = `-₹${Math.round(discountAmount).toLocaleString('en-IN')}`;
+      if (discountLabel) discountLabel.textContent = `DISCOUNT (${promo.code}):`;
+      if (discountEl) discountEl.textContent = `-₹${discountAmount.toLocaleString('en-IN')}`;
     } else {
       discountRow.style.display = 'none';
     }
   }
+
+  // Update Drawer Promo Controls
+  const promoBadge = document.getElementById('drawerPromoBadge');
+  const promoForm = document.getElementById('cartDrawerPromoForm');
+  const appliedRow = document.getElementById('drawerAppliedPromoRow');
+  const appliedText = document.getElementById('drawerAppliedPromoText');
+  const removeBtn = document.getElementById('drawerRemovePromoBtn');
+
+  if (promo && promo.code) {
+    if (promoBadge) {
+      promoBadge.textContent = promo.code;
+      promoBadge.style.display = 'inline-block';
+    }
+    if (promoForm) promoForm.style.display = 'none';
+    if (appliedRow) {
+      appliedRow.style.display = 'flex';
+      if (appliedText) {
+        appliedText.innerHTML = `✓ <strong>${promo.code}</strong> — ${promo.description || 'Discount Applied'}`;
+      }
+    }
+  } else {
+    if (promoBadge) promoBadge.style.display = 'none';
+    if (promoForm) promoForm.style.display = 'flex';
+    if (appliedRow) appliedRow.style.display = 'none';
+  }
+
+  removeBtn?.addEventListener('click', () => {
+    removePromoCode();
+    const msg = document.getElementById('cartPromoMsg');
+    if (msg) msg.textContent = 'Promo code removed.';
+    updateCartDrawerUI();
+  }, { once: true });
 
   // Bind item controls
   container.querySelectorAll('.drawer-qty-dec').forEach(btn => {
@@ -243,4 +285,5 @@ export function initCartDrawerEvents() {
   });
 
   window.addEventListener('pv-cart-updated', updateCartDrawerUI);
+  window.addEventListener('pv-promo-updated', updateCartDrawerUI);
 }

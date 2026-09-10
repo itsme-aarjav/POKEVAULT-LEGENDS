@@ -64,11 +64,11 @@ class OrderConfirmationPage {
         customerEmail: 'trainer@pokevault.com',
         shippingAddress: '102 Pallet Town Way, Kanto 90210',
         trackingNumber: `TRK-${Math.floor(10000000 + Math.random() * 90000000)}`,
-        subtotal: 149.99,
-        insuranceCost: 9.99,
-        totalAmount: 159.98,
+        subtotalINR: 12450,
+        shippingINR: 150,
+        totalINR: 12600,
         items: [
-          { card_name: 'Master Vault XL Mystery Chest', quantity: 1, unit_price: 149.99 }
+          { name: 'Master Vault XL Mystery Chest', quantity: 1, unit_price: 150, inrPrice: 12450 }
         ]
       };
     }
@@ -80,24 +80,29 @@ class OrderConfirmationPage {
 
     const items = orderData.items || orderData.order_items || [];
     if (listEl) {
-      listEl.innerHTML = items.map(item => `
-        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #EEE; font-family:var(--font-mono); font-size:0.85rem;">
-          <div>
-            <strong style="color:#000;">${item.card_name || item.name || 'Pokémon Collector Product'}</strong>
-            <div style="font-size:0.75rem; color:#666;">Quantity: ${item.quantity || 1} × $${Number(item.unit_price || item.price || 0).toFixed(2)}</div>
+      listEl.innerHTML = items.map(item => {
+        const unitPrice = Number(item.inrPrice || (item.price ? (item.price > 500 ? item.price : item.price * 83) : (item.unit_price ? item.unit_price * 83 : 2490)));
+        const qty = Number(item.quantity || item.qty || 1);
+        const itemTotal = unitPrice * qty;
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px dashed #E2E8F0; font-family:var(--font-mono); font-size:0.85rem;">
+            <div>
+              <strong style="color:#000;">${item.card_name || item.name || 'Pokémon Collector Product'}</strong>
+              <div style="font-size:0.75rem; color:#64748B;">Quantity: ${qty} × ₹${Math.round(unitPrice).toLocaleString('en-IN')}</div>
+            </div>
+            <div style="font-weight:900; color:var(--accent-red); font-size:0.95rem;">₹${Math.round(itemTotal).toLocaleString('en-IN')}</div>
           </div>
-          <div style="font-weight:900; color:var(--accent-red);">$${(Number(item.unit_price || item.price || 0) * Number(item.quantity || 1)).toFixed(2)}</div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    const sub = Number(orderData.subtotal || 149.99);
-    const ship = Number(orderData.insuranceCost || orderData.insurance_cost || 9.99);
-    const tot = Number(orderData.totalAmount || orderData.total_amount || (sub + ship));
+    const sub = Number(orderData.subtotalINR || (orderData.subtotal ? orderData.subtotal * 83 : 12450));
+    const ship = Number(orderData.shippingINR !== undefined ? orderData.shippingINR : (orderData.insuranceCost ? 150 : 0));
+    const tot = Number(orderData.totalINR || (orderData.totalAmount ? orderData.totalAmount * 83 : (sub + ship)));
 
-    if (subtotalEl) subtotalEl.textContent = `$${sub.toFixed(2)}`;
-    if (shippingEl) shippingEl.textContent = `$${ship.toFixed(2)}`;
-    if (totalEl) totalEl.textContent = `$${tot.toFixed(2)}`;
+    if (subtotalEl) subtotalEl.textContent = `₹${Math.round(sub).toLocaleString('en-IN')}`;
+    if (shippingEl) shippingEl.textContent = ship > 0 ? `₹${Math.round(ship)}` : 'FREE';
+    if (totalEl) totalEl.textContent = `₹${Math.round(tot).toLocaleString('en-IN')}`;
   }
 }
 

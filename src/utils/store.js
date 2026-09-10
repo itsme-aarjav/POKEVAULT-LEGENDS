@@ -88,30 +88,63 @@ export const getCartSubtotal = () => {
   }, 0);
 };
 
-// Promo code & insurance state
-let appliedPromo = { code: '', discountPercent: 0 };
-let insuranceEnabled = true;
+// Promo code & insurance state with LocalStorage persistence
+export const getPromoState = () => {
+  try {
+    const raw = localStorage.getItem('pvPromo');
+    if (!raw) return { code: '', discountPercent: 0, type: 'none', value: 0, description: '' };
+    return JSON.parse(raw);
+  } catch (e) {
+    return { code: '', discountPercent: 0, type: 'none', value: 0, description: '' };
+  }
+};
 
 export const applyPromoCode = (code) => {
   const cleanCode = (code || '').toUpperCase().trim();
+  let promo = null;
+
   if (cleanCode === 'POKEVAULT10') {
-    appliedPromo = { code: 'POKEVAULT10', discountPercent: 10 };
-    return { success: true, message: '★ 10% Vault Collector Discount Applied!' };
+    promo = { code: 'POKEVAULT10', discountPercent: 10, type: 'percent', value: 10, description: '10% Vault Collector Discount' };
   } else if (cleanCode === 'LEGENDS20') {
-    appliedPromo = { code: 'LEGENDS20', discountPercent: 20 };
-    return { success: true, message: '★ 20% Legend Special Discount Applied!' };
+    promo = { code: 'LEGENDS20', discountPercent: 20, type: 'percent', value: 20, description: '20% Legend Special Discount' };
+  } else if (cleanCode === 'VIP15PASS') {
+    promo = { code: 'VIP15PASS', discountPercent: 15, type: 'percent', value: 15, description: '15% VIP Collector Pass' };
+  } else if (cleanCode === 'COIN250') {
+    promo = { code: 'COIN250', discountPercent: 0, type: 'fixed', fixedINR: 250, value: 3.01, description: '₹250 PokéCoins Voucher' };
+  } else if (cleanCode === 'COIN500') {
+    promo = { code: 'COIN500', discountPercent: 0, type: 'fixed', fixedINR: 500, value: 6.02, description: '₹500 PokéCoins Voucher' };
+  } else if (cleanCode === 'FREESHIPVIP') {
+    promo = { code: 'FREESHIPVIP', discountPercent: 0, type: 'shipping', freeShipping: true, description: 'Free BlueDart Air Shipping Pass' };
+  } else if (cleanCode === 'FREEBOOSTER') {
+    promo = { code: 'FREEBOOSTER', discountPercent: 0, type: 'gift', gift: 'Free Japanese Booster Pack', description: 'Free Booster Pack Voucher' };
+  }
+
+  if (promo) {
+    localStorage.setItem('pvPromo', JSON.stringify(promo));
+    window.dispatchEvent(new CustomEvent('pv-promo-updated', { detail: promo }));
+    dispatchCartUpdate();
+    return { success: true, message: `★ ${promo.description} Applied!`, promo };
   }
   return { success: false, message: 'Invalid promo code. Try POKEVAULT10 or LEGENDS20' };
 };
 
-export const getPromoState = () => appliedPromo;
+export const removePromoCode = () => {
+  localStorage.removeItem('pvPromo');
+  const empty = { code: '', discountPercent: 0, type: 'none', value: 0, description: '' };
+  window.dispatchEvent(new CustomEvent('pv-promo-updated', { detail: empty }));
+  dispatchCartUpdate();
+  return { success: true, message: 'Promo code removed.' };
+};
 
 export const setInsurance = (enabled) => {
-  insuranceEnabled = !!enabled;
+  localStorage.setItem('pvInsurance', enabled ? 'true' : 'false');
   dispatchCartUpdate();
 };
 
-export const getInsuranceState = () => insuranceEnabled;
+export const getInsuranceState = () => {
+  const val = localStorage.getItem('pvInsurance');
+  return val === null ? true : val === 'true';
+};
 
 // Wishlist Actions
 export const isInWishlist = (productId) => {

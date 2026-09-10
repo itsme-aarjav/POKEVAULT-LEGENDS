@@ -58,8 +58,8 @@ export function renderProductCard(product) {
         </div>
 
         <div class="card-price-row">
-          <div class="card-price-current">₹${Math.round(product.price > 500 ? product.price : product.price * 83).toLocaleString('en-IN')}</div>
-          ${product.originalPrice ? `<div class="card-price-original">₹${Math.round(product.originalPrice > 500 ? product.originalPrice : product.originalPrice * 83).toLocaleString('en-IN')}</div>` : ''}
+          <div class="card-price-current">₹${Math.round(product.price * 83).toLocaleString('en-IN')}</div>
+          ${product.originalPrice ? `<div class="card-price-original">₹${Math.round(product.originalPrice * 83).toLocaleString('en-IN')}</div>` : ''}
         </div>
 
         <div style="font-size:0.72rem; display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">

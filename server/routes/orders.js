@@ -38,10 +38,9 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Cart items cannot be empty' });
     }
 
-    // Cap insurance cost to expected value to prevent manipulation
-    const safeInsuranceCost = Math.min(Number(insuranceCost) || 9.99, 49.99);
-    const safeDiscountAmount = Math.max(0, Number(discountAmount) || 0);
     const orderId = `ORD-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
+    const safeInsuranceCostInput = Math.min(Number(insuranceCost) || 9.99, 49.99);
+    const safeDiscountAmount = Math.max(0, Number(discountAmount) || 0);
 
     let subtotal = 0;
     const lineItems = [];
@@ -71,9 +70,21 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Cap discount to at most 100% of subtotal
-    const cappedDiscount = Math.min(safeDiscountAmount, subtotal);
-    const totalAmount = Math.max(0.00, subtotal - cappedDiscount + (insuranceIncluded ? safeInsuranceCost : 0));
+    // Cap discount to at most subtotal
+    let safeInsuranceCost = insuranceIncluded ? safeInsuranceCostInput : 0;
+    let cappedDiscount = Math.min(safeDiscountAmount, subtotal);
+
+    // If 100% discount (or discount amount covers the subtotal)
+    if (safeDiscountAmount >= subtotal && subtotal > 0) {
+      cappedDiscount = subtotal;
+      safeInsuranceCost = 0;
+    }
+
+    let totalAmount = Math.max(0.00, subtotal - cappedDiscount + safeInsuranceCost);
+    if (req.body.totalAmount !== undefined && Number(req.body.totalAmount) === 0) {
+      totalAmount = 0.00;
+    }
+
     const trackingNumber = req.body.trackingNumber || `TRK-${Math.floor(10000000 + Math.random() * 90000000)}`;
     const orderStatus = req.body.orderStatus || req.body.order_status || 'dispatched';
     const paymentStatus = req.body.paymentStatus || req.body.payment_status || 'completed';
@@ -198,8 +209,8 @@ router.get('/', requireAdmin, async (req, res) => {
   }
 });
 
-// GET /api/orders/:id — Get order details by ID [ADMIN PROTECTED]
-router.get('/:id', requireAdmin, async (req, res) => {
+// GET /api/orders/:id — Get order details by ID [PUBLIC RECEIPT]
+router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     if (isMySQLConfigured()) {

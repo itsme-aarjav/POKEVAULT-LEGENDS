@@ -31,13 +31,37 @@ export default function ShopifyAdminShell() {
       const health = await checkApiHealth();
       setDbStatus(health?.database === 'mysql-connected' ? 'mysql-connected' : 'local');
 
-      // 2. Fetch Orders
+      let combinedOrders = [];
+
+      // 2. Fetch Orders from Backend API
       const orderRes = await getOrders();
-      if (orderRes && orderRes.data) {
-        setOrders(orderRes.data);
+      if (orderRes && Array.isArray(orderRes.data)) {
+        combinedOrders = [...orderRes.data];
       }
 
-      // 3. Fetch Products
+      // 3. Merge any local browser test orders if not already in list
+      if (typeof window !== 'undefined') {
+        try {
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('pvOrder_')) {
+              const localOrder = JSON.parse(localStorage.getItem(key));
+              if (localOrder && (localOrder.id || localOrder.orderId)) {
+                const id = localOrder.id || localOrder.orderId;
+                if (!combinedOrders.some(o => o.id === id || o.order_id === id)) {
+                  combinedOrders.unshift(localOrder);
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Local orders scan error:', e);
+        }
+      }
+
+      setOrders(combinedOrders);
+
+      // 4. Fetch Products
       const prodRes = await getProducts();
       if (prodRes && prodRes.data) {
         setProducts(prodRes.data);

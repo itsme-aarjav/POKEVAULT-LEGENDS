@@ -49,19 +49,25 @@ router.get('/', async (req, res) => {
       const rows = await dbQuery(`SELECT * FROM cards ${whereClause} ORDER BY created_at DESC`, params);
 
       if (rows && rows.length > 0) {
-        const formatted = rows.map(r => ({
-          ...r,
-          gallery: parseJsonField(r.gallery, []),
-          tags: parseJsonField(r.tags, []),
-          specs: parseJsonField(r.specs, {}),
-          comicLore: parseJsonField(r.comic_lore, {}),
-          isTrending: Boolean(r.is_trending),
-          isFeatured: Boolean(r.is_featured),
-          isBestseller: Boolean(r.is_bestseller),
-          isNew: Boolean(r.is_new),
-          price: Number(r.price),
-          originalPrice: r.original_price ? Number(r.original_price) : null
-        }));
+        const formatted = rows.map(r => {
+          const stock = r.in_stock !== undefined ? Number(r.in_stock) : 10;
+          return {
+            ...r,
+            in_stock: stock,
+            inStock: stock,
+            availability: stock > 0 ? 'In Stock' : 'Out of Stock',
+            gallery: parseJsonField(r.gallery, []),
+            tags: parseJsonField(r.tags, []),
+            specs: parseJsonField(r.specs, {}),
+            comicLore: parseJsonField(r.comic_lore, {}),
+            isTrending: Boolean(r.is_trending),
+            isFeatured: Boolean(r.is_featured),
+            isBestseller: Boolean(r.is_bestseller),
+            isNew: Boolean(r.is_new),
+            price: Number(r.price),
+            originalPrice: r.original_price ? Number(r.original_price) : null
+          };
+        });
         return res.json({ success: true, count: formatted.length, data: formatted, source: 'mysql' });
       }
     }
@@ -94,8 +100,12 @@ router.get('/:id', async (req, res) => {
       const rows = await dbQuery('SELECT * FROM cards WHERE id = ? LIMIT 1', [id]);
       if (rows && rows.length > 0) {
         const r = rows[0];
+        const stock = r.in_stock !== undefined ? Number(r.in_stock) : 10;
         const formatted = {
           ...r,
+          in_stock: stock,
+          inStock: stock,
+          availability: stock > 0 ? 'In Stock' : 'Out of Stock',
           gallery: parseJsonField(r.gallery, []),
           tags: parseJsonField(r.tags, []),
           specs: parseJsonField(r.specs, {}),

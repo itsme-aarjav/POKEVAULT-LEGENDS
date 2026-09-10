@@ -8,7 +8,9 @@ import { isInWishlist, toggleWishlist, addToCart } from '../utils/store.js';
 export function renderProductCard(product) {
   const isWishlisted = isInWishlist(product.id);
   const starsHtml = '★'.repeat(Math.floor(product.rating)) + (product.rating % 1 !== 0 ? '½' : '');
-  const isLowStock = product.inStock && product.inStock <= 3;
+  const stock = product.in_stock !== undefined ? Number(product.in_stock) : (product.inStock !== undefined ? Number(product.inStock) : 10);
+  const isOutOfStock = stock <= 0;
+  const isLowStock = !isOutOfStock && stock <= 3;
 
   // Pop Culture Hype Tag
   let popCultureTag = product.badge;
@@ -21,9 +23,9 @@ export function renderProductCard(product) {
   }
 
   return `
-    <div class="card-item-box" data-product-id="${product.id}">
+    <div class="card-item-box ${isOutOfStock ? 'out-of-stock' : ''}" data-product-id="${product.id}">
       <div class="card-image-wrap">
-        ${product.discountPercent ? `<div class="card-discount-tag">-${product.discountPercent}%</div>` : ''}
+        ${isOutOfStock ? `<div class="card-discount-tag" style="background:#DC2626; color:#FFF; font-weight:800;">SOLD OUT</div>` : (product.discountPercent ? `<div class="card-discount-tag">-${product.discountPercent}%</div>` : '')}
         ${popCultureTag ? `<div class="card-badge">${popCultureTag}</div>` : ''}
         <button class="card-wishlist-btn ${isWishlisted ? 'active' : ''}" data-wishlist-id="${product.id}" aria-label="Toggle Wishlist for ${product.name}">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="${isWishlisted ? '#E94057' : 'none'}" stroke="${isWishlisted ? '#E94057' : '#000'}" stroke-width="2">
@@ -64,13 +66,19 @@ export function renderProductCard(product) {
 
         <div style="font-size:0.72rem; display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
           <span style="color:#008060; font-weight:700;">⚡ Free BlueDart Delivery</span>
-          ${isLowStock ? `<span style="color:#DC2626; font-weight:800; font-family:var(--font-mono);">⚠️ Only ${product.inStock} left!</span>` : `<span style="color:#475569; font-weight:600;">✓ In Mumbai Vault</span>`}
+          ${isOutOfStock ? `<span style="color:#DC2626; font-weight:800; font-family:var(--font-mono);">❌ Out of Stock</span>` : (isLowStock ? `<span style="color:#DC2626; font-weight:800; font-family:var(--font-mono);">⚠️ Only ${stock} left!</span>` : `<span style="color:#475569; font-weight:600;">✓ In Mumbai Vault</span>`)}
         </div>
 
         <div class="card-actions-row">
-          <button class="btn-pill btn-add-cart-fast" data-cart-id="${product.id}" aria-label="Add ${product.name} to Cart">
-            <img src="assets/pokeball-emoji.png" alt="Pokéball" class="pokeball-emoji-sm" /> Add to Cart
-          </button>
+          ${isOutOfStock ? `
+            <button class="btn-pill btn-add-cart-fast disabled" data-cart-id="${product.id}" disabled style="background:#94A3B8; color:#FFF; cursor:not-allowed; opacity:0.75;" aria-label="${product.name} is Out of Stock">
+              ❌ Out of Stock
+            </button>
+          ` : `
+            <button class="btn-pill btn-add-cart-fast" data-cart-id="${product.id}" aria-label="Add ${product.name} to Cart">
+              <img src="assets/pokeball-emoji.png" alt="Pokéball" class="pokeball-emoji-sm" /> Add to Cart
+            </button>
+          `}
           <a href="product.html?id=${product.id}" class="btn-inspect" title="Inspect ${product.name}">
             Details →
           </a>
@@ -115,6 +123,7 @@ export function bindProductCardEvents(container) {
 
   // Fast Add to Cart Buttons with Micro-Animations
   container.querySelectorAll('[data-cart-id]').forEach(btn => {
+    if (btn.disabled || btn.classList.contains('disabled')) return;
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();

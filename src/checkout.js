@@ -307,8 +307,23 @@ class CheckoutPage {
       totalAmount: totals.total,
       totalINR: totals.inrTotal,
       insuranceIncluded: totals.inrShipping > 0,
-      paymentMethod
+      paymentMethod,
+      orderStatus: 'received',
+      order_status: 'received'
     };
+
+    // Check for any out-of-stock items in cart
+    const outOfStockItem = this.cart.find(item => {
+      const p = item.product;
+      if (!p) return false;
+      const stock = p.in_stock !== undefined ? Number(p.in_stock) : (p.inStock !== undefined ? Number(p.inStock) : 10);
+      return stock <= 0;
+    });
+
+    if (outOfStockItem) {
+      alert(`⚠️ "${outOfStockItem.product?.name || 'An item'}" in your cart is currently out of stock. Please remove it before proceeding.`);
+      return;
+    }
 
     try {
       const res = await fetch('/api/orders', {
@@ -317,6 +332,12 @@ class CheckoutPage {
         body: JSON.stringify(orderPayload)
       });
       const data = await res.json();
+
+      if (!res.ok || data.success === false) {
+        alert(data.message || 'Unable to place order: Some items in your cart may be out of stock.');
+        return;
+      }
+
       const orderId = data.orderId || data.data?.id || `ORD-${Date.now()}`;
 
       const fullOrderRecord = data.data || {
@@ -329,6 +350,8 @@ class CheckoutPage {
         total_amount: orderPayload.totalAmount,
         discount_amount: orderPayload.discountAmount,
         promo_code: orderPayload.promoCode,
+        order_status: 'received',
+        status: 'received',
         order_items: orderPayload.items,
         tracking_number: `TRK-${Math.floor(10000000 + Math.random() * 90000000)}`,
         created_at: new Date().toISOString()
@@ -340,27 +363,8 @@ class CheckoutPage {
       clearCart();
       window.location.href = `order-confirmation.html?id=${orderId}`;
     } catch (err) {
-      console.warn('Backend order placement error, creating local order receipt:', err);
-      const localId = `ORD-${Date.now()}`;
-      const localOrderRecord = {
-        ...orderPayload,
-        id: localId,
-        orderId: localId,
-        customer_name: orderPayload.customerName,
-        customer_email: orderPayload.customerEmail,
-        shipping_address: orderPayload.shippingAddress,
-        total_amount: orderPayload.totalAmount,
-        discount_amount: orderPayload.discountAmount,
-        promo_code: orderPayload.promoCode,
-        order_items: orderPayload.items,
-        tracking_number: `TRK-${Math.floor(10000000 + Math.random() * 90000000)}`,
-        createdAt: new Date().toISOString(),
-        created_at: new Date().toISOString()
-      };
-      localStorage.setItem(`pvOrder_${localId}`, JSON.stringify(localOrderRecord));
-      localStorage.setItem('pvLastOrder', JSON.stringify(localOrderRecord));
-      clearCart();
-      window.location.href = `order-confirmation.html?id=${localId}`;
+      console.warn('Backend order placement network error:', err);
+      alert('Network error placing order. Please try again.');
     }
   }
 

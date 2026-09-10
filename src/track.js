@@ -84,26 +84,96 @@ class OrderTracker {
     });
   }
 
-  displayOrder(orderId) {
+  async displayOrder(orderId) {
     const container = document.getElementById('trackResultContainer');
     if (!container) return;
 
-    const data = SAMPLE_ORDERS[orderId] || {
-      orderId: orderId,
-      item: "Official Pokémon Vault Merchandise Order",
-      orderDate: new Date().toISOString().split('T')[0],
-      courier: "BlueDart Express Priority",
-      trackingNo: `BD-${Math.floor(1000000000 + Math.random() * 9000000000)}IN`,
-      origin: "PokéVault Central Vault (Mumbai Air Hub)",
-      destination: "Your Delivery Address",
-      currentStage: 2,
-      statusText: "ARMORED VAULT PACKAGING IN PROGRESS",
-      estDelivery: "In 2 Business Days",
-      timeline: [
-        { time: "Today", title: "Order Verified & Payment Authenticated", desc: "Vault curator team assigned." },
-        { time: "Today", title: "5-Point Vault Inspection & Hologram Serialized", desc: "Undergoing UV foil and casing inspection." }
-      ]
-    };
+    let realOrder = null;
+    try {
+      const res = await fetch(`/api/orders/${orderId}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json && json.success && json.data) {
+          realOrder = json.data;
+        }
+      }
+    } catch (e) {}
+
+    if (!realOrder) {
+      try {
+        const local = localStorage.getItem(`pvOrder_${orderId}`) || localStorage.getItem('pvLastOrder');
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (parsed.id === orderId || parsed.orderId === orderId || orderId === 'LAST') {
+            realOrder = parsed;
+          }
+        }
+      } catch (e) {}
+    }
+
+    let data = SAMPLE_ORDERS[orderId];
+    if (realOrder) {
+      const st = (realOrder.order_status || realOrder.status || 'received').toLowerCase();
+      let stage = 1;
+      let statusText = 'ORDER RECEIVED & QUEUED IN VAULT';
+      if (st === 'processing') {
+        stage = 2;
+        statusText = 'VAULT AUDIT & MINT AUTHENTICATION IN PROGRESS';
+      } else if (st === 'dispatched') {
+        stage = 3;
+        statusText = 'ARMORED PACKAGING COMPLETE — DISPATCHED';
+      } else if (st === 'shipped') {
+        stage = 4;
+        statusText = 'IN BLUEDART AIR TRANSIT';
+      } else if (st === 'delivered') {
+        stage = 5;
+        statusText = 'PACKAGE DELIVERED TO DESTINATION';
+      } else if (st === 'cancelled' || st === 'refunded') {
+        stage = 1;
+        statusText = st === 'cancelled' ? 'ORDER CANCELLED' : 'REFUND PROCESSED';
+      }
+
+      const items = realOrder.order_items || realOrder.items || [];
+      const itemNames = items.map(i => i.card_name || i.name || 'Pokémon Vault Item').join(', ');
+      const formattedDate = realOrder.created_at ? new Date(realOrder.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Today';
+
+      data = {
+        orderId: realOrder.id || realOrder.orderId || orderId,
+        item: itemNames || 'Official Pokémon Vault Merchandise',
+        orderDate: formattedDate,
+        courier: realOrder.tracking_number?.includes(':') ? realOrder.tracking_number.split(':')[0] : 'BlueDart Express Priority',
+        trackingNo: realOrder.tracking_number || `TRK-${Math.floor(10000000 + Math.random() * 90000000)}`,
+        origin: 'PokéVault Central Vault (Mumbai Air Hub)',
+        destination: realOrder.shipping_address || 'Customer Verified Address',
+        currentStage: stage,
+        statusText: statusText,
+        estDelivery: stage === 5 ? 'Delivered' : '1-2 Business Days',
+        timeline: [
+          { time: formattedDate, title: 'Order Received & Payment Authenticated', desc: `Order #${realOrder.id || orderId} registered in database for ${realOrder.customer_name || 'Collector'}.` },
+          ...(stage >= 2 ? [{ time: 'In Progress', title: '5-Point Vault Authentication & Packaging', desc: 'Case verification and tamper-evident serialized seal.' }] : []),
+          ...(stage >= 3 ? [{ time: 'Dispatched', title: 'Handed to Armored Dispatch Courier', desc: 'Secure transit initiated.' }] : []),
+          ...(stage >= 4 ? [{ time: 'In Transit', title: 'Air Hub Cargo Transit', desc: 'En route to destination delivery center.' }] : []),
+          ...(stage >= 5 ? [{ time: 'Completed', title: 'Delivered', desc: 'Delivered to customer address.' }] : [])
+        ]
+      };
+    } else if (!data) {
+      data = {
+        orderId: orderId,
+        item: "Official Pokémon Vault Merchandise Order",
+        orderDate: new Date().toISOString().split('T')[0],
+        courier: "BlueDart Express Priority",
+        trackingNo: `BD-${Math.floor(1000000000 + Math.random() * 9000000000)}IN`,
+        origin: "PokéVault Central Vault (Mumbai Air Hub)",
+        destination: "Your Delivery Address",
+        currentStage: 1,
+        statusText: "ORDER RECEIVED IN VAULT SYSTEM",
+        estDelivery: "In 2 Business Days",
+        timeline: [
+          { time: "Today", title: "Order Verified & Payment Authenticated", desc: "Vault curator team assigned." },
+          { time: "Today", title: "5-Point Vault Inspection & Seal", desc: "Undergoing UV foil and casing inspection." }
+        ]
+      };
+    }
 
     const stages = [
       { num: 1, label: "Order Verified", icon: "✓" },

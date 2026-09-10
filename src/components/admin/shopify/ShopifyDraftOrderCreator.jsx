@@ -146,7 +146,8 @@ export default function ShopifyDraftOrderCreator({ onOrderCreated }) {
       insuranceCost: shippingMethod.price || 0,
       paymentMethod,
       paymentStatus: targetPaymentStatus,
-      orderStatus: targetPaymentStatus === 'completed' ? 'dispatched' : 'processing'
+      orderStatus: 'received',
+      order_status: 'received'
     };
 
     try {

@@ -123,7 +123,7 @@ export default function ShopifyAdminShell() {
     window.location.reload();
   };
 
-  const unfulfilledOrdersCount = orders.filter(o => (o.order_status || o.status || 'dispatched').toLowerCase() !== 'delivered').length;
+  const unfulfilledOrdersCount = orders.filter(o => ['received', 'processing', 'dispatched', 'shipped'].includes((o.order_status || o.status || 'received').toLowerCase())).length;
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: '#090D16', color: '#F8FAFC', fontFamily: "'Inter', sans-serif", overflow: 'hidden' }}>

@@ -109,12 +109,14 @@ class OrderConfirmationPage {
     const shippingAddr = orderData.shipping_address || orderData.shippingAddress || '123 Pallet Town Way, Kanto';
     const trackingNo = orderData.tracking_number || orderData.trackingNumber || `TRK-${Math.floor(10000000 + Math.random() * 90000000)}`;
     const promoCode = orderData.promo_code || orderData.promoCode || '';
+    const trackBtnEl = document.getElementById('receiptTrackBtn');
 
     if (receiptIdEl) receiptIdEl.textContent = finalOrderId;
     if (nameEl) nameEl.textContent = custName;
     if (emailEl) emailEl.textContent = custEmail;
     if (addrEl) addrEl.textContent = shippingAddr;
     if (trkEl) trkEl.textContent = `Tracking: ${trackingNo}`;
+    if (trackBtnEl) trackBtnEl.href = `track.html?order=${finalOrderId}`;
 
     // Render Line Items
     const items = orderData.order_items || orderData.items || [];
@@ -122,7 +124,7 @@ class OrderConfirmationPage {
       if (items.length === 0) {
         listEl.innerHTML = `
           <div style="padding: 10px 0; font-family: var(--font-mono); font-size: 0.85rem; color: #64748B;">
-            Vault Collectible Order Items Dispatched
+            Vault Collectible Order Items Registered
           </div>
         `;
       } else {

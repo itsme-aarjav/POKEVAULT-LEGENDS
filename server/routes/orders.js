@@ -86,7 +86,7 @@ router.post('/', async (req, res) => {
     }
 
     const trackingNumber = req.body.trackingNumber || `TRK-${Math.floor(10000000 + Math.random() * 90000000)}`;
-    const orderStatus = req.body.orderStatus || req.body.order_status || 'dispatched';
+    const orderStatus = req.body.orderStatus || req.body.order_status || 'received';
     const paymentStatus = req.body.paymentStatus || req.body.payment_status || 'completed';
     const paymentMethod = req.body.paymentMethod || req.body.payment_method || 'PayPal';
 
@@ -94,6 +94,22 @@ router.post('/', async (req, res) => {
       const conn = await pool.getConnection();
       try {
         await conn.beginTransaction();
+
+        // 0. Validate stock availability for all items
+        for (const line of lineItems) {
+          const [cardRows] = await conn.query('SELECT name, in_stock FROM cards WHERE id = ?', [line.card_id]);
+          if (cardRows && cardRows.length > 0) {
+            const currentStock = Number(cardRows[0].in_stock);
+            if (currentStock <= 0) {
+              await conn.rollback();
+              conn.release();
+              return res.status(400).json({
+                success: false,
+                message: `Product "${cardRows[0].name || line.card_name}" is currently out of stock and cannot be purchased.`
+              });
+            }
+          }
+        }
 
         // 1. Insert order header
         await conn.query(`

@@ -183,9 +183,9 @@ router.post('/capture-order', async (req, res) => {
       });
     }
 
-    const safeDiscount = Math.min(Math.max(0, Number(discountAmount) || 0), subtotal * 0.5);
+    const safeDiscount = Math.min(Math.max(0, Number(discountAmount) || 0), subtotal);
     const safeInsurance = insuranceIncluded ? Math.min(Number(insuranceCost) || 9.99, 49.99) : 0;
-    const totalAmount = Math.max(0.01, subtotal - safeDiscount + safeInsurance);
+    const totalAmount = Math.max(0.00, subtotal - safeDiscount + safeInsurance);
     const trackingNumber = `TRK-${Math.floor(10000000 + Math.random() * 90000000)}`;
 
     if (isMySQLConfigured()) {
@@ -194,7 +194,7 @@ router.post('/capture-order', async (req, res) => {
           id, customer_name, customer_email, shipping_address,
           subtotal, discount_amount, insurance_included, insurance_cost,
           total_amount, order_status, payment_method, payment_status, tracking_number
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'dispatched', 'PayPal', 'completed', ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'received', 'PayPal', 'completed', ?)
       `, [
         orderId,
         payerDetails.name ? `${payerDetails.name.given_name} ${payerDetails.name.surname}` : 'PayPal Collector',

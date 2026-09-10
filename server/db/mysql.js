@@ -150,7 +150,7 @@ export const initMySQLDatabase = async () => {
         insurance_included BOOLEAN DEFAULT TRUE,
         insurance_cost DECIMAL(10, 2) DEFAULT 9.99,
         total_amount DECIMAL(10, 2) NOT NULL,
-        order_status VARCHAR(50) DEFAULT 'dispatched',
+        order_status VARCHAR(50) DEFAULT 'received',
         payment_method VARCHAR(50) DEFAULT 'PayPal',
         payment_status VARCHAR(50) DEFAULT 'completed',
         tracking_number VARCHAR(100),

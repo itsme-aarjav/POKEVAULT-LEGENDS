@@ -19,7 +19,7 @@ export default function ShopifyOrderManager({ orders = [], onRefresh, searchQuer
     // Status filter
     if (statusFilter !== 'All') {
       result = result.filter(o => {
-        const st = (o.order_status || o.status || 'dispatched').toLowerCase();
+        const st = (o.order_status || o.status || 'received').toLowerCase();
         return st === statusFilter.toLowerCase();
       });
     }
@@ -73,7 +73,7 @@ export default function ShopifyOrderManager({ orders = [], onRefresh, searchQuer
       return;
     }
     const fullTracking = `${carrier}: ${trackingInput.trim()}`;
-    await handleUpdateStatus(orderId, 'Shipped', fullTracking);
+    await handleUpdateStatus(orderId, 'shipped', fullTracking);
     setTrackingInput('');
   };
 
@@ -93,6 +93,27 @@ export default function ShopifyOrderManager({ orders = [], onRefresh, searchQuer
       showFeedback(err.message, 'error');
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const getStatusBadgeStyle = (status) => {
+    const s = (status || 'received').toLowerCase();
+    switch (s) {
+      case 'received':
+        return { background: 'rgba(56,189,248,0.15)', color: '#38BDF8', border: '1px solid #38BDF8' };
+      case 'processing':
+        return { background: 'rgba(168,85,247,0.15)', color: '#C084FC', border: '1px solid #C084FC' };
+      case 'dispatched':
+        return { background: 'rgba(245,158,11,0.15)', color: '#FBBF24', border: '1px solid #FBBF24' };
+      case 'shipped':
+        return { background: 'rgba(59,130,246,0.15)', color: '#60A5FA', border: '1px solid #60A5FA' };
+      case 'delivered':
+        return { background: 'rgba(16,185,129,0.15)', color: '#34D399', border: '1px solid #34D399' };
+      case 'cancelled':
+      case 'refunded':
+        return { background: 'rgba(239,68,68,0.15)', color: '#F87171', border: '1px solid #F87171' };
+      default:
+        return { background: 'rgba(148,163,184,0.15)', color: '#94A3B8', border: '1px solid #94A3B8' };
     }
   };
 
@@ -144,16 +165,17 @@ export default function ShopifyOrderManager({ orders = [], onRefresh, searchQuer
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', background: '#1E293B', padding: '6px', borderRadius: '10px', border: '1px solid #334155' }}>
         {[
           { id: 'All', label: 'All Orders' },
-          { id: 'dispatched', label: 'Dispatched' },
-          { id: 'Shipped', label: 'Shipped' },
-          { id: 'Delivered', label: 'Delivered' },
+          { id: 'received', label: 'Received' },
           { id: 'processing', label: 'Processing' },
-          { id: 'Refunded', label: 'Refunded' },
-          { id: 'Cancelled', label: 'Cancelled' }
+          { id: 'dispatched', label: 'Dispatched' },
+          { id: 'shipped', label: 'Shipped' },
+          { id: 'delivered', label: 'Delivered' },
+          { id: 'cancelled', label: 'Cancelled' },
+          { id: 'refunded', label: 'Refunded' }
         ].map(t => {
           const count = t.id === 'All'
             ? orders.length
-            : orders.filter(o => (o.order_status || o.status || 'dispatched').toLowerCase() === t.id.toLowerCase()).length;
+            : orders.filter(o => (o.order_status || o.status || 'received').toLowerCase() === t.id.toLowerCase()).length;
 
           return (
             <button
@@ -214,10 +236,11 @@ export default function ShopifyOrderManager({ orders = [], onRefresh, searchQuer
             ) : (
               filteredOrders.map(order => {
                 const orderId = order.id || order.order_id;
-                const status = order.order_status || order.status || 'dispatched';
+                const status = order.order_status || order.status || 'received';
                 const itemsCount = (order.order_items || order.items || []).reduce((s, i) => s + (Number(i.quantity) || 1), 0) || 1;
                 const total = Number(order.total_amount) || 0;
                 const dateStr = order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Just now';
+                const badgeStyle = getStatusBadgeStyle(status);
 
                 return (
                   <tr key={orderId} style={{ borderBottom: '1px solid rgba(71,85,105,0.4)', transition: 'background 0.15s ease' }}>
@@ -241,15 +264,7 @@ export default function ShopifyOrderManager({ orders = [], onRefresh, searchQuer
                         fontSize: '0.72rem',
                         fontWeight: 800,
                         textTransform: 'uppercase',
-                        background: status.toLowerCase() === 'delivered' ? 'rgba(16,185,129,0.15)' :
-                                    status.toLowerCase() === 'shipped' ? 'rgba(59,130,246,0.15)' :
-                                    status.toLowerCase() === 'refunded' ? 'rgba(239,68,68,0.15)' :
-                                    status.toLowerCase() === 'cancelled' ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)',
-                        color: status.toLowerCase() === 'delivered' ? '#34D399' :
-                               status.toLowerCase() === 'shipped' ? '#60A5FA' :
-                               status.toLowerCase() === 'refunded' ? '#F87171' :
-                               status.toLowerCase() === 'cancelled' ? '#F87171' : '#FBBF24',
-                        border: '1px solid currentColor'
+                        ...badgeStyle
                       }}>
                         {status}
                       </span>
@@ -376,24 +391,45 @@ export default function ShopifyOrderManager({ orders = [], onRefresh, searchQuer
               </div>
 
               {/* Status Action Buttons */}
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
                 <button
                   disabled={isUpdating}
-                  onClick={() => handleUpdateStatus(selectedOrder.id || selectedOrder.order_id, 'Delivered')}
+                  onClick={() => handleUpdateStatus(selectedOrder.id || selectedOrder.order_id, 'received')}
+                  style={{ background: '#0284C7', color: '#FFF', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Mark Received
+                </button>
+                <button
+                  disabled={isUpdating}
+                  onClick={() => handleUpdateStatus(selectedOrder.id || selectedOrder.order_id, 'processing')}
+                  style={{ background: '#7C3AED', color: '#FFF', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Mark Processing
+                </button>
+                <button
+                  disabled={isUpdating}
+                  onClick={() => handleUpdateStatus(selectedOrder.id || selectedOrder.order_id, 'dispatched')}
+                  style={{ background: '#D97706', color: '#FFF', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Mark Dispatched
+                </button>
+                <button
+                  disabled={isUpdating}
+                  onClick={() => handleUpdateStatus(selectedOrder.id || selectedOrder.order_id, 'delivered')}
                   style={{ background: '#10B981', color: '#FFF', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
                 >
                   ✓ Mark Delivered
                 </button>
                 <button
                   disabled={isUpdating}
-                  onClick={() => handleUpdateStatus(selectedOrder.id || selectedOrder.order_id, 'Processing')}
-                  style={{ background: '#F59E0B', color: '#000', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 800, cursor: 'pointer' }}
+                  onClick={() => handleUpdateStatus(selectedOrder.id || selectedOrder.order_id, 'cancelled')}
+                  style={{ background: 'rgba(239,68,68,0.2)', color: '#F87171', border: '1px solid rgba(239,68,68,0.4)', padding: '6px 12px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
                 >
-                  Mark Processing
+                  Cancel Order
                 </button>
                 <button
                   disabled={isUpdating}
-                  onClick={() => handleUpdateStatus(selectedOrder.id || selectedOrder.order_id, 'Refunded')}
+                  onClick={() => handleUpdateStatus(selectedOrder.id || selectedOrder.order_id, 'refunded')}
                   style={{ background: 'rgba(239,68,68,0.2)', color: '#F87171', border: '1px solid rgba(239,68,68,0.4)', padding: '6px 12px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
                 >
                   Issue Refund

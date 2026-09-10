@@ -37,14 +37,23 @@ export const addToCart = (productId, qty = 1) => {
   const product = getProductById(productId);
   if (!product) return;
 
+  const stock = product.in_stock !== undefined ? Number(product.in_stock) : (product.inStock !== undefined ? Number(product.inStock) : 10);
+  if (stock <= 0) {
+    if (typeof window !== 'undefined') {
+      alert(`⚠️ "${product.name}" is currently out of stock and cannot be added to your vault cart.`);
+    }
+    return;
+  }
+
   const existingIndex = cart.findIndex(item => item.id === productId || item.product?.id === productId);
   if (existingIndex !== -1) {
-    cart[existingIndex].quantity = Math.max(1, cart[existingIndex].quantity + qty);
+    const newQty = cart[existingIndex].quantity + qty;
+    cart[existingIndex].quantity = Math.max(1, Math.min(stock, newQty));
   } else {
     cart.push({
       id: productId,
       product: product,
-      quantity: Math.max(1, qty),
+      quantity: Math.max(1, Math.min(stock, qty)),
       addedAt: new Date().toISOString()
     });
   }

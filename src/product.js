@@ -12,7 +12,6 @@ import { getReviewsForProduct } from './data/reviews.js';
 import { addToCart, toggleWishlist, isInWishlist } from './utils/store.js';
 import { injectProductSeo } from './utils/seo.js';
 import { initLiveViewerCounter, startLiveDispatchCountdown, initExitIntentModal } from './utils/social-proof.js';
-import { Slab3DViewer } from './components/slab-3d-viewer.js';
 
 import confettiModule from 'canvas-confetti';
 const confetti = confettiModule?.default || confettiModule || ((typeof window !== 'undefined' && window.confetti) ? window.confetti : () => {});
@@ -24,14 +23,45 @@ class ProductPage {
     const cardId = params.get('id');
     this.product = getProductById(cardId) || this.allProducts[0];
     this.reviews = getReviewsForProduct(this.product.id);
-    this.selectedQty = 1;
-    this.slab3DViewer = null;
+    const initStock = this.product.in_stock !== undefined ? Number(this.product.in_stock) : (this.product.inStock !== undefined ? Number(this.product.inStock) : 10);
+    this.selectedQty = initStock > 0 ? 1 : 0;
 
     // Inject Rich Schema.org Product, Offer, AggregateRating, Review & Breadcrumb JSON-LD
     injectProductSeo(this.product, this.reviews);
 
     this.initLayout();
     this.renderProductDetails();
+    if (cardId) {
+      this.fetchLiveProductData(cardId);
+    }
+  }
+
+  async fetchLiveProductData(cardId) {
+    try {
+      const res = await fetch(`/api/cards/${cardId}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json && json.success && json.data) {
+          const live = json.data;
+          const liveStock = live.in_stock !== undefined ? Number(live.in_stock) : (live.inStock !== undefined ? Number(live.inStock) : (live.stock_quantity !== undefined ? Number(live.stock_quantity) : 0));
+          this.product = {
+            ...this.product,
+            ...live,
+            in_stock: liveStock,
+            inStock: liveStock,
+            availability: liveStock > 0 ? "In Stock" : "Out of Stock"
+          };
+          if (liveStock <= 0) {
+            this.selectedQty = 0;
+          } else if (this.selectedQty === 0) {
+            this.selectedQty = 1;
+          }
+          this.renderProductDetails();
+        }
+      }
+    } catch (e) {
+      console.warn('Live product stock fetch error:', e);
+    }
   }
 
   initLayout() {
@@ -49,6 +79,17 @@ class ProductPage {
     if (!root || !this.product) return;
 
     const p = this.product;
+    const stock = p.in_stock !== undefined ? Number(p.in_stock) : (p.inStock !== undefined ? Number(p.inStock) : 10);
+    const isOutOfStock = stock <= 0;
+    const isLowStock = !isOutOfStock && stock <= 3;
+    if (isOutOfStock) {
+      this.selectedQty = 0;
+    } else if (this.selectedQty === 0) {
+      this.selectedQty = 1;
+    } else {
+      this.selectedQty = Math.min(this.selectedQty, stock);
+    }
+
     const isWishlisted = isInWishlist(p.id);
     const starsHtml = '★'.repeat(Math.floor(p.rating)) + (p.rating % 1 !== 0 ? '½' : '');
 
@@ -87,6 +128,9 @@ class ProductPage {
     const rawBundleTotal = unitPriceINR + b1PriceINR + b2PriceINR;
     const discountedBundleTotal = Math.round(rawBundleTotal * 0.85);
     const bundleSavings = rawBundleTotal - discountedBundleTotal;
+    const bundleItem1Stock = bundleItem1?.in_stock !== undefined ? Number(bundleItem1.in_stock) : (Number(bundleItem1?.inStock) || 5);
+    const bundleItem2Stock = bundleItem2?.in_stock !== undefined ? Number(bundleItem2.in_stock) : (Number(bundleItem2?.inStock) || 5);
+    const canBundle = !isOutOfStock && bundleItem1Stock > 0 && bundleItem2Stock > 0;
 
     root.innerHTML = `
       <!-- BREADCRUMBS -->
@@ -101,15 +145,8 @@ class ProductPage {
       <div class="pd-grid">
         <!-- LEFT: GALLERY & IMAGES -->
         <div class="pd-stage-box">
-          <!-- 2D Photo / 3D Hologram Toggle Bar -->
-          <div class="pd-stage-toggle-bar">
-            <button type="button" class="stage-toggle-btn active" id="btnShow2DPhoto">📸 Photo Gallery</button>
-            <button type="button" class="stage-toggle-btn" id="btnShow3DHolo">🎮 3D Hologram Stage</button>
-          </div>
-
           <div id="pdMainStageCanvas" class="pd-main-stage">
             <img id="mainGalleryImg" src="${p.image}" alt="${p.name}" class="pd-main-img" />
-            <div id="pd3DViewerContainer" style="display:none; width:100%; height:450px;"></div>
           </div>
 
           <!-- THUMBNAIL STRIP -->
@@ -128,7 +165,10 @@ class ProductPage {
         <div class="pd-details-box">
           <!-- LIVE FOMO & SOCIAL PROOF BADGE -->
           <div class="pd-badges-row">
-            <span class="stock-badge in-stock">${p.availability}</span>
+            ${isOutOfStock 
+              ? `<span class="stock-badge out-of-stock">❌ OUT OF STOCK</span>`
+              : `<span class="stock-badge in-stock">✓ ${p.availability || 'In Stock'} (${stock} Left)</span>`
+            }
             <span style="font-family:var(--font-mono); font-size:0.8rem; font-weight:700; background:#000; color:#FFF056; padding:2px 8px; border-radius:4px;">${p.categoryName}</span>
             <span id="pdLiveViewersBadge" style="background:#FEF2F2; color:#DC2626; border:1px solid #FCA5A5; font-family:var(--font-mono); font-weight:800; font-size:0.78rem; padding:3px 10px; border-radius:12px; display:inline-flex; align-items:center; gap:4px;">
               <span class="live-pulse-dot"></span> <strong>14 collectors</strong> viewing right now
@@ -171,20 +211,37 @@ class ProductPage {
           </div>
 
           <!-- LIVE STOCK & VELOCITY SCARCITY BAR -->
-          <div class="pd-scarcity-box">
-            <div class="pd-scarcity-header">
-              <span style="color:#DC2626; font-weight:800; font-family:var(--font-mono); font-size:0.85rem;">
-                🔥 HIGH DEMAND: Only ${p.inStock || 2} left in Mumbai Vault
-              </span>
-              <span style="font-size:0.75rem; color:#475569; font-weight:700;">88% Claimed</span>
+          ${isOutOfStock ? `
+            <div class="pd-scarcity-box out-of-stock-box" style="border-color:#FCA5A5; background:#FEF2F2;">
+              <div class="pd-scarcity-header">
+                <span style="color:#DC2626; font-weight:800; font-family:var(--font-mono); font-size:0.85rem;">
+                  ⚠️ CURRENTLY SOLD OUT (0 left in Mumbai Vault)
+                </span>
+                <span style="font-size:0.75rem; color:#991B1B; font-weight:700;">Restock In Progress</span>
+              </div>
+              <div class="pd-scarcity-track" style="background:#FCA5A5;">
+                <div class="pd-scarcity-fill" style="width: 100%; background:#DC2626;"></div>
+              </div>
+              <div style="font-size:0.75rem; color:#991B1B; margin-top:4px;">
+                ⚡ Next verified Japanese shipment arriving soon. Join waiting list or check back later!
+              </div>
             </div>
-            <div class="pd-scarcity-track">
-              <div class="pd-scarcity-fill" style="width: 88%;"></div>
+          ` : `
+            <div class="pd-scarcity-box">
+              <div class="pd-scarcity-header">
+                <span style="color:#DC2626; font-weight:800; font-family:var(--font-mono); font-size:0.85rem;">
+                  🔥 ${isLowStock ? `HIGH DEMAND: Only ${stock} left in Mumbai Vault` : `IN STOCK: ${stock} units available in Mumbai Vault`}
+                </span>
+                <span style="font-size:0.75rem; color:#475569; font-weight:700;">${isLowStock ? '88% Claimed' : 'Fast Dispatch'}</span>
+              </div>
+              <div class="pd-scarcity-track">
+                <div class="pd-scarcity-fill" style="width: ${isLowStock ? '88%' : '40%'};"></div>
+              </div>
+              <div style="font-size:0.75rem; color:#64748B; margin-top:4px;">
+                ⚡ <strong>24 collectors</strong> ordered from this category in the last 12 hours.
+              </div>
             </div>
-            <div style="font-size:0.75rem; color:#64748B; margin-top:4px;">
-              ⚡ <strong>24 collectors</strong> ordered from this category in the last 12 hours.
-            </div>
-          </div>
+          `}
 
           <!-- GEOLOCATION DELIVERY ESTIMATOR & LIVE COUNTDOWN -->
           <div class="pd-delivery-box">
@@ -220,21 +277,39 @@ class ProductPage {
           </p>
 
           <!-- QUANTITY & ACTIONS -->
-          <div class="pd-actions-row">
-            <div class="qty-control-box" style="background:#FFF; padding:4px; border-radius:6px;">
-              <button class="btn-qty" id="pdQtyDec">-</button>
-              <span id="pdQtyVal" style="font-family:var(--font-mono); font-weight:900; font-size:1.1rem; padding:0 12px;">1</span>
-              <button class="btn-qty" id="pdQtyInc">+</button>
+          ${isOutOfStock ? `
+            <div class="pd-actions-row">
+              <div class="qty-control-box disabled" style="background:#F1F5F9; padding:4px; border-radius:6px; opacity:0.65;">
+                <button class="btn-qty" id="pdQtyDec" disabled style="cursor:not-allowed;">-</button>
+                <span id="pdQtyVal" style="font-family:var(--font-mono); font-weight:900; font-size:1.1rem; padding:0 12px; color:#94A3B8;">0</span>
+                <button class="btn-qty" id="pdQtyInc" disabled style="cursor:not-allowed;">+</button>
+              </div>
+
+              <button class="btn-pill pd-add-cart-btn disabled" id="pdAddToCartBtn" disabled style="background:#94A3B8; border-color:#64748B; color:#FFF; cursor:not-allowed; opacity:0.8; box-shadow:none;">
+                ❌ Out of Stock
+              </button>
+
+              <button class="btn-inspect pd-wishlist-btn ${isWishlisted ? 'active' : ''}" id="pdWishlistBtn" title="Save to Wishlist">
+                ${isWishlisted ? '❤️ Saved' : '🤍 Wishlist'}
+              </button>
             </div>
+          ` : `
+            <div class="pd-actions-row">
+              <div class="qty-control-box" style="background:#FFF; padding:4px; border-radius:6px;">
+                <button class="btn-qty" id="pdQtyDec">-</button>
+                <span id="pdQtyVal" style="font-family:var(--font-mono); font-weight:900; font-size:1.1rem; padding:0 12px;">${this.selectedQty}</span>
+                <button class="btn-qty" id="pdQtyInc">+</button>
+              </div>
 
-            <button class="btn-pill pd-add-cart-btn" id="pdAddToCartBtn">
-              🛒 Add to Cart
-            </button>
+              <button class="btn-pill pd-add-cart-btn" id="pdAddToCartBtn">
+                🛒 Add to Cart
+              </button>
 
-            <button class="btn-inspect pd-wishlist-btn ${isWishlisted ? 'active' : ''}" id="pdWishlistBtn" title="Save to Wishlist">
-              ${isWishlisted ? '❤️ Saved' : '🤍 Wishlist'}
-            </button>
-          </div>
+              <button class="btn-inspect pd-wishlist-btn ${isWishlisted ? 'active' : ''}" id="pdWishlistBtn" title="Save to Wishlist">
+                ${isWishlisted ? '❤️ Saved' : '🤍 Wishlist'}
+              </button>
+            </div>
+          `}
 
           <!-- 4-POINT BUYER PROTECTION SHIELD -->
           <div class="buyer-protection-shield">
@@ -269,25 +344,42 @@ class ProductPage {
           </div>
 
           <!-- STICKY ADD TO CART BAR ON SCROLL -->
-          <div class="sticky-buy-bar" id="stickyBuyBar">
-            <div class="sticky-product-info">
-              <img src="${p.image}" class="sticky-product-thumb" alt="${p.name}" />
-              <div class="sticky-product-text">
-                <div class="sticky-product-title">${p.name}</div>
-                <div class="sticky-product-price" id="stickyPriceVal">₹${(unitPriceINR * this.selectedQty).toLocaleString('en-IN')}</div>
+          ${isOutOfStock ? `
+            <div class="sticky-buy-bar" id="stickyBuyBar">
+              <div class="sticky-product-info">
+                <img src="${p.image}" class="sticky-product-thumb" alt="${p.name}" />
+                <div class="sticky-product-text">
+                  <div class="sticky-product-title">${p.name}</div>
+                  <div class="sticky-product-price" style="color:#DC2626;">OUT OF STOCK</div>
+                </div>
+              </div>
+              <div class="sticky-buy-actions">
+                <button class="btn-pill disabled" id="stickyAddToCartBtn" disabled style="background:#94A3B8; border-color:#64748B; color:#FFF; cursor:not-allowed; padding:10px 20px; font-size:1rem; flex-shrink:0;">
+                  ❌ Out of Stock
+                </button>
               </div>
             </div>
-            <div class="sticky-buy-actions">
-              <div class="qty-control-box" style="background:#FFF; padding:2px; border-radius:6px; display:flex; align-items:center;">
-                <button class="btn-qty" id="stickyQtyDec">-</button>
-                <span id="stickyQtyVal" style="font-family:var(--font-mono); font-weight:900; font-size:1rem; padding:0 8px;">1</span>
-                <button class="btn-qty" id="stickyQtyInc">+</button>
+          ` : `
+            <div class="sticky-buy-bar" id="stickyBuyBar">
+              <div class="sticky-product-info">
+                <img src="${p.image}" class="sticky-product-thumb" alt="${p.name}" />
+                <div class="sticky-product-text">
+                  <div class="sticky-product-title">${p.name}</div>
+                  <div class="sticky-product-price" id="stickyPriceVal">₹${(unitPriceINR * this.selectedQty).toLocaleString('en-IN')}</div>
+                </div>
               </div>
-              <button class="btn-pill" id="stickyAddToCartBtn" style="padding:10px 20px; font-size:1rem; flex-shrink:0;">
-                🛒 Add to Cart
-              </button>
+              <div class="sticky-buy-actions">
+                <div class="qty-control-box" style="background:#FFF; padding:2px; border-radius:6px; display:flex; align-items:center;">
+                  <button class="btn-qty" id="stickyQtyDec">-</button>
+                  <span id="stickyQtyVal" style="font-family:var(--font-mono); font-weight:900; font-size:1rem; padding:0 8px;">${this.selectedQty}</span>
+                  <button class="btn-qty" id="stickyQtyInc">+</button>
+                </div>
+                <button class="btn-pill" id="stickyAddToCartBtn" style="padding:10px 20px; font-size:1rem; flex-shrink:0;">
+                  🛒 Add to Cart
+                </button>
+              </div>
             </div>
-          </div>
+          `}
 
           <!-- FREQUENTLY BOUGHT TOGETHER BUNDLE BUILDER -->
           <div class="bundle-builder-wrap">
@@ -312,12 +404,12 @@ class ProductPage {
                 <label for="bundleCheckThis"><strong>This item:</strong> ${p.name} (₹${unitPriceINR.toLocaleString('en-IN')})</label>
               </div>
               <div class="bundle-checkbox-row">
-                <input type="checkbox" id="bundleCheck1" checked />
-                <label for="bundleCheck1"><strong>Add:</strong> ${bundleItem1.name} (₹${b1PriceINR.toLocaleString('en-IN')})</label>
+                <input type="checkbox" id="bundleCheck1" ${bundleItem1Stock > 0 ? 'checked' : 'disabled'} />
+                <label for="bundleCheck1"><strong>Add:</strong> ${bundleItem1.name} (₹${b1PriceINR.toLocaleString('en-IN')}) ${bundleItem1Stock <= 0 ? '<span style="color:#DC2626;">(Out of Stock)</span>' : ''}</label>
               </div>
               <div class="bundle-checkbox-row">
-                <input type="checkbox" id="bundleCheck2" checked />
-                <label for="bundleCheck2"><strong>Add:</strong> ${bundleItem2.name} (₹${b2PriceINR.toLocaleString('en-IN')})</label>
+                <input type="checkbox" id="bundleCheck2" ${bundleItem2Stock > 0 ? 'checked' : 'disabled'} />
+                <label for="bundleCheck2"><strong>Add:</strong> ${bundleItem2.name} (₹${b2PriceINR.toLocaleString('en-IN')}) ${bundleItem2Stock <= 0 ? '<span style="color:#DC2626;">(Out of Stock)</span>' : ''}</label>
               </div>
             </div>
 
@@ -331,9 +423,15 @@ class ProductPage {
                 </div>
               </div>
 
-              <button class="btn-pill" id="addBundleBtn" style="padding:10px 18px; font-size:0.9rem;">
-                ⚡ Add All 3 to Cart
-              </button>
+              ${canBundle ? `
+                <button class="btn-pill" id="addBundleBtn" style="padding:10px 18px; font-size:0.9rem;">
+                  ⚡ Add All 3 to Cart
+                </button>
+              ` : `
+                <button class="btn-pill disabled" id="addBundleBtn" disabled style="padding:10px 18px; font-size:0.9rem; background:#94A3B8; color:#FFF; cursor:not-allowed;">
+                  ❌ Bundle Unavailable
+                </button>
+              `}
             </div>
           </div>
 
@@ -582,34 +680,13 @@ class ProductPage {
       });
     });
 
-    // 2D Photo / 3D Hologram Toggle Handlers
-    const btn2D = document.getElementById('btnShow2DPhoto');
-    const btn3D = document.getElementById('btnShow3DHolo');
-    const mainImgEl = document.getElementById('mainGalleryImg');
-    const viewer3DContainer = document.getElementById('pd3DViewerContainer');
-
-    btn2D?.addEventListener('click', () => {
-      btn2D.classList.add('active');
-      btn3D?.classList.remove('active');
-      if (mainImgEl) mainImgEl.style.display = 'block';
-      if (viewer3DContainer) viewer3DContainer.style.display = 'none';
-    });
-
-    btn3D?.addEventListener('click', () => {
-      btn3D.classList.add('active');
-      btn2D?.classList.remove('active');
-      if (mainImgEl) mainImgEl.style.display = 'none';
-      if (viewer3DContainer) {
-        viewer3DContainer.style.display = 'block';
-        if (!this.slab3DViewer) {
-          this.slab3DViewer = new Slab3DViewer(viewer3DContainer, p);
-        }
-      }
-    });
-
     // Quantity & Price & PokéCoins Synchronized Handlers
     const updateQtyAndPrices = (newQty) => {
-      this.selectedQty = Math.max(1, newQty);
+      if (isOutOfStock) {
+        this.selectedQty = 0;
+      } else {
+        this.selectedQty = Math.max(1, Math.min(stock, newQty));
+      }
       const qtyVal = document.getElementById('pdQtyVal');
       const stickyQtyVal = document.getElementById('stickyQtyVal');
       const stickyPriceVal = document.getElementById('stickyPriceVal');
@@ -627,10 +704,12 @@ class ProductPage {
       if (stickyPriceVal) stickyPriceVal.textContent = `₹${(unitPriceINR * this.selectedQty).toLocaleString('en-IN')}`;
     };
 
-    document.getElementById('pdQtyDec')?.addEventListener('click', () => updateQtyAndPrices(this.selectedQty - 1));
-    document.getElementById('pdQtyInc')?.addEventListener('click', () => updateQtyAndPrices(this.selectedQty + 1));
-    document.getElementById('stickyQtyDec')?.addEventListener('click', () => updateQtyAndPrices(this.selectedQty - 1));
-    document.getElementById('stickyQtyInc')?.addEventListener('click', () => updateQtyAndPrices(this.selectedQty + 1));
+    if (!isOutOfStock) {
+      document.getElementById('pdQtyDec')?.addEventListener('click', () => updateQtyAndPrices(this.selectedQty - 1));
+      document.getElementById('pdQtyInc')?.addEventListener('click', () => updateQtyAndPrices(this.selectedQty + 1));
+      document.getElementById('stickyQtyDec')?.addEventListener('click', () => updateQtyAndPrices(this.selectedQty - 1));
+      document.getElementById('stickyQtyInc')?.addEventListener('click', () => updateQtyAndPrices(this.selectedQty + 1));
+    }
 
     // Authenticity Trust Modal Handlers
     const modalOverlay = document.getElementById('vaultAuthModalOverlay');
@@ -656,6 +735,10 @@ class ProductPage {
     const stickyAddToCartBtn = document.getElementById('stickyAddToCartBtn');
 
     const handleAddToCart = (btn) => {
+      if (isOutOfStock || stock <= 0) {
+        alert(`Sorry, "${p.name}" is currently out of stock and cannot be added to cart.`);
+        return;
+      }
       if (btn) btn.textContent = '✓ Added to Vault!';
       addToCart(p.id, this.selectedQty);
       confetti({ particleCount: 60, spread: 60, origin: { y: 0.75 } });
@@ -664,8 +747,10 @@ class ProductPage {
       }, 1500);
     };
 
-    mainAddToCartBtn?.addEventListener('click', () => handleAddToCart(mainAddToCartBtn));
-    stickyAddToCartBtn?.addEventListener('click', () => handleAddToCart(stickyAddToCartBtn));
+    if (!isOutOfStock) {
+      mainAddToCartBtn?.addEventListener('click', () => handleAddToCart(mainAddToCartBtn));
+      stickyAddToCartBtn?.addEventListener('click', () => handleAddToCart(stickyAddToCartBtn));
+    }
 
     // Sticky Buy Bar Scroll Listener (Desktop & Mobile)
     const stickyBar = document.getElementById('stickyBuyBar');
@@ -748,19 +833,21 @@ class ProductPage {
 
     // 1-Click Vault Bundle Add-to-Cart Handler
     const addBundleBtn = document.getElementById('addBundleBtn');
-    addBundleBtn?.addEventListener('click', () => {
-      addToCart(p.id, 1);
-      if (document.getElementById('bundleCheck1')?.checked) addToCart(bundleItem1.id, 1);
-      if (document.getElementById('bundleCheck2')?.checked) addToCart(bundleItem2.id, 1);
-      
-      confetti({ particleCount: 90, spread: 80, origin: { y: 0.65 } });
-      addBundleBtn.innerHTML = '✓ Vault Bundle Added (15% Saved)!';
-      addBundleBtn.style.background = '#10B981';
-      setTimeout(() => {
-        addBundleBtn.innerHTML = '⚡ Add All 3 to Cart';
-        addBundleBtn.style.background = '';
-      }, 1800);
-    });
+    if (canBundle) {
+      addBundleBtn?.addEventListener('click', () => {
+        addToCart(p.id, 1);
+        if (document.getElementById('bundleCheck1')?.checked) addToCart(bundleItem1.id, 1);
+        if (document.getElementById('bundleCheck2')?.checked) addToCart(bundleItem2.id, 1);
+        
+        confetti({ particleCount: 90, spread: 80, origin: { y: 0.65 } });
+        addBundleBtn.innerHTML = '✓ Vault Bundle Added (15% Saved)!';
+        addBundleBtn.style.background = '#10B981';
+        setTimeout(() => {
+          addBundleBtn.innerHTML = '⚡ Add All 3 to Cart';
+          addBundleBtn.style.background = '';
+        }, 1800);
+      });
+    }
 
     // Interactive Image Hover Magnifier Lens
     const stageCanvas = document.getElementById('pdMainStageCanvas');

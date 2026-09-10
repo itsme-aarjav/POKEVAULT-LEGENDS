@@ -37,6 +37,7 @@ docker exec "$CONTAINER_NAME" mysqldump \
     --quick \
     --routines \
     --triggers \
+    --no-tablespaces \
     "$DB_NAME" | gzip -9 > "$BACKUP_FILE"
 
 FILE_SIZE=$(du -h "$BACKUP_FILE" | cut -f1)

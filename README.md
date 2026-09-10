@@ -15,6 +15,52 @@ Transitioned from third-party serverless dependencies into a **cloud-native, mul
 
 ---
 
+## 📸 Production Deployment Proof (AWS EC2 & Docker)
+
+<div align="center">
+
+### 1. Live Storefront on AWS EC2 (Port 80 via Nginx)
+<p align="center">
+  <img src="./docs/screenshots/02-live-storefront.png" alt="Live Storefront running on AWS EC2 IP" width="95%" />
+</p>
+<p><i>Live WebGL 3D holographic rendering served over standard Port 80 via Nginx Reverse Proxy on AWS EC2 Public IP.</i></p>
+
+<br />
+
+### 2. AWS Management Console (EC2 Instance & VPC)
+<p align="center">
+  <img src="./docs/screenshots/01-aws-ec2-console.png" alt="AWS EC2 Management Console Instance Summary" width="95%" />
+</p>
+<p><i>AWS EC2 Compute Instance (<code>t3.small</code>) running in <code>eu-north-1</code> with Public IP and Security Group rules.</i></p>
+
+<br />
+
+### 3. 3-Tier Container Composition (`docker compose ps`)
+<p align="center">
+  <img src="./docs/screenshots/03-docker-compose-ps.png" alt="Docker Compose ps showing 3 healthy tiers" width="95%" />
+</p>
+<p><i>All 3 isolated containers (<code>pokevault-nginx</code>, <code>pokevault-app</code>, <code>pokevault-mysql</code>) running with passing health checks.</i></p>
+
+<br />
+
+### 4. Automated Health Probe & Sub-2ms Latency (`./deploy/health-check.sh`)
+<p align="center">
+  <img src="./docs/screenshots/04-health-check.png" alt="Health check probe showing 1.8ms latency" width="95%" />
+</p>
+<p><i>Automated liveness probe measuring an ultra-fast response latency of <b>0.0018s (1.8ms)</b> and HTTP 200 status.</i></p>
+
+<br />
+
+### 5. Automated MySQL Database Backup & Rotation (`./deploy/backup-mysql.sh`)
+<p align="center">
+  <img src="./docs/screenshots/05-mysql-backup.png" alt="Automated MySQL Backup and 7-day rotation" width="95%" />
+</p>
+<p><i>Automated <code>mysqldump</code> with gzip compression and 7-day retention rotation cleanup.</i></p>
+
+</div>
+
+---
+
 ## 🏗️ 3-Tier Production Cloud Architecture
 
 ```
@@ -118,6 +164,11 @@ pokevault/
 │
 ├── docs/                         # 📸 Visual Proof & Architecture Diagrams
 │   └── screenshots/              # Terminal & deployment verification images
+│       ├── 01-aws-ec2-console.png
+│       ├── 02-live-storefront.png
+│       ├── 03-docker-compose-ps.png
+│       ├── 04-health-check.png
+│       └── 05-mysql-backup.png
 │
 ├── server/                       # ⚡ Backend API & Database Tier
 │   ├── db/
@@ -142,40 +193,6 @@ pokevault/
 ├── Dockerfile                    # Root multi-stage Dockerfile
 ├── docker-compose.yml            # Root docker-compose configuration
 └── package.json                  # Dependencies (No SaaS lock-in)
-```
-
----
-
-## 📸 Deployment Verification & Proof
-
-### 1. 3-Tier Container Health (`docker compose ps`)
-```text
-NAME                IMAGE                COMMAND                  SERVICE   CREATED          STATUS                    PORTS
-pokevault-mysql     mysql:8.0            "docker-entrypoint.s…"   mysql     10 minutes ago   Up 10 minutes (healthy)   127.0.0.1:3306->3306/tcp
-pokevault-app       pokevault-app:latest "node server/index.js"   app       10 minutes ago   Up 10 minutes (healthy)   5001/tcp
-pokevault-nginx     nginx:alpine         "/docker-entrypoint.…"   nginx     10 minutes ago   Up 10 minutes             0.0.0.0:80->80/tcp
-```
-
-### 2. Live Health Probe (`./deploy/health-check.sh`)
-```text
-=================================================================
-🔍 POKÉVAULT LEGENDS — PRODUCTION SYSTEM HEALTH PROBE
-Target URL: http://127.0.0.1/api/health
-=================================================================
-HTTP Status Code : 200
-Response Latency : 0.003s
-
-✅ SERVICE IS HEALTHY & RESPONDING
-Payload: {"status":"online","service":"POKÉVAULT LEGENDS Production Express API","database":"mysql-connected"}
-```
-
-### 3. Automated Database Backup Rotation (`./deploy/backup-mysql.sh`)
-```text
----------------------------------------------------------------
-[Fri Sep 11 01:45:00 UTC 2026] Starting automated MySQL backup for 'pokevault'...
-[SUCCESS] Backup created at: /opt/backups/mysql/pokevault_backup_20260911_014500.sql.gz (Size: 48K)
-[CLEANUP] Removing backups older than 7 days...
-[Fri Sep 11 01:45:01 UTC 2026] Backup and rotation completed cleanly.
 ```
 
 ---
@@ -206,7 +223,7 @@ http://localhost
 
 ### 1. Launch AWS EC2 Instance
 - **AMI**: Ubuntu Server 22.04 LTS or 24.04 LTS (x86_64).
-- **Instance Type**: `t2.micro` or `t3.micro` (Free Tier eligible).
+- **Instance Type**: `t2.micro` or `t3.micro` / `t3.small`.
 - **Security Group Rules**:
   - `SSH (Port 22)`: Your IP
   - `HTTP (Port 80)`: `0.0.0.0/0` (Anywhere)

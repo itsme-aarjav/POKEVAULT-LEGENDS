@@ -1,4 +1,4 @@
-# ⚡ POKÉVAULT LEGENDS — 3-Tier Cloud-Native Architecture on AWS
+# POKÉVAULT LEGENDS — 3-Tier Cloud-Native Architecture on AWS
 
 [![AWS Cloud](https://img.shields.io/badge/AWS-EC2%20%7C%20VPC%20%7C%20Security%20Groups-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
 [![Docker](https://img.shields.io/badge/Docker-Multi--Stage%20Alpine-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
@@ -15,7 +15,7 @@ Transitioned from third-party serverless dependencies into a **cloud-native, mul
 
 ---
 
-## 📸 Production Deployment Proof (AWS EC2 & Docker)
+## Production Deployment Proof (AWS EC2 & Docker)
 
 <div align="center">
 
@@ -35,7 +35,7 @@ Transitioned from third-party serverless dependencies into a **cloud-native, mul
 
 <br />
 
-### 3. 3-Tier Container Composition (`docker compose ps`)
+### 3. 3-Tier Container Composition (docker compose ps)
 <p align="center">
   <img src="./docs/screenshots/03-docker-compose-ps.png" alt="Docker Compose ps showing 3 healthy tiers" width="95%" />
 </p>
@@ -43,7 +43,7 @@ Transitioned from third-party serverless dependencies into a **cloud-native, mul
 
 <br />
 
-### 4. Automated Health Probe & Sub-2ms Latency (`./deploy/health-check.sh`)
+### 4. Automated Health Probe & Sub-2ms Latency (./deploy/health-check.sh)
 <p align="center">
   <img src="./docs/screenshots/04-health-check.png" alt="Health check probe showing 1.8ms latency" width="95%" />
 </p>
@@ -51,7 +51,7 @@ Transitioned from third-party serverless dependencies into a **cloud-native, mul
 
 <br />
 
-### 5. Automated MySQL Database Backup & Rotation (`./deploy/backup-mysql.sh`)
+### 5. Automated MySQL Database Backup & Rotation (./deploy/backup-mysql.sh)
 <p align="center">
   <img src="./docs/screenshots/05-mysql-backup.png" alt="Automated MySQL Backup and 7-day rotation" width="95%" />
 </p>
@@ -61,7 +61,7 @@ Transitioned from third-party serverless dependencies into a **cloud-native, mul
 
 ---
 
-## 🏗️ 3-Tier Production Cloud Architecture
+## 3-Tier Production Cloud Architecture
 
 ```
                                   ┌────────────────────────────────────────────────────────┐
@@ -102,15 +102,15 @@ Transitioned from third-party serverless dependencies into a **cloud-native, mul
                                                               │
                                             ┌─────────────────┴─────────────────┐
                                             ▼                                   ▼
-                               ┌─────────────────────────┐         ┌─────────────────────────┐
-                               │ Automated Daily Backups │         │   PayPal Gateway API    │
-                               │  (mysqldump + gzip)     │         │   (Payment Capture)     │
-                               └─────────────────────────┘         └─────────────────────────┘
+                                ┌─────────────────────────┐         ┌─────────────────────────┐
+                                │ Automated Daily Backups │         │   PayPal Gateway API    │
+                                │  (mysqldump + gzip)     │         │   (Payment Capture)     │
+                                └─────────────────────────┘         └─────────────────────────┘
 ```
 
 ---
 
-## 🛠️ Key DevOps & Cloud Engineering Highlights
+## Key DevOps & Cloud Engineering Highlights
 
 ### 1. Multi-Stage Docker Build Optimization
 - **Stage 1 (Builder)**: Compiles the multi-page Vite frontend inside `node:20-alpine`.
@@ -140,29 +140,29 @@ Transitioned from third-party serverless dependencies into a **cloud-native, mul
 
 ---
 
-## 📂 Repository Directory Structure
+## Repository Directory Structure
 
 ```text
 pokevault/
-├── .github/                      # 🔮 CI/CD Workflows (GitHub Actions)
+├── .github/                      # CI/CD Workflows (GitHub Actions)
 │   └── workflows/
 │       ├── ci.yml                # Automated test & build verification
 │       └── cd.yml                # Docker build -> Amazon ECR -> EC2 deploy
 │
-├── deploy/                       # 🚀 Production Shell/Bash Automation
+├── deploy/                       # Production Shell/Bash Automation
 │   ├── setup-ec2.sh              # EC2 bootstrap provisioner (Docker, UFW, sysctl)
 │   ├── deploy.sh                 # Zero-downtime container deployment pipeline
 │   ├── backup-mysql.sh           # Automated MySQL backup & 7-day rotation
 │   └── health-check.sh           # Liveness & latency monitoring probe
 │
-├── docker/                       # 🐳 Docker & Nginx Configurations
+├── docker/                       # Docker & Nginx Configurations
 │   ├── Dockerfile                # Multi-stage production build (Node 20 Alpine)
 │   ├── docker-compose.yml        # 3-Tier composition (Nginx, App, MySQL)
 │   └── nginx/
 │       ├── nginx.conf            # Reverse proxy, Gzip, Caching, SPA fallbacks
 │       └── security-headers.conf # OWASP security headers
 │
-├── docs/                         # 📸 Visual Proof & Architecture Diagrams
+├── docs/                         # Visual Proof & Architecture Diagrams
 │   └── screenshots/              # Terminal & deployment verification images
 │       ├── 01-aws-ec2-console.png
 │       ├── 02-live-storefront.png
@@ -170,7 +170,7 @@ pokevault/
 │       ├── 04-health-check.png
 │       └── 05-mysql-backup.png
 │
-├── server/                       # ⚡ Backend API & Database Tier
+├── server/                       # Backend API & Database Tier
 │   ├── db/
 │   │   ├── mysql.js              # Connection pooling, health check, auto-seeder
 │   │   └── mysql_schema.sql      # Production MySQL 8.0 DDL Schema
@@ -178,14 +178,14 @@ pokevault/
 │   ├── middleware/               # Admin authentication & security middleware
 │   └── index.js                  # Production Express Server
 │
-├── src/                          # 🎨 Frontend (HTML5, Vanilla JS, Three.js, React)
+├── src/                          # Frontend (HTML5, Vanilla JS, Three.js, React)
 │   ├── components/               # 3D holographic card viewers, admin dashboard
 │   ├── data/                     # 64+ Pokémon products, reviews, categories
 │   └── lib/api.js                # Centralized REST API client
 │
-├── terraform/                    # 🔮 [Future Phase] Infrastructure as Code (IaC)
-├── k8s/                          # 🔮 [Future Phase] Kubernetes Manifests / Helm
-├── monitoring/                   # 🔮 [Future Phase] Prometheus & Grafana Dashboards
+├── terraform/                    # [Future Phase] Infrastructure as Code (IaC)
+├── k8s/                          # [Future Phase] Kubernetes Manifests / Helm
+├── monitoring/                   # [Future Phase] Prometheus & Grafana Dashboards
 │
 ├── .dockerignore                 # Docker build context filter
 ├── .env.example                  # Environment configuration template
@@ -197,7 +197,7 @@ pokevault/
 
 ---
 
-## 🚀 Quickstart & Local Deployment
+## Quickstart & Local Deployment
 
 ### Prerequisites
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
@@ -219,7 +219,7 @@ http://localhost
 
 ---
 
-## ☁️ Step-by-Step AWS EC2 Production Deployment
+## Step-by-Step AWS EC2 Production Deployment
 
 ### 1. Launch AWS EC2 Instance
 - **AMI**: Ubuntu Server 22.04 LTS or 24.04 LTS (x86_64).
@@ -277,7 +277,7 @@ Add this cron schedule to run backups daily at 2:00 AM:
 
 ---
 
-## 🔮 Future Extensibility Roadmap
+## Future Extensibility Roadmap
 
 The repository is modularly architected to accommodate upcoming DevOps tooling:
 - **CI/CD Pipelines**: Adding `.github/workflows/` for automated unit testing, container build & push to **Amazon ECR**, and SSH deployment.
@@ -287,5 +287,5 @@ The repository is modularly architected to accommodate upcoming DevOps tooling:
 
 ---
 
-## 📜 License
+## License
 This project is licensed under the MIT License — feel free to use and extend for personal and portfolio projects.

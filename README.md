@@ -205,7 +205,7 @@ pokevault/
 ### 1. Clone & Run with Docker Compose
 ```bash
 # Clone the repository
-git clone https://github.com/itsme-aarjav/3-tier-application.git pokevault
+git clone https://github.com/itsme-aarjav/pokevault.git pokevault
 cd pokevault
 
 # Start all 3 tiers (Nginx + Express App + MySQL)
@@ -237,7 +237,7 @@ ssh -i /path/to/your-key.pem ubuntu@<YOUR-EC2-PUBLIC-IP>
 ### 3. Clone Repository & Run Automated Server Provisioning
 ```bash
 # Clone repository into /opt/pokevault
-sudo git clone https://github.com/itsme-aarjav/3-tier-application.git /opt/pokevault
+sudo git clone https://github.com/itsme-aarjav/pokevault.git /opt/pokevault
 sudo chown -R ubuntu:ubuntu /opt/pokevault
 cd /opt/pokevault
 

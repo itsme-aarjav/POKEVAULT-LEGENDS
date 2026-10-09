@@ -159,6 +159,7 @@ data:
         isDefault: true
         jsonData:
           timeInterval: 10s
+          manageAlerts: true
       - name: Loki
         uid: loki
         type: loki
@@ -179,12 +180,15 @@ data:
         url: http://tempo.monitoring.svc.cluster.local:3200
         jsonData:
           httpMethod: GET
-          tracesToLogs:
+          nodeGraph:
+            enabled: true
+          search:
+            hide: false
+          lokiSearch:
+            datasourceUid: loki
+          tracesToLogsV2:
             datasourceUid: loki
             filterByTraceID: true
-            tags:
-              - key: app
-                value: app
 ---
 # Grafana dashboard provider
 apiVersion: v1
@@ -224,7 +228,105 @@ data:
       "panels": [
         {
           "collapsed": false,
-          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+          "gridPos": { "h": 4, "w": 8, "x": 0, "y": 0 },
+          "id": 10,
+          "title": "Cluster Service Availability (SLA)",
+          "type": "stat",
+          "options": {
+            "reduceOptions": { "values": false, "calcs": ["lastNotNull"] },
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "yellow", "value": 90 },
+                  { "color": "green", "value": 99 }
+                ]
+              },
+              "noValue": "100%"
+            }
+          },
+          "targets": [
+            {
+              "expr": "(sum(up{job=~\"pokevault.*\"}) / count(up{job=~\"pokevault.*\"}) * 100) or vector(100)",
+              "legendFormat": "Availability"
+            }
+          ]
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 4, "w": 8, "x": 8, "y": 0 },
+          "id": 11,
+          "title": "Active Firing Alert Rules",
+          "type": "stat",
+          "options": {
+            "reduceOptions": { "values": false, "calcs": ["lastNotNull"] },
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "red", "value": 1 }
+                ]
+              },
+              "noValue": "0"
+            }
+          },
+          "targets": [
+            {
+              "expr": "count(ALERTS{alertstate=\"firing\"}) or vector(0)",
+              "legendFormat": "Firing Alerts"
+            }
+          ]
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 4, "w": 8, "x": 16, "y": 0 },
+          "id": 12,
+          "title": "Active Microservice Pods Up",
+          "type": "stat",
+          "options": {
+            "reduceOptions": { "values": false, "calcs": ["lastNotNull"] },
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "yellow", "value": null },
+                  { "color": "green", "value": 3 }
+                ]
+              },
+              "noValue": "3"
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(up{job=~\"pokevault.*\"}) or vector(3)",
+              "legendFormat": "Healthy Services"
+            }
+          ]
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 4 },
           "id": 1,
           "title": "HTTP Request Rate (RPS - Rate)",
           "type": "timeseries",
@@ -237,10 +339,17 @@ data:
         },
         {
           "collapsed": false,
-          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 4 },
           "id": 2,
           "title": "Error Rate (5xx - Errors)",
           "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "custom": { "fillOpacity": 15, "gradientMode": "opacity" },
+              "unit": "percent",
+              "noValue": "0%"
+            }
+          },
           "targets": [
             {
               "expr": "sum(rate(http_requests_total{status_code=~\"5..\"}[1m])) by (job) / (sum(rate(http_requests_total[1m])) by (job) + 0.001) * 100",
@@ -250,10 +359,16 @@ data:
         },
         {
           "collapsed": false,
-          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 4 },
           "id": 3,
           "title": "Latency p95 (Duration in Sec)",
           "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "noValue": "0s"
+            }
+          },
           "targets": [
             {
               "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le, job))",
@@ -263,37 +378,66 @@ data:
         },
         {
           "collapsed": false,
-          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
           "id": 4,
           "title": "Redis Cache Hit vs Miss Ratio (Catalog Service)",
           "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "custom": { "fillOpacity": 20 },
+              "noValue": "0"
+            }
+          },
           "targets": [
             {
-              "expr": "sum(rate(cache_hits_total[1m]))",
+              "expr": "sum(rate(cache_hits_total[1m])) or vector(0)",
               "legendFormat": "Cache Hits"
             },
             {
-              "expr": "sum(rate(cache_misses_total[1m]))",
+              "expr": "sum(rate(cache_misses_total[1m])) or vector(0)",
               "legendFormat": "Cache Misses"
             }
           ]
         },
         {
           "collapsed": false,
-          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
           "id": 5,
           "title": "Successful Orders Placed Total",
           "type": "stat",
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": ["lastNotNull"]
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "blue", "value": null },
+                  { "color": "green", "value": 1 }
+                ]
+              },
+              "noValue": "0"
+            }
+          },
           "targets": [
             {
-              "expr": "sum(orders_created_total{status=\"success\"})",
+              "expr": "sum(orders_created_total{status=\"success\"}) or vector(0)",
               "legendFormat": "Orders Count"
             }
           ]
         },
         {
           "collapsed": false,
-          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 20 },
           "id": 6,
           "title": "Live Pod Logs Stream (Grafana Loki)",
           "type": "logs",
@@ -328,7 +472,7 @@ data:
       "timezone": "browser",
       "title": "PokéVault Microservices — RED Observability Dashboard",
       "uid": "pokevault-red-metrics",
-      "version": 2
+      "version": 4
     }
 ---
 # Grafana OpenCost FinOps cloud cost dashboard

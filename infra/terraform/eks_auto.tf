@@ -88,9 +88,15 @@ resource "aws_iam_role_policy_attachment" "node_ecr_pull" {
 
 # ─── 3. AMAZON EKS AUTO CLUSTER RESOURCE ──────────────────────────────────────
 resource "aws_eks_cluster" "main" {
-  name     = "${var.project_name}-eks-auto"
-  role_arn = aws_iam_role.cluster.arn
-  version  = "1.31"
+  name                          = "${var.project_name}-eks-auto"
+  role_arn                      = aws_iam_role.cluster.arn
+  version                       = "1.31"
+  bootstrap_self_managed_addons = false
+
+  access_config {
+    authentication_mode                         = "API_AND_CONFIG_MAP"
+    bootstrap_cluster_creator_admin_permissions = true
+  }
 
   vpc_config {
     subnet_ids              = aws_subnet.public[*].id
@@ -130,22 +136,5 @@ resource "aws_eks_cluster" "main" {
 
   tags = {
     Name = "${var.project_name}-eks-auto"
-  }
-}
-
-# ─── 4. EKS ACCESS ENTRY (ADMIN PERMISSION FOR CURRENT AWS CALLER) ────────────
-resource "aws_eks_access_entry" "admin_user" {
-  cluster_name  = aws_eks_cluster.main.name
-  principal_arn = data.aws_caller_identity.current.arn
-  type          = "STANDARD"
-}
-
-resource "aws_eks_access_policy_association" "admin_policy" {
-  cluster_name  = aws_eks_cluster.main.name
-  policy_arn    = "arn:aws:iam::aws:policy/AmazonEKSClusterAdminPolicy"
-  principal_arn = data.aws_caller_identity.current.arn
-
-  access_scope {
-    type = "cluster"
   }
 }

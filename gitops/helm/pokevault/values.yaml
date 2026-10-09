@@ -7,7 +7,7 @@ frontend:
   replicaCount: 2
   image:
     repository: 592668326948.dkr.ecr.us-east-1.amazonaws.com/pokevault-frontend
-    tag: latest
+    tag: ec170f86cc5d737513d71480a742d07cc35ddbbb
     pullPolicy: Always
   service:
     type: ClusterIP
@@ -34,7 +34,7 @@ auth:
   replicaCount: 2
   image:
     repository: 592668326948.dkr.ecr.us-east-1.amazonaws.com/pokevault-auth
-    tag: latest
+    tag: ec170f86cc5d737513d71480a742d07cc35ddbbb
     pullPolicy: Always
   service:
     type: ClusterIP
@@ -61,7 +61,7 @@ catalog:
   replicaCount: 2
   image:
     repository: 592668326948.dkr.ecr.us-east-1.amazonaws.com/pokevault-catalog
-    tag: latest
+    tag: ec170f86cc5d737513d71480a742d07cc35ddbbb
     pullPolicy: Always
   service:
     type: ClusterIP
@@ -94,7 +94,7 @@ order:
   replicaCount: 2
   image:
     repository: 592668326948.dkr.ecr.us-east-1.amazonaws.com/pokevault-order
-    tag: latest
+    tag: ec170f86cc5d737513d71480a742d07cc35ddbbb
     pullPolicy: Always
   service:
     type: ClusterIP
@@ -120,7 +120,7 @@ order:
 redis:
   image:
     repository: redis
-    tag: 7-alpine
+    tag: ec170f86cc5d737513d71480a742d07cc35ddbbb
   service:
     type: ClusterIP
     port: 6379

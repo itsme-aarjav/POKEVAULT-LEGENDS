@@ -42,7 +42,7 @@ jobs:
     needs: validate
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         service:
           - name: auth-service
@@ -82,7 +82,7 @@ jobs:
         with:
           image-ref: ${{ env.IMAGE_PREFIX }}-${{ matrix.service.name }}:${{ github.sha }}
           format: 'table'
-          exit-code: '0' # Set to '1' in strict production environments to break build on CRITICAL
+          exit-code: '1' # Enforce strict DevSecOps gate: breaks build immediately on CRITICAL or HIGH CVEs
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'

@@ -31,7 +31,7 @@ variable "github_org" {
 variable "github_repo" {
   description = "GitHub repository name used for OIDC federation trust policy scoping"
   type        = string
-  default     = "3-tier-application"
+  default     = "POKEVAULT-LEGENDS"
 }
 
 variable "alert_email" {

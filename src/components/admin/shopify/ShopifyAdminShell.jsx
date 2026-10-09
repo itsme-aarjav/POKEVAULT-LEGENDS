@@ -128,7 +128,7 @@ export default function ShopifyAdminShell() {
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: '#090D16', color: '#F8FAFC', fontFamily: "'Inter', sans-serif", overflow: 'hidden' }}>
       
-      {/* ─── POLARIS COLLAPSIBLE SIDEBAR ────────────────────────────── */}
+      {/* Polaris Collapsible Sidebar */}
       <aside style={{
         width: isSidebarCollapsed ? '72px' : '260px',
         backgroundColor: '#0F172A',
@@ -238,7 +238,7 @@ export default function ShopifyAdminShell() {
         </div>
       </aside>
 
-      {/* ─── MAIN CONTENT VIEWPORT ─────────────────────────────────── */}
+      {/* Main Content Viewport */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         
         {/* Top Header */}

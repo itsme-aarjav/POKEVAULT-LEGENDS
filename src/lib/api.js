@@ -21,7 +21,7 @@ const getHeaders = (requiresAdmin = false) => {
   return headers;
 };
 
-// ─── Health & Connection ──────────────────────────────────────────────────
+// Health and connection
 export const checkApiHealth = async () => {
   try {
     const res = await fetch(`${API_BASE}/health`);
@@ -36,7 +36,7 @@ export const isDatabaseConnected = async () => {
   return health?.database === 'mysql-connected';
 };
 
-// ─── Store Settings & Hype Drop ───────────────────────────────────────────
+// Store settings and hype drop
 export const getStoreSettings = async () => {
   try {
     const res = await fetch(`${API_BASE}/settings`);
@@ -81,7 +81,7 @@ export const optInHypeDrop = async () => {
   }
 };
 
-// ─── Admin Authentication ─────────────────────────────────────────────────
+// Admin authentication
 export const loginAdmin = async (passkey) => {
   try {
     const res = await fetch(`${API_BASE}/auth/login`, {
@@ -113,7 +113,7 @@ export const verifyAdminSession = async () => {
   }
 };
 
-// ─── Products & Inventory ─────────────────────────────────────────────────
+// Products and inventory
 export const getProducts = async (params = {}) => {
   try {
     const query = new URLSearchParams(params).toString();
@@ -159,7 +159,7 @@ export const updateInventory = async (cardId, data) => {
   }
 };
 
-// ─── Orders ───────────────────────────────────────────────────────────────
+// Orders
 export const getOrders = async () => {
   try {
     const res = await fetch(`${API_BASE}/orders`, {
@@ -209,7 +209,7 @@ export const deleteOrder = async (orderId) => {
   }
 };
 
-// ─── Discounts & Promo Codes ───────────────────────────────────────────────
+// Discounts and promo codes
 const DEFAULT_DISCOUNTS = [
   {
     id: 'd1',

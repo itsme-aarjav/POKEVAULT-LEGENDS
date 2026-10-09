@@ -1,16 +1,8 @@
-# ==============================================================================
-# ☸️ AMAZON EKS AUTO MODE CLUSTER & IAM ARCHITECTURE
-# ==============================================================================
-# Amazon EKS Auto Mode represents the bleeding-edge (2025/2026) of Kubernetes.
-# It embeds Karpenter, AWS ALB Controller, and EBS CSI directly into AWS control plane:
-# - ZERO manual EC2 worker node groups
-# - Automatic JIT node provisioning in < 45 seconds
-# - Native dynamic EBS gp3 block storage binding for MySQL StatefulSets
-# ==============================================================================
+# Amazon EKS Auto Mode cluster and IAM configuration
 
 data "aws_caller_identity" "current" {}
 
-# ─── 1. EKS CLUSTER IAM ROLE & AUTO MODE POLICIES ─────────────────────────────
+# 1. EKS cluster IAM role and policies
 resource "aws_iam_role" "cluster" {
   name = "${var.project_name}-eks-cluster-role"
 
@@ -58,7 +50,7 @@ resource "aws_iam_role_policy_attachment" "cluster_networking_policy" {
   role       = aws_iam_role.cluster.name
 }
 
-# ─── 2. EKS AUTO MODE NODE IAM ROLE ───────────────────────────────────────────
+# 2. EKS Auto Mode node IAM role
 resource "aws_iam_role" "node" {
   name = "${var.project_name}-eks-auto-node-role"
 
@@ -86,7 +78,7 @@ resource "aws_iam_role_policy_attachment" "node_ecr_pull" {
   role       = aws_iam_role.node.name
 }
 
-# ─── 3. AMAZON EKS AUTO CLUSTER RESOURCE ──────────────────────────────────────
+# 3. Amazon EKS Auto cluster resource
 resource "aws_eks_cluster" "main" {
   name                          = "${var.project_name}-eks-auto"
   role_arn                      = aws_iam_role.cluster.arn

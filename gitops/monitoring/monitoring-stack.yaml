@@ -3,7 +3,7 @@ kind: Namespace
 metadata:
   name: monitoring
 ---
-# ─── 1. PROMETHEUS CONFIGMAP ──────────────────────────────────────────────────
+# Prometheus configuration
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -14,6 +14,9 @@ data:
     global:
       scrape_interval: 10s
       evaluation_interval: 10s
+
+    rule_files:
+      - /etc/prometheus/alert_rules.yml
 
     scrape_configs:
       - job_name: 'pokevault-auth'
@@ -30,8 +33,58 @@ data:
         metrics_path: '/metrics'
         static_configs:
           - targets: ['order-service.pokevault.svc.cluster.local:5003']
+
+      - job_name: 'opencost'
+        metrics_path: '/metrics'
+        scrape_interval: 30s
+        static_configs:
+          - targets: ['opencost.monitoring.svc.cluster.local:9003']
+
+  alert_rules.yml: |
+    groups:
+      - name: pokevault-microservices-alerts
+        rules:
+          - alert: HighHTTPErrorRate5xx
+            expr: sum(rate(http_requests_total{status_code=~"5.."}[2m])) by (job) / (sum(rate(http_requests_total[2m])) by (job) + 0.001) * 100 > 5
+            for: 1m
+            labels:
+              severity: critical
+              tier: application
+            annotations:
+              summary: "High HTTP 5xx error rate detected on {{ $labels.job }}"
+              description: "{{ $labels.job }} is experiencing > 5% 5xx errors for more than 1 minute."
+
+          - alert: HighP95Latency
+            expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[2m])) by (le, job)) > 1.0
+            for: 2m
+            labels:
+              severity: warning
+              tier: application
+            annotations:
+              summary: "p95 Latency exceeding 1.0s on {{ $labels.job }}"
+              description: "{{ $labels.job }} p95 response time is above 1.0s."
+
+          - alert: ServiceTargetDown
+            expr: up{job=~"pokevault.*"} == 0
+            for: 1m
+            labels:
+              severity: critical
+              tier: application
+            annotations:
+              summary: "Microservice target down: {{ $labels.job }}"
+              description: "Target {{ $labels.instance }} of job {{ $labels.job }} is unreachable."
+
+          - alert: FinOpsClusterCostSpike
+            expr: sum(node_total_hourly_cost) > 0.50
+            for: 5m
+            labels:
+              severity: warning
+              tier: finops
+            annotations:
+              summary: "Cloud infrastructure spend spike detected"
+              description: "Current hourly cluster run-rate exceeds budget threshold."
 ---
-# ─── 2. PROMETHEUS DEPLOYMENT & SERVICE ───────────────────────────────────────
+# Prometheus deployment and service
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -89,7 +142,7 @@ spec:
   selector:
     app: prometheus
 ---
-# ─── 3. GRAFANA DATASOURCE CONFIGMAP ──────────────────────────────────────────
+# Grafana datasource configuration (Prometheus, Loki, Tempo)
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -106,8 +159,34 @@ data:
         isDefault: true
         jsonData:
           timeInterval: 10s
+      - name: Loki
+        uid: loki
+        type: loki
+        access: proxy
+        url: http://loki.monitoring.svc.cluster.local:3100
+        jsonData:
+          maxLines: 1000
+          manageAlerts: false
+          derivedFields:
+            - datasourceUid: tempo
+              matcherRegex: "trace_id=([0-9a-fA-F]+)"
+              name: TraceID
+              url: "$${__value.raw}"
+      - name: Tempo
+        uid: tempo
+        type: tempo
+        access: proxy
+        url: http://tempo.monitoring.svc.cluster.local:3200
+        jsonData:
+          httpMethod: GET
+          tracesToLogs:
+            datasourceUid: loki
+            filterByTraceID: true
+            tags:
+              - key: app
+                value: app
 ---
-# ─── 4. GRAFANA DASHBOARD PROVIDER CONFIGMAP ─────────────────────────────────
+# Grafana dashboard provider
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -126,7 +205,7 @@ data:
         options:
           path: /var/lib/grafana/dashboards
 ---
-# ─── 5. GRAFANA DASHBOARD JSON CONFIGMAP ─────────────────────────────────────
+# Grafana RED dashboard with live Loki logs panel
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -211,6 +290,33 @@ data:
               "legendFormat": "Orders Count"
             }
           ]
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
+          "id": 6,
+          "title": "Live Pod Logs Stream (Grafana Loki)",
+          "type": "logs",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "loki"
+              },
+              "expr": "{namespace=~\"pokevault|monitoring\"}",
+              "refId": "A"
+            }
+          ],
+          "options": {
+            "showLabels": true,
+            "wrapLogMessage": true,
+            "enableLogDetails": true,
+            "sortOrder": "Descending"
+          }
         }
       ],
       "refresh": "5s",
@@ -222,10 +328,172 @@ data:
       "timezone": "browser",
       "title": "PokéVault Microservices — RED Observability Dashboard",
       "uid": "pokevault-red-metrics",
+      "version": 2
+    }
+---
+# Grafana OpenCost FinOps cloud cost dashboard
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-cost-dashboard
+  namespace: monitoring
+data:
+  pokevault-cost.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "collapsed": false,
+          "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+          "id": 1,
+          "title": "Total Node Run Rate ($/Hour)",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "sum(node_total_hourly_cost)",
+              "legendFormat": "$/Hour"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "currencyUSD",
+              "decimals": 3,
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 0.5 },
+                  { "color": "red", "value": 1.0 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
+          "id": 2,
+          "title": "Projected Monthly Cluster Cost ($/Month)",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "sum(node_total_hourly_cost) * 730",
+              "legendFormat": "$/Month"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "currencyUSD",
+              "decimals": 2,
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 70 },
+                  { "color": "red", "value": 90 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 6, "w": 8, "x": 16, "y": 0 },
+          "id": 3,
+          "title": "PokéVault Microservices Cost ($/Month)",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "sum(container_cpu_allocation{namespace=\"pokevault\"} * on(node) group_left() node_cpu_hourly_cost) * 730",
+              "legendFormat": "App Monthly"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "currencyUSD",
+              "decimals": 2,
+              "color": { "mode": "palette-classic" }
+            }
+          }
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+          "id": 4,
+          "title": "Hourly Cost by Namespace ($/Hour)",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "sum by (namespace) (container_cpu_allocation * on(node) group_left() node_cpu_hourly_cost)",
+              "legendFormat": "{{namespace}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "currencyUSD",
+              "decimals": 4
+            }
+          }
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+          "id": 5,
+          "title": "Hourly Cost by Microservice (PokéVault Pods)",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "sum by (container) (container_cpu_allocation{namespace=\"pokevault\"} * on(node) group_left() node_cpu_hourly_cost)",
+              "legendFormat": "{{container}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "currencyUSD",
+              "decimals": 4
+            }
+          }
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 14 },
+          "id": 6,
+          "title": "Microservice Resource Allocation Breakdown (CPU Cores Allocated)",
+          "type": "bargauge",
+          "targets": [
+            {
+              "expr": "sum by (container, namespace) (container_cpu_allocation)",
+              "legendFormat": "{{namespace}} / {{container}}"
+            }
+          ],
+          "options": {
+            "orientation": "horizontal",
+            "displayMode": "gradient",
+            "showUnfilled": true
+          }
+        }
+      ],
+      "refresh": "10s",
+      "schemaVersion": 38,
+      "style": "dark",
+      "tags": ["pokevault", "finops", "opencost", "aws"],
+      "time": { "from": "now-1h", "to": "now" },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "PokéVault FinOps — OpenCost Real-Time Cloud Cost Dashboard",
+      "uid": "pokevault-opencost-finops",
       "version": 1
     }
 ---
-# ─── 6. GRAFANA DEPLOYMENT & SERVICE ──────────────────────────────────────────
+# Grafana deployment and service
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -254,7 +522,11 @@ spec:
             - name: GF_AUTH_ANONYMOUS_ORG_ROLE
               value: "Admin"
             - name: GF_AUTH_DISABLE_LOGIN_FORM
-              value: "true"
+              value: "false"
+            - name: GF_SECURITY_ADMIN_USER
+              value: "admin"
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: "admin"
           ports:
             - containerPort: 3000
               name: http
@@ -270,8 +542,10 @@ spec:
               mountPath: /etc/grafana/provisioning/datasources
             - name: provider-volume
               mountPath: /etc/grafana/provisioning/dashboards
-            - name: dashboard-volume
-              mountPath: /var/lib/grafana/dashboards
+            - name: red-dashboard-volume
+              mountPath: /var/lib/grafana/dashboards/red
+            - name: cost-dashboard-volume
+              mountPath: /var/lib/grafana/dashboards/cost
       volumes:
         - name: datasource-volume
           configMap:
@@ -279,9 +553,12 @@ spec:
         - name: provider-volume
           configMap:
             name: grafana-dashboard-providers
-        - name: dashboard-volume
+        - name: red-dashboard-volume
           configMap:
             name: grafana-red-dashboard
+        - name: cost-dashboard-volume
+          configMap:
+            name: grafana-cost-dashboard
 ---
 apiVersion: v1
 kind: Service
@@ -322,3 +599,424 @@ spec:
                 name: grafana
                 port:
                   number: 80
+---
+# Loki centralized logging
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loki-config
+  namespace: monitoring
+data:
+  loki.yaml: |
+    auth_enabled: false
+    server:
+      http_listen_port: 3100
+    common:
+      ring:
+        instance_addr: 127.0.0.1
+        kvstore:
+          store: inmemory
+      replication_factor: 1
+      path_prefix: /tmp/loki
+    schema_config:
+      configs:
+        - from: 2020-10-24
+          store: tsdb
+          object_store: filesystem
+          schema: v13
+          index:
+            prefix: index_
+            period: 24h
+    storage_config:
+      filesystem:
+        directory: /tmp/loki/chunks
+    ruler:
+      storage:
+        type: local
+        local:
+          directory: /tmp/loki/rules
+      rule_path: /tmp/loki/rules-temp
+      ring:
+        kvstore:
+          store: inmemory
+    limits_config:
+      enforce_metric_name: false
+      reject_old_samples: true
+      reject_old_samples_max_age: 168h
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loki
+  namespace: monitoring
+  labels:
+    app: loki
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loki
+  template:
+    metadata:
+      labels:
+        app: loki
+    spec:
+      containers:
+        - name: loki
+          image: grafana/loki:2.9.4
+          args:
+            - "-config.file=/etc/loki/loki.yaml"
+          ports:
+            - containerPort: 3100
+              name: http
+          resources:
+            limits:
+              cpu: 250m
+              memory: 256Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+          volumeMounts:
+            - name: config
+              mountPath: /etc/loki
+            - name: storage
+              mountPath: /tmp/loki
+      volumes:
+        - name: config
+          configMap:
+            name: loki-config
+        - name: storage
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki
+  namespace: monitoring
+  labels:
+    app: loki
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3100
+      targetPort: 3100
+      name: http
+  selector:
+    app: loki
+---
+# Promtail log shipping agent
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: promtail
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: promtail
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - nodes/proxy
+      - services
+      - endpoints
+      - pods
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: promtail
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: promtail
+subjects:
+  - kind: ServiceAccount
+    name: promtail
+    namespace: monitoring
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: promtail-config
+  namespace: monitoring
+data:
+  promtail.yaml: |
+    server:
+      http_listen_port: 9080
+      grpc_listen_port: 0
+    positions:
+      filename: /tmp/positions.yaml
+    clients:
+      - url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+    scrape_configs:
+      - job_name: kubernetes-pods
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            target_label: app
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_container_name]
+            target_label: container
+          - replacement: /var/log/pods/*$1*/*/*.log
+            separator: /
+            source_labels:
+              - __meta_kubernetes_pod_uid
+            target_label: __path__
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: promtail
+  namespace: monitoring
+  labels:
+    app: promtail
+spec:
+  selector:
+    matchLabels:
+      app: promtail
+  template:
+    metadata:
+      labels:
+        app: promtail
+    spec:
+      serviceAccountName: promtail
+      containers:
+        - name: promtail
+          image: grafana/promtail:2.9.4
+          args:
+            - "-config.file=/etc/promtail/promtail.yaml"
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          resources:
+            limits:
+              cpu: 150m
+              memory: 128Mi
+            requests:
+              cpu: 25m
+              memory: 32Mi
+          volumeMounts:
+            - name: config
+              mountPath: /etc/promtail
+            - name: varlog
+              mountPath: /var/log/pods
+              readOnly: true
+            - name: varlibdocker
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: promtail-config
+        - name: varlog
+          hostPath:
+            path: /var/log/pods
+        - name: varlibdocker
+          hostPath:
+            path: /var/lib/docker/containers
+---
+# Grafana Tempo distributed tracing backend
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tempo-config
+  namespace: monitoring
+data:
+  tempo.yaml: |
+    server:
+      http_listen_port: 3200
+    distributor:
+      receivers:
+        otlp:
+          protocols:
+            http:
+              endpoint: "0.0.0.0:4318"
+            grpc:
+              endpoint: "0.0.0.0:4317"
+    ingester:
+      max_block_duration: 5m
+    compactor:
+      compaction:
+        block_retention: 24h
+    storage:
+      trace:
+        backend: local
+        wal:
+          path: /var/tempo/wal
+        local:
+          path: /var/tempo/blocks
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tempo
+  namespace: monitoring
+  labels:
+    app: tempo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tempo
+  template:
+    metadata:
+      labels:
+        app: tempo
+    spec:
+      containers:
+        - name: tempo
+          image: grafana/tempo:2.4.1
+          args:
+            - "-config.file=/etc/tempo/tempo.yaml"
+          ports:
+            - containerPort: 3200
+              name: http
+            - containerPort: 4317
+              name: otlp-grpc
+            - containerPort: 4318
+              name: otlp-http
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 25m
+              memory: 64Mi
+          volumeMounts:
+            - name: config
+              mountPath: /etc/tempo
+            - name: data
+              mountPath: /var/tempo
+      volumes:
+        - name: config
+          configMap:
+            name: tempo-config
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo
+  namespace: monitoring
+  labels:
+    app: tempo
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3200
+      targetPort: 3200
+      name: http
+    - port: 4317
+      targetPort: 4317
+      name: otlp-grpc
+    - port: 4318
+      targetPort: 4318
+      name: otlp-http
+  selector:
+    app: tempo
+---
+# OpenCost FinOps cloud cost monitoring
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: opencost
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: opencost
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "pods", "services", "namespaces", "persistentvolumes", "persistentvolumeclaims", "nodes/proxy", "configmaps", "replicationcontrollers"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["daemonsets", "deployments", "statefulsets", "replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: opencost
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: opencost
+subjects:
+  - kind: ServiceAccount
+    name: opencost
+    namespace: monitoring
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opencost
+  namespace: monitoring
+  labels:
+    app: opencost
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opencost
+  template:
+    metadata:
+      labels:
+        app: opencost
+    spec:
+      serviceAccountName: opencost
+      containers:
+        - name: opencost
+          image: quay.io/kubecost1/kubecost-cost-model:latest
+          env:
+            - name: PROMETHEUS_SERVER_ENDPOINT
+              value: "http://prometheus.monitoring.svc.cluster.local:9090"
+            - name: CLUSTER_ID
+              value: "pokevault-eks-cluster"
+            - name: AWS_REGION
+              value: "us-east-1"
+            - name: EMIT_KUBECOST_METRICS
+              value: "true"
+          ports:
+            - containerPort: 9003
+              name: http
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 25m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opencost
+  namespace: monitoring
+  labels:
+    app: opencost
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9003
+      targetPort: 9003
+      name: http
+  selector:
+    app: opencost

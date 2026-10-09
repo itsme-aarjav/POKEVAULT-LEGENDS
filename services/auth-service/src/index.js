@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import client from 'prom-client';
+import { traceMiddleware } from './tracer.js';
 
 dotenv.config();
 
@@ -10,7 +11,7 @@ const PORT = process.env.PORT || 5001;
 const HOST = process.env.HOST || '0.0.0.0';
 const ADMIN_KEY = process.env.ADMIN_SECRET_KEY || 'pokevaultadmin123';
 
-// ─── Prometheus Observability Setup (RED Metrics) ───────────────────────────
+// Prometheus metrics setup
 const collectDefaultMetrics = client.collectDefaultMetrics;
 collectDefaultMetrics({ register: client.register, prefix: 'auth_' });
 
@@ -27,6 +28,8 @@ const httpRequestsTotal = new client.Counter({
   labelNames: ['method', 'route', 'status_code']
 });
 
+app.use(traceMiddleware('auth-service'));
+
 // Middleware to track Prometheus metrics
 app.use((req, res, next) => {
   const start = process.hrtime();
@@ -36,6 +39,9 @@ app.use((req, res, next) => {
     const route = req.route ? req.route.path : req.path;
     httpRequestDurationMicroseconds.labels(req.method, route, res.statusCode).observe(durationInSeconds);
     httpRequestsTotal.labels(req.method, route, res.statusCode).inc();
+    if (route !== '/health' && route !== '/metrics') {
+      console.log(`[auth-service] [trace_id=${req.traceId}] ${req.method} ${req.url} ${res.statusCode} - ${(durationInSeconds * 1000).toFixed(1)}ms`);
+    }
   });
   next();
 });
@@ -44,7 +50,7 @@ app.use((req, res, next) => {
 app.use(cors());
 app.use(express.json());
 
-// ─── Kubernetes Liveness & Readiness Probes ─────────────────────────────────
+// Health probes
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'UP',
@@ -54,7 +60,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// ─── Prometheus Metrics Scraping Endpoint ───────────────────────────────────
+// Prometheus metrics scraping endpoint
 app.get('/metrics', async (req, res) => {
   try {
     res.set('Content-Type', client.register.contentType);
@@ -64,7 +70,7 @@ app.get('/metrics', async (req, res) => {
   }
 });
 
-// ─── Authentication Routes ─────────────────────────────────────────────────
+// Authentication routes
 // POST /api/auth/login — Authenticate admin credentials
 app.post('/api/auth/login', (req, res) => {
   try {
@@ -101,7 +107,7 @@ app.get('/api/auth/verify', (req, res) => {
 
 // Start Server
 app.listen(PORT, HOST, () => {
-  console.log(`[auth-service] 🚀 Running on http://${HOST}:${PORT}`);
-  console.log(`[auth-service] 🩺 Health probe: http://${HOST}:${PORT}/health`);
-  console.log(`[auth-service] 📊 Prometheus metrics: http://${HOST}:${PORT}/metrics`);
+  console.log(`[auth-service] Running on http://${HOST}:${PORT}`);
+  console.log(`[auth-service] Health probe: http://${HOST}:${PORT}/health`);
+  console.log(`[auth-service] Prometheus metrics: http://${HOST}:${PORT}/metrics`);
 });

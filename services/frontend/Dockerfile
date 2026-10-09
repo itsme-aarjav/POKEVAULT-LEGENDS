@@ -1,4 +1,4 @@
-# ─── Stage 1: Build Vite Production Assets ──────────────────────────────────
+# Build frontend assets
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -9,7 +9,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# ─── Stage 2: High-Performance Nginx Web Server & Reverse Proxy ─────────────
+# Nginx web server
 FROM nginx:alpine AS runner
 
 # Remove default nginx html

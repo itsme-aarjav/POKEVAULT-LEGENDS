@@ -1,9 +1,9 @@
 /**
- * POKÉVAULT LEGENDS — Shopify Polaris Admin TypeScript Schemas & Data Models
+ * POKÉVAULT LEGENDS
  * Enterprise data contracts for Analytics, Catalog, Draft Orders, and Promotions.
  */
 
-// ── 1. Analytics & KPI Types ─────────────────────────────────────────
+// 1. Analytics and KPI types
 export interface KPISummary {
   totalSales: number;
   salesGrowthPercent: number;
@@ -39,7 +39,7 @@ export interface TimeSeriesPoint {
   sessions: number;
 }
 
-// ── 2. Product & Inventory Types ─────────────────────────────────────
+// 2. Product and inventory types
 export type ProductStatus = 'Active' | 'Draft' | 'Archived';
 
 export interface MediaAsset {
@@ -97,7 +97,7 @@ export interface AdminProduct {
   updatedAt: string;
 }
 
-// ── 3. Draft Order Types ─────────────────────────────────────────────
+// 3. Draft order types
 export type PaymentStatus = 'Paid' | 'Pending' | 'Invoice Sent' | 'Refunded';
 
 export interface DraftOrderCustomer {
@@ -151,7 +151,7 @@ export interface DraftOrder {
   createdAt: string;
 }
 
-// ── 4. Promotions & Discount Types ───────────────────────────────────
+// 4. Promotions and discount types
 export type DiscountType = 'percentage' | 'fixed_amount' | 'free_shipping' | 'bxgy';
 
 export interface DiscountRule {

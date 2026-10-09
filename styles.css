@@ -1,6 +1,4 @@
-/* ==========================================================================
-   POKÉVAULT LEGENDS - RETRO PULP COMIC & 3D PARALLAX DESIGN SYSTEM
-   ========================================================================== */
+/* Pokévault legends - retro pulp comic & 3d parallax design system */
 
 @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Kanit:ital,wght@0,700;0,900;1,900&family=Space+Grotesk:wght@400;600;700&display=swap');
 
@@ -228,7 +226,7 @@ h1, h2, h3, .font-display {
   transform: translateY(-2px);
 }
 
-/* ─── Vault Features Dropdown (Top Bar) ─────────────────────────────────── */
+/* Vault Features Dropdown (Top Bar) */
 .nav-item-dropdown {
   position: relative;
   display: inline-flex;
@@ -2017,9 +2015,7 @@ h1, h2, h3, .font-display {
   box-shadow: 4px 4px 0px #000;
 }
 
-/* ==========================================================================
-   MOBILE & TABLET RESPONSIVE SYSTEM
-   ========================================================================== */
+/* Mobile & tablet responsive system */
 
 /* Mobile Hamburger Toggle & Overlay Drawer */
 .mobile-nav-toggle {
@@ -2137,9 +2133,7 @@ h1, h2, h3, .font-display {
   margin-top: 4px;
 }
 
-/* ==========================================================================
-   GLOBAL RESPONSIVE MEDIA QUERIES & TOUCH OPTIMIZATIONS
-   ========================================================================== */
+/* Global responsive media queries & touch optimizations */
 
 html {
   overflow-x: hidden !important;
@@ -2169,9 +2163,7 @@ main {
   display: none;
 }
 
-/* ==========================================================================
-   FEATURED CATEGORIES — 2x2 MOBILE / 4x1 DESKTOP GRID PATTERN
-   ========================================================================== */
+/* Featured categories — 2x2 mobile / 4x1 desktop grid pattern */
 .featured-categories-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -2748,9 +2740,7 @@ main {
   }
 }
 
-/* ==========================================================================
-   MULTI-PAGE MARKETPLACE STYLES
-   ========================================================================== */
+/* Multi-page marketplace styles */
 
 /* Navbar Live Search Bar */
 .nav-search-wrap {
@@ -3462,9 +3452,7 @@ main {
 }
 
 /* Cart & Checkout Page Layouts */
-/* ==========================================================================
-   TRAINER'S VAULT CHECKOUT PAGE STYLES — MOCKUP PIXEL PERFECT DESIGN
-   ========================================================================== */
+/* Trainer's vault checkout page styles — mockup pixel perfect design */
 
 /* Body Yellow Background on Checkout Page */
 .checkout-body {
@@ -4490,9 +4478,7 @@ main {
 
 
 
-/* ==========================================================================
-   PDP (PRODUCT DETAIL PAGE) — LAYOUT CSS CLASSES
-   ========================================================================== */
+/* Pdp (product detail page) — layout css classes */
 
 /* Product Page Wrapper */
 .product-page-wrap {
@@ -4848,9 +4834,7 @@ main {
   }
 }
 
-/* ==========================================================================
-   PDP CRO ENHANCEMENTS — FEATURE TAGS, TRUST MODAL & STICKY BUY BAR
-   ========================================================================== */
+/* Pdp cro enhancements — feature tags, trust modal & sticky buy bar */
 
 /* PDP BNPL Row */
 .pd-bnpl-row {
@@ -5273,11 +5257,7 @@ main {
   }
 }
 
-/* ==========================================================================
-   GLOBAL OPAQUE IMAGE CANVAS & BLEED PROTECTION
-   Enforces solid white background and z-index 2 stacking context on ALL product,
-   category, cart, search, and PDP image frames across the entire website.
-   ========================================================================== */
+/* Global opaque image canvas & bleed protection enforces solid white background and z-index 2 stacking context on all product, category, cart, search, and pdp image frames across the entire website. */
 .card-image-wrap,
 .category-directory-card,
 .category-card-img-wrap,
@@ -5328,9 +5308,7 @@ main {
   background-color: #FFFFFF !important;
 }
 
-/* ==========================================================================
-   CRO & TRUST ENGINE STYLES (Social Proof, Urgency, Trust Seals, Sticky CTA)
-   ========================================================================== */
+/* Cro & trust engine styles (social proof, urgency, trust seals, sticky cta) */
 
 /* Social Proof Live Purchase Toast */
 .cro-toast-container {
@@ -5737,9 +5715,7 @@ main {
   box-sizing: border-box;
 }
 
-/* ==========================================================================
-   ADVANCED CRO & TRUST ENGINE COMPONENT STYLES
-   ========================================================================== */
+/* Advanced cro & trust engine component styles */
 
 /* Live Ticking Dispatch Clock Badge */
 .dispatch-live-ticker {
@@ -5995,9 +5971,7 @@ main {
   transform: scale(1.04);
 }
 
-/* ==========================================================================
-   VAULT SLAB CERTIFICATE VERIFICATION PORTAL STYLES
-   ========================================================================== */
+/* Vault slab certificate verification portal styles */
 .verify-portal-wrap,
 .rewards-portal-wrap,
 .track-portal-wrap,
@@ -6174,9 +6148,7 @@ main {
   font-weight: 900;
 }
 
-/* ==========================================================================
-   POKÉCOINS VIP LOYALTY & REWARDS HUB STYLES
-   ========================================================================== */
+/* Pokécoins vip loyalty & rewards hub styles */
 .rewards-hero-grid {
   display: grid;
   grid-template-columns: 1.5fr 1fr;
@@ -6266,9 +6238,7 @@ main {
   justify-content: space-between;
 }
 
-/* ==========================================================================
-   LIVE ORDER TRACKING STYLES
-   ========================================================================== */
+/* Live order tracking styles */
 .track-timeline-card {
   background: #FFFFFF;
   border: 4px solid #000000;
@@ -6325,9 +6295,7 @@ main {
   animation: pulseDot 1.8s infinite;
 }
 
-/* ==========================================================================
-   MYSTERY CHEST UNBOXING SIMULATOR STYLES
-   ========================================================================== */
+/* Mystery chest unboxing simulator styles */
 .mystery-chest-tier-card {
   background: #FFFFFF;
   border: 4px solid #000000;
@@ -6366,9 +6334,7 @@ main {
   justify-content: center;
 }
 
-/* ==========================================================================
-   "FREQUENTLY BOUGHT TOGETHER" BUNDLE BUILDER STYLES
-   ========================================================================== */
+/* "frequently bought together" bundle builder styles */
 .bundle-builder-wrap {
   background: #FFFFFF;
   border: 3px solid #000000;
@@ -6412,9 +6378,7 @@ main {
   margin-bottom: 6px;
 }
 
-/* ==========================================================================
-   IMAGE ZOOM / MAGNIFIER LENS
-   ========================================================================== */
+/* Image zoom / magnifier lens */
 .magnifier-container {
   position: relative;
   overflow: hidden;
@@ -6434,9 +6398,7 @@ main {
   z-index: 100;
 }
 
-/* ==========================================================================
-   ABOUT PAGE STORYTELLING & APPRAISAL LAB STYLES
-   ========================================================================== */
+/* About page storytelling & appraisal lab styles */
 .about-hero-section {
   background: linear-gradient(135deg, #FFF056 0%, #FF914D 100%);
   border-bottom: 4px solid #000000;
@@ -6776,9 +6738,7 @@ main {
   margin-top: 3rem;
 }
 
-/* ==========================================================================
-   BLOG JOURNAL & SEO ARTICLE STYLES
-   ========================================================================== */
+/* Blog journal & seo article styles */
 .blog-catalog-wrap,
 .blog-article-wrap {
   max-width: 1100px;
@@ -7125,9 +7085,7 @@ main {
   padding-top: 2.5rem;
 }
 
-/* ==========================================================================
-   3D WEBGL ENGINE & IMMERSIVE CONTROLS STYLES
-   ========================================================================== */
+/* 3d webgl engine & immersive controls styles */
 
 /* 3D Hero Card Switcher Pills */
 .hero-3d-card-selector {

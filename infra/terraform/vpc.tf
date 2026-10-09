@@ -1,11 +1,4 @@
-# ==============================================================================
-# 🌐 VIRTUAL PRIVATE CLOUD (VPC) & NETWORKING ARCHITECTURE
-# ==============================================================================
-# Cost-optimized, Multi-AZ networking design.
-# To protect the user's $90 credits from expensive idle NAT Gateways (~$35/month each),
-# we deploy a high-performance public subnet topology with direct Internet Gateway routing.
-# Kubernetes Ingress and Karpenter subnets are properly tagged according to AWS EKS standards.
-# ==============================================================================
+# AWS VPC and networking configuration
 
 data "aws_availability_zones" "available" {
   state = "available"

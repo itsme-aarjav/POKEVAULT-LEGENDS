@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # ─── 1. DATABASE (MySQL 8.0) ───────────────────────────────────────────────
+  # 1. Database (MySQL 8.0)
   mysql:
     image: mysql:8.0
     container_name: pokevault-mysql
@@ -14,7 +14,7 @@ services:
       MYSQL_PASSWORD: pokevault_secret
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./server/db/mysql_schema.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./services/db/mysql_schema.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "3306:3306"
     healthcheck:
@@ -26,7 +26,7 @@ services:
     networks:
       - pokevault-net
 
-  # ─── 2. IN-MEMORY CACHE (Redis Alpine) ─────────────────────────────────────
+  # 2. In-memory cache (Redis)
   redis:
     image: redis:7-alpine
     container_name: pokevault-redis
@@ -41,7 +41,7 @@ services:
     networks:
       - pokevault-net
 
-  # ─── 3. AUTH MICROSERVICE ──────────────────────────────────────────────────
+  # 3. Auth microservice
   auth-service:
     build:
       context: ./services/auth-service
@@ -58,7 +58,7 @@ services:
     networks:
       - pokevault-net
 
-  # ─── 4. CATALOG MICROSERVICE (High-Read & Redis Cache-Aside) ───────────────
+  # 4. Catalog microservice
   catalog-service:
     build:
       context: ./services/catalog-service
@@ -87,7 +87,7 @@ services:
     networks:
       - pokevault-net
 
-  # ─── 5. ORDER & INVENTORY MICROSERVICE (Inter-Service Pricing Calls) ──────
+  # 5. Order microservice
   order-service:
     build:
       context: ./services/order-service
@@ -115,7 +115,7 @@ services:
     networks:
       - pokevault-net
 
-  # ─── 6. FRONTEND STOREFRONT & REVERSE PROXY GATEWAY (Nginx) ────────────────
+  # 6. Frontend storefront and proxy (Nginx)
   frontend:
     build:
       context: .

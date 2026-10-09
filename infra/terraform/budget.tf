@@ -1,10 +1,4 @@
-# ==============================================================================
-# 💰 FINOPS GUARDRAIL: AWS BUDGET $5 ALERT
-# ==============================================================================
-# This resource guarantees that cloud costs never unexpectedly spiral.
-# If actual or forecasted spending exceeds $4 (80%) or $5 (100%),
-# AWS immediately triggers automated email notifications.
-# ==============================================================================
+# AWS Budget alert to monitor monthly cloud spend
 
 resource "aws_budgets_budget" "cost_guardrail" {
   name              = "${var.project_name}-finops-guardrail"

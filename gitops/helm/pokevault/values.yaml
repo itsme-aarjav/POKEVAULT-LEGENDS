@@ -2,7 +2,7 @@ global:
   environment: production
   namespace: pokevault
 
-# ─── FRONTEND WEB / GATEWAY ──────────────────────────────────────────────────
+# Frontend
 frontend:
   replicaCount: 2
   image:
@@ -29,7 +29,7 @@ frontend:
       initialDelaySeconds: 5
       periodSeconds: 10
 
-# ─── AUTH MICROSERVICE ───────────────────────────────────────────────────────
+# Auth service
 auth:
   replicaCount: 2
   image:
@@ -56,7 +56,7 @@ auth:
       initialDelaySeconds: 5
       periodSeconds: 10
 
-# ─── CATALOG MICROSERVICE (High-Read with HPA & Redis) ──────────────────────
+# Catalog service
 catalog:
   replicaCount: 2
   image:
@@ -89,7 +89,7 @@ catalog:
       initialDelaySeconds: 5
       periodSeconds: 10
 
-# ─── ORDER MICROSERVICE (Stateful Transactions) ─────────────────────────────
+# Order service
 order:
   replicaCount: 2
   image:
@@ -116,7 +116,7 @@ order:
       initialDelaySeconds: 5
       periodSeconds: 10
 
-# ─── IN-MEMORY CACHE (Redis) ────────────────────────────────────────────────
+# Redis cache
 redis:
   image:
     repository: redis
@@ -132,7 +132,7 @@ redis:
       cpu: 50m
       memory: 64Mi
 
-# ─── DATABASE (MySQL 8.0) ───────────────────────────────────────────────────
+# MySQL database
 mysql:
   image:
     repository: mysql
@@ -144,7 +144,7 @@ mysql:
     type: ClusterIP
     port: 3306
 
-# ─── INGRESS CONTROLLER ─────────────────────────────────────────────────────
+# Ingress controller
 ingress:
   enabled: true
   className: alb

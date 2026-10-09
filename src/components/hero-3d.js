@@ -171,9 +171,7 @@ export class Hero3DSlab {
     this.slabGroup = new THREE.Group();
     const data = this.cardData[this.currentKey];
 
-    // =========================================================================
-    // 1. INNER CARD MESH (Front & Back Authentic Card)
-    // =========================================================================
+    // 1. Inner card mesh
     const cardWidth = 2.75;
     const cardHeight = 3.4;
     const cardThickness = 0.035;
@@ -225,9 +223,7 @@ export class Hero3DSlab {
     this.cardMesh.renderOrder = 1;
     this.slabGroup.add(this.cardMesh);
 
-    // =========================================================================
-    // 2. PSA TOP HEADER LABEL
-    // =========================================================================
+    // 2. PSA top header label
     const labelCanvas = this.createPsaLabelCanvas(data);
     const labelTexture = new THREE.CanvasTexture(labelCanvas);
     labelTexture.colorSpace = THREE.SRGBColorSpace;
@@ -243,9 +239,7 @@ export class Hero3DSlab {
     labelMesh.renderOrder = 2;
     this.slabGroup.add(labelMesh);
 
-    // =========================================================================
-    // 3. PSA SLAB INTERNAL FROSTED BORDER / INNER RAILS
-    // =========================================================================
+    // 3. PSA slab internal frosted border
     const railMat = new THREE.MeshStandardMaterial({
       color: 0xF1F5F9,
       roughness: 0.4,
@@ -268,9 +262,7 @@ export class Hero3DSlab {
     cardBorderMesh.renderOrder = 1;
     this.slabGroup.add(cardBorderMesh);
 
-    // =========================================================================
-    // 4. CRYSTAL CLEAR ACRYLIC CASING (Outer Glass Slab)
-    // =========================================================================
+    // 4. Crystal clear acrylic casing
     const caseWidth = 3.25;
     const caseHeight = 4.85;
     const caseDepth = 0.18;

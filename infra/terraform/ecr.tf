@@ -1,10 +1,4 @@
-# ==============================================================================
-# 📦 AMAZON ECR (ELASTIC CONTAINER REGISTRY) REPOSITORIES
-# ==============================================================================
-# Enterprise container registries with image tag immutability and automated
-# scan-on-push security compliance.
-# Lifecycle policies ensure obsolete layers are pruned automatically to keep storage costs negligible.
-# ==============================================================================
+# Amazon ECR container repositories with automated image scanning
 
 locals {
   services = [

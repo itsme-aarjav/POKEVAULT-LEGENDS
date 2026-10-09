@@ -1,10 +1,4 @@
-# ==============================================================================
-# 🔐 AWS IAM OIDC FEDERATION FOR GITHUB ACTIONS (ZERO STATIC SECRETS)
-# ==============================================================================
-# Replaces hazardous static AWS Access Keys in GitHub Secrets with cryptographic
-# OpenID Connect (OIDC) token exchange.
-# The IAM role can ONLY be assumed by workflows executing inside the specified GitHub repository.
-# ==============================================================================
+# AWS IAM OIDC federation for GitHub Actions (no static keys)
 
 data "tls_certificate" "github" {
   url = "https://token.actions.githubusercontent.com"

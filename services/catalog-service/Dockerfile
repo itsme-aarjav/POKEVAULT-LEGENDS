@@ -1,4 +1,4 @@
-# ─── Stage 1: Dependencies & Build ──────────────────────────────────────────
+# Build dependencies
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --omit=dev --no-audit --no-fund
 
-# ─── Stage 2: Minimal Production Runtime ────────────────────────────────────
+# Production image
 FROM node:20-alpine AS runner
 
 WORKDIR /app
@@ -14,10 +14,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=5002
 
-# Production Hardening: Remove npm CLI to eliminate bundled vulnerable packages (node-tar CVE) & reduce image size
+# Clean up npm to reduce image size
 RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
-# Run as non-root user for security
+# Run as regular user
 USER node
 
 # Copy dependencies and application source

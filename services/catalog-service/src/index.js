@@ -1,23 +1,4 @@
-/**
- * ==============================================================================
- * POKÉVAULT LEGENDS — CATALOG MICROSERVICE (High-Read & Caching Tier)
- * ==============================================================================
- * 
- * 🛠️ DEVOPS TECH STACK & ARCHITECTURE PATTERNS:
- * ------------------------------------------------------------------------------
- * • Containerization:     Docker Multi-Stage Alpine (<120MB image, non-root USER node)
- * • Container Security:   Aquasec Trivy (CVE scanner for HIGH/CRITICAL in CI)
- * • CI Automation:        GitHub Actions (Docker Buildx layer caching, matrix build)
- * • Orchestration:        Kubernetes (Deployment, ClusterIP Service)
- * • Pod Autoscaling:      Kubernetes HPA v2 (CPU/Memory scaling: 2 to 8 replicas)
- * • GitOps Continuous:    ArgoCD (Declarative reconciliation, automated drift self-healing)
- * • Package Management:   Helm v3 (Umbrella chart with values-dev vs values-prod)
- * • Observability:        Prometheus (prom-client RED Method metrics: Rate, Errors, Duration)
- * • Dashboards:           Grafana (Real-time RED monitoring & Redis hit/miss ratio)
- * • Stateful Persistence: Kubernetes StatefulSet with PersistentVolumeClaim (MySQL 8.0)
- * • In-Memory Caching:    Redis 7 Alpine (Cache-Aside pattern with TTL & auto-invalidation)
- * ==============================================================================
- */
+// Catalog microservice for product retrieval and Redis caching
 
 import express from 'express';
 import cors from 'cors';
@@ -28,6 +9,7 @@ import client from 'prom-client';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { traceMiddleware, createChildSpan } from './tracer.js';
 
 dotenv.config();
 
@@ -45,10 +27,10 @@ let FALLBACK_PRODUCTS = [];
 try {
   FALLBACK_PRODUCTS = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
 } catch (e) {
-  console.warn('[catalog-service] ⚠️ Could not load products.json fallback:', e.message);
+  console.warn('[catalog-service] Could not load products.json fallback:', e.message);
 }
 
-// ─── Prometheus Observability Setup (RED Metrics) ───────────────────────────
+// Prometheus metrics setup
 const collectDefaultMetrics = client.collectDefaultMetrics;
 collectDefaultMetrics({ register: client.register, prefix: 'catalog_' });
 
@@ -77,6 +59,8 @@ const cacheMissesTotal = new client.Counter({
   labelNames: ['cache']
 });
 
+app.use(traceMiddleware('catalog-service'));
+
 app.use((req, res, next) => {
   const start = process.hrtime();
   res.on('finish', () => {
@@ -85,6 +69,9 @@ app.use((req, res, next) => {
     const route = req.route ? req.route.path : req.path;
     httpRequestDurationMicroseconds.labels(req.method, route, res.statusCode).observe(durationInSeconds);
     httpRequestsTotal.labels(req.method, route, res.statusCode).inc();
+    if (route !== '/health' && route !== '/metrics') {
+      console.log(`[catalog-service] [trace_id=${req.traceId}] ${req.method} ${req.url} ${res.statusCode} - ${(durationInSeconds * 1000).toFixed(1)}ms`);
+    }
   });
   next();
 });
@@ -92,13 +79,13 @@ app.use((req, res, next) => {
 app.use(cors());
 app.use(express.json());
 
-// ─── Database & Redis Cache Initialization ─────────────────────────────────
+// Database and Redis cache initialization
 let pool = null;
 let isDbConnected = false;
 
 try {
   pool = mysql.createPool({
-    host: process.env.MYSQL_HOST || '127.0.0.1',
+    host: process.env.MYSQL_HOST || 'pokevault-mysql',
     port: Number(process.env.MYSQL_PORT) || 3306,
     user: process.env.MYSQL_USER || 'pokevault',
     password: process.env.MYSQL_PASSWORD || 'pokevault_secret',
@@ -114,7 +101,7 @@ try {
 
 // Redis Client
 const redis = new Redis({
-  host: process.env.REDIS_HOST || '127.0.0.1',
+  host: process.env.REDIS_HOST || 'pokevault-redis',
   port: Number(process.env.REDIS_PORT) || 6379,
   lazyConnect: true,
   retryStrategy: (times) => Math.min(times * 1000, 5000)
@@ -123,7 +110,7 @@ const redis = new Redis({
 let isRedisConnected = false;
 redis.on('connect', () => {
   isRedisConnected = true;
-  console.log('[catalog-service] ✅ Redis Connected successfully!');
+  console.log('[catalog-service] Redis connected successfully');
 });
 redis.on('error', (err) => {
   isRedisConnected = false;
@@ -147,7 +134,7 @@ async function queryDatabase(sql, params = []) {
   }
 }
 
-// ─── Kubernetes Probes & Metrics ────────────────────────────────────────────
+// Health probes and metrics
 app.get('/health', async (req, res) => {
   res.status(200).json({
     status: 'UP',
@@ -170,7 +157,7 @@ app.get('/metrics', async (req, res) => {
   }
 });
 
-// ─── Catalog Routes ─────────────────────────────────────────────────────────
+// Catalog routes
 
 // GET /api/cards or /api/products
 const getProductsHandler = async (req, res) => {
@@ -368,7 +355,7 @@ app.post('/api/cards', async (req, res) => {
 
 // Start Server
 app.listen(PORT, HOST, () => {
-  console.log(`[catalog-service] 🚀 Running on http://${HOST}:${PORT}`);
-  console.log(`[catalog-service] 🩺 Health probe: http://${HOST}:${PORT}/health`);
-  console.log(`[catalog-service] 📊 Prometheus metrics: http://${HOST}:${PORT}/metrics`);
+  console.log(`[catalog-service] Running on http://${HOST}:${PORT}`);
+  console.log(`[catalog-service] Health probe: http://${HOST}:${PORT}/health`);
+  console.log(`[catalog-service] Prometheus metrics: http://${HOST}:${PORT}/metrics`);
 });

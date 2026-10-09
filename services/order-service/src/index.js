@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import mysql from 'mysql2/promise';
 import client from 'prom-client';
+import { traceMiddleware, createChildSpan } from './tracer.js';
 
 dotenv.config();
 
@@ -10,9 +11,9 @@ const app = express();
 const PORT = process.env.PORT || 5003;
 const HOST = process.env.HOST || '0.0.0.0';
 const ADMIN_KEY = process.env.ADMIN_SECRET_KEY || 'pokevaultadmin123';
-const CATALOG_SERVICE_URL = process.env.CATALOG_SERVICE_URL || 'http://127.0.0.1:5002';
+const CATALOG_SERVICE_URL = process.env.CATALOG_SERVICE_URL || 'http://catalog-service:5002';
 
-// ─── Prometheus Observability Setup (RED Metrics) ───────────────────────────
+// Prometheus metrics setup
 const collectDefaultMetrics = client.collectDefaultMetrics;
 collectDefaultMetrics({ register: client.register, prefix: 'order_' });
 
@@ -35,6 +36,8 @@ const ordersCreatedTotal = new client.Counter({
   labelNames: ['status']
 });
 
+app.use(traceMiddleware('order-service'));
+
 app.use((req, res, next) => {
   const start = process.hrtime();
   res.on('finish', () => {
@@ -43,6 +46,9 @@ app.use((req, res, next) => {
     const route = req.route ? req.route.path : req.path;
     httpRequestDurationMicroseconds.labels(req.method, route, res.statusCode).observe(durationInSeconds);
     httpRequestsTotal.labels(req.method, route, res.statusCode).inc();
+    if (route !== '/health' && route !== '/metrics') {
+      console.log(`[order-service] [trace_id=${req.traceId}] ${req.method} ${req.url} ${res.statusCode} - ${(durationInSeconds * 1000).toFixed(1)}ms`);
+    }
   });
   next();
 });
@@ -54,13 +60,13 @@ app.use(express.json());
 const memoryOrders = [];
 const memoryInventory = {};
 
-// ─── Database Pool ─────────────────────────────────────────────────────────
+// Database pool initialization
 let pool = null;
 let isDbConnected = false;
 
 try {
   pool = mysql.createPool({
-    host: process.env.MYSQL_HOST || '127.0.0.1',
+    host: process.env.MYSQL_HOST || 'pokevault-mysql',
     port: Number(process.env.MYSQL_PORT) || 3306,
     user: process.env.MYSQL_USER || 'pokevault',
     password: process.env.MYSQL_PASSWORD || 'pokevault_secret',
@@ -86,26 +92,43 @@ async function queryDatabase(sql, params = []) {
   }
 }
 
-// ─── Inter-Service Communication (Order -> Catalog) ─────────────────────────
-// SECURITY: Fetch verified pricing directly from Catalog Microservice
-async function fetchVerifiedPriceFromCatalog(cardId) {
+// Inter-service communication (order to catalog)
+// Fetch verified pricing directly from catalog microservice
+async function fetchVerifiedPriceFromCatalog(cardId, parentReq = null) {
+  const childSpan = parentReq ? createChildSpan(parentReq, `GET /api/cards/${cardId}`, 3, [
+    { key: 'peer.service', value: 'catalog-service' },
+    { key: 'card.id', value: cardId }
+  ]) : null;
+
   try {
+    const headers = {};
+    if (childSpan) {
+      headers['traceparent'] = childSpan.traceparent;
+    } else if (parentReq?.traceparent) {
+      headers['traceparent'] = parentReq.traceparent;
+    }
+
     const res = await fetch(`${CATALOG_SERVICE_URL}/api/cards/${cardId}`, {
-      signal: AbortSignal.timeout(3000) // 3s network timeout
+      headers,
+      signal: AbortSignal.timeout(3000)
     });
     if (res.ok) {
       const data = await res.json();
+      childSpan?.end(true, [{ key: 'http.status_code', value: res.status }]);
       if (data && data.data && data.data.price) {
         return Number(data.data.price);
       }
+    } else {
+      childSpan?.end(false, [{ key: 'http.status_code', value: res.status }]);
     }
   } catch (e) {
-    console.warn(`[order-service] ⚠️ Inter-service call to catalog failed for ${cardId}:`, e.message);
+    childSpan?.end(false, [{ key: 'error.message', value: e.message }]);
+    console.warn(`[order-service] [trace_id=${parentReq?.traceId || 'none'}] Inter-service call to catalog failed for ${cardId}:`, e.message);
   }
   return null;
 }
 
-// ─── Kubernetes Probes & Metrics ────────────────────────────────────────────
+// Health probes and metrics
 app.get('/health', async (req, res) => {
   res.status(200).json({
     status: 'UP',
@@ -128,7 +151,7 @@ app.get('/metrics', async (req, res) => {
   }
 });
 
-// ─── Order Routes ───────────────────────────────────────────────────────────
+// Order routes
 
 // POST /api/orders — Create new order with inter-service verified pricing
 app.post('/api/orders', async (req, res) => {
@@ -161,7 +184,7 @@ app.post('/api/orders', async (req, res) => {
       const cardId = item.id || item.cardId || `item-${Date.now()}`;
 
       let unitPrice = Number(item.price) || 0;
-      const verifiedPrice = await fetchVerifiedPriceFromCatalog(cardId);
+      const verifiedPrice = await fetchVerifiedPriceFromCatalog(cardId, req);
       if (verifiedPrice !== null && verifiedPrice > 0) {
         unitPrice = verifiedPrice;
       }
@@ -277,7 +300,7 @@ app.get('/api/orders/:id', async (req, res) => {
   return res.status(404).json({ success: false, message: 'Order not found' });
 });
 
-// ─── Inventory Endpoints ───────────────────────────────────────────────────
+// Inventory endpoints
 app.get('/api/inventory', async (req, res) => {
   const rows = await queryDatabase('SELECT * FROM inventory ORDER BY stock_quantity ASC');
   if (rows && rows.length > 0) {
@@ -298,8 +321,8 @@ app.get('/api/inventory/:cardId', async (req, res) => {
 
 // Start Server
 app.listen(PORT, HOST, () => {
-  console.log(`[order-service] 🚀 Running on http://${HOST}:${PORT}`);
-  console.log(`[order-service] 🩺 Health probe: http://${HOST}:${PORT}/health`);
-  console.log(`[order-service] 📊 Prometheus metrics: http://${HOST}:${PORT}/metrics`);
-  console.log(`[order-service] 🔗 Catalog service target: ${CATALOG_SERVICE_URL}`);
+  console.log(`[order-service] Running on http://${HOST}:${PORT}`);
+  console.log(`[order-service] Health probe: http://${HOST}:${PORT}/health`);
+  console.log(`[order-service] Prometheus metrics: http://${HOST}:${PORT}/metrics`);
+  console.log(`[order-service] Catalog service target: ${CATALOG_SERVICE_URL}`);
 });

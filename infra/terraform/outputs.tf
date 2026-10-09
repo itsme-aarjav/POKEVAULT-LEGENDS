@@ -1,8 +1,4 @@
-# ==============================================================================
-# 📤 TERRAFORM OUTPUTS
-# ==============================================================================
-# Essential connection parameters, ARNs, and commands generated post-apply.
-# ==============================================================================
+# Terraform outputs
 
 output "aws_region" {
   description = "AWS region hosting the infrastructure"

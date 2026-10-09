@@ -16,7 +16,7 @@ env:
   AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
 
 jobs:
-  # ─── 1. CODE INTEGRITY & SYNTAX VALIDATION ─────────────────────────────────
+  # 1. Code validation
   validate:
     name: Lint & Code Validation
     runs-on: ubuntu-latest
@@ -36,7 +36,7 @@ jobs:
       - name: Verify Frontend Build Artifacts
         run: npm run build
 
-  # ─── 2. MATRIX CONTAINER BUILD & TRIVY SECURITY SCAN (DEVSECOPS) ────────────
+  # 2. Build and Trivy security scan
   build-and-security-scan:
     name: Build & Trivy Security Scan
     needs: validate
@@ -79,7 +79,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ─── DEVSECOPS PILLAR: Aquasec Trivy Vulnerability Scanner ──────────────
+      # Scan image with Trivy
       - name: Run Trivy Vulnerability Scanner (DevSecOps)
         uses: aquasecurity/trivy-action@master
         with:
@@ -90,7 +90,7 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL'
 
-      # ─── AWS OIDC AUTHENTICATION & AMAZON ECR PUSH (WHEN ROLE CONFIGURED) ───
+      # Authenticate to AWS via OIDC
       - name: Configure AWS Credentials via OIDC (No Static Keys)
         if: env.AWS_ROLE_ARN != ''
         uses: aws-actions/configure-aws-credentials@v4
@@ -113,7 +113,7 @@ jobs:
           docker push $ECR_REGISTRY/${{ env.IMAGE_PREFIX }}-${{ matrix.service.name }}:${{ github.sha }}
           docker push $ECR_REGISTRY/${{ env.IMAGE_PREFIX }}-${{ matrix.service.name }}:latest
 
-  # ─── 3. GITOPS AUTOMATED RECONCILIATION DISPATCH ────────────────────────────
+  # 3. GitOps sync notification
   gitops-reconcile:
     name: GitOps Sync & Tag Update
     needs: build-and-security-scan
@@ -123,12 +123,9 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Display GitOps & Cloud Target Status
+      - name: Display GitOps status
         run: |
-          echo "=========================================================="
-          echo "✅ DevSecOps Verification Passed!"
-          echo "📦 Target Cloud Registry: Amazon ECR (${{ env.AWS_REGION }})"
-          echo "☸️ Target Kubernetes: Amazon EKS Auto Mode Cluster"
-          echo "🔄 ArgoCD Declarative Sync Target: gitops/helm/pokevault/values-prod.yaml"
-          echo "🏷️ Image Tag Generated: sha-${{ github.sha }}"
-          echo "=========================================================="
+          echo "Security scan passed"
+          echo "Target Registry: Amazon ECR (${{ env.AWS_REGION }})"
+          echo "Target Cluster: Amazon EKS Auto Mode"
+          echo "Image Tag: sha-${{ github.sha }}"

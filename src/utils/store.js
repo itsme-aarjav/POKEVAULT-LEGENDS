@@ -198,9 +198,7 @@ export const toggleWishlist = (productId) => {
   return added;
 };
 
-// ==========================================================================
-// MULTI-CURRENCY CONVERTER SYSTEM (INR, USD, EUR, GBP, JPY)
-// ==========================================================================
+// Multi-currency conversion
 export const CURRENCY_RATES = {
   INR: { symbol: '₹', rate: 83.0, label: 'INR (₹)' },
   USD: { symbol: '$', rate: 1.0, label: 'USD ($)' },
@@ -233,9 +231,7 @@ export const formatPrice = (priceUSD, targetCurrency = null) => {
   return `${config.symbol}${converted.toFixed(2)}`;
 };
 
-// ==========================================================================
-// POKÉCOINS LOYALTY & REWARDS STATE
-// ==========================================================================
+// Loyalty and rewards state
 export const getPokeCoins = () => {
   return parseInt(localStorage.getItem('pvCoins') || '450', 10);
 };

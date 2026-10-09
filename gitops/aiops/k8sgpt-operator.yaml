@@ -3,8 +3,8 @@
 # ==============================================================================
 # K8sGPT runs as an in-cluster SRE assistant that monitors Kubernetes workloads,
 # correlates failure events (CrashLoopBackOff, OOMKilled, ImagePullBackOff, etc.),
-# and queries an AI engine (AWS Bedrock, OpenAI, or Local AI) to deliver actionable
-# plain-language root-cause diagnoses and exact remediation commands.
+# and queries an AI engine to deliver actionable plain-language root-cause
+# diagnoses and exact remediation commands.
 # ==============================================================================
 
 apiVersion: v1
@@ -20,22 +20,16 @@ metadata:
   name: pokevault-aiops-sre
   namespace: k8sgpt-operator-system
 spec:
-  # AI Backend Engine configuration (Can point to AWS Bedrock, OpenAI, or Local LLM)
-  backend: openai
-  model: gpt-4o-mini
+  ai:
+    enabled: true
+    backend: openai
+    model: gpt-4o-mini
+    anonymized: true
+    secret:
+      name: k8sgpt-ai-secret
+      key: openai-api-key
   noCache: false
   version: v0.3.40
-  
-  # Secret containing the API key for the AI provider
-  secret:
-    name: k8sgpt-ai-secret
-    key: openai-api-key
-
-  # Namespaces to autonomously monitor and triage
-  extraAnalyzeLabels:
-    app.kubernetes.io/part-of: pokevault
-
-  # Active AI Analyzers: Deep inspection across all critical Kubernetes primitives
   filters:
     - Pod
     - Deployment
@@ -45,9 +39,3 @@ spec:
     - Service
     - Ingress
     - HorizontalPodAutoscaler
-    - VulnerabilityReport # Correlates with Trivy container security scans!
-    - NetworkPolicy
-
-  # Autonomous Sink / Reporting Configuration
-  sink:
-    type: stdout # Logs AI diagnoses to stdout for Prometheus/FluentBit aggregation

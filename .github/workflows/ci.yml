@@ -89,19 +89,19 @@ jobs:
 
       # ─── AWS OIDC AUTHENTICATION & AMAZON ECR PUSH (WHEN ROLE CONFIGURED) ───
       - name: Configure AWS Credentials via OIDC (No Static Keys)
-        if: ${{ secrets.AWS_ROLE_ARN != '' }}
+        if: env.AWS_ROLE_ARN != ''
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Log in to Amazon ECR
-        if: ${{ secrets.AWS_ROLE_ARN != '' }}
+        if: env.AWS_ROLE_ARN != ''
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Tag and Push to Amazon ECR
-        if: ${{ secrets.AWS_ROLE_ARN != '' }}
+        if: env.AWS_ROLE_ARN != ''
         run: |
           ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
           docker tag ${{ env.IMAGE_PREFIX }}-${{ matrix.service.name }}:${{ github.sha }} $ECR_REGISTRY/${{ env.IMAGE_PREFIX }}-${{ matrix.service.name }}:${{ github.sha }}

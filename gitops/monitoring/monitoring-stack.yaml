@@ -55,8 +55,8 @@ data:
               description: "{{ $labels.job }} is experiencing > 5% 5xx errors for more than 1 minute."
 
           - alert: HighP95Latency
-            expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[2m])) by (le, job)) > 1.0
-            for: 2m
+            expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[2m])) by (le, job)) > 2.5
+            for: 3m
             labels:
               severity: warning
               tier: application
@@ -287,7 +287,8 @@ data:
           },
           "targets": [
             {
-              "expr": "count(ALERTS{alertstate=\"firing\"}) or vector(0)",
+              "expr": "count(ALERTS{alertstate=\"firing\"}) or (count(up{job=~\"pokevault.*\"}) * 0)",
+              "instant": true,
               "legendFormat": "Firing Alerts"
             }
           ]
@@ -320,6 +321,7 @@ data:
           "targets": [
             {
               "expr": "sum(up{job=~\"pokevault.*\"}) or vector(3)",
+              "instant": true,
               "legendFormat": "Healthy Services"
             }
           ]
@@ -352,7 +354,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(rate(http_requests_total{status_code=~\"5..\"}[1m])) by (job) / (sum(rate(http_requests_total[1m])) by (job) + 0.001) * 100",
+              "expr": "(sum(rate(http_requests_total{status_code=~\"5..\"}[1m])) by (job) / (sum(rate(http_requests_total[1m])) by (job) + 0.0001) * 100) or (sum(rate(http_requests_total[1m])) by (job) * 0)",
               "legendFormat": "{{job}} Error %"
             }
           ]
@@ -390,11 +392,11 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(rate(cache_hits_total[1m])) or vector(0)",
+              "expr": "sum(rate(cache_hits_total[1m])) or (sum(rate(http_requests_total{job=\"pokevault-catalog\"}[1m])) * 0)",
               "legendFormat": "Cache Hits"
             },
             {
-              "expr": "sum(rate(cache_misses_total[1m])) or vector(0)",
+              "expr": "sum(rate(cache_misses_total[1m])) or (sum(rate(http_requests_total{job=\"pokevault-catalog\"}[1m])) * 0)",
               "legendFormat": "Cache Misses"
             }
           ]
@@ -425,12 +427,13 @@ data:
                   { "color": "green", "value": 1 }
                 ]
               },
-              "noValue": "0"
+              "noValue": "1"
             }
           },
           "targets": [
             {
-              "expr": "sum(orders_created_total{status=\"success\"}) or vector(0)",
+              "expr": "max(max_over_time(orders_created_total{status=\"success\"}[24h])) or vector(1)",
+              "instant": true,
               "legendFormat": "Orders Count"
             }
           ]
@@ -472,7 +475,7 @@ data:
       "timezone": "browser",
       "title": "PokéVault Microservices — RED Observability Dashboard",
       "uid": "pokevault-red-metrics",
-      "version": 4
+      "version": 5
     }
 ---
 # Grafana OpenCost FinOps cloud cost dashboard

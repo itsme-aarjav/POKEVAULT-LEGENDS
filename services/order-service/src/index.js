@@ -38,20 +38,26 @@ const ordersCreatedTotal = new client.Counter({
 
 app.use(traceMiddleware('order-service'));
 
+
 app.use((req, res, next) => {
   const start = process.hrtime();
+  const isInternal = req.path === '/health' || req.path === '/metrics';
   res.on('finish', () => {
     const diff = process.hrtime(start);
     const durationInSeconds = diff[0] + diff[1] / 1e9;
     const route = req.route ? req.route.path : req.path;
-    httpRequestDurationMicroseconds.labels(req.method, route, res.statusCode).observe(durationInSeconds);
+    // Exclude internal probe endpoints from latency histogram to prevent scrape spikes from skewing P95
+    if (!isInternal) {
+      httpRequestDurationMicroseconds.labels(req.method, route, res.statusCode).observe(durationInSeconds);
+    }
     httpRequestsTotal.labels(req.method, route, res.statusCode).inc();
-    if (route !== '/health' && route !== '/metrics') {
+    if (!isInternal) {
       console.log(`[order-service] [trace_id=${req.traceId}] ${req.method} ${req.url} ${res.statusCode} - ${(durationInSeconds * 1000).toFixed(1)}ms`);
     }
   });
   next();
 });
+
 
 app.use(cors());
 app.use(express.json());
@@ -144,6 +150,27 @@ app.get('/health', async (req, res) => {
 
 app.get('/metrics', async (req, res) => {
   try {
+    if (pool) {
+      try {
+        const [rows] = await pool.query('SELECT count(*) as count FROM orders');
+        if (rows && rows[0]) {
+          const dbCount = Number(rows[0].count) || 0;
+          const metricObj = await client.register.getSingleMetric('orders_created_total');
+          const currentVal = metricObj ? (metricObj.hashMap?.['status:success']?.value || 0) : 0;
+          if (dbCount > currentVal) {
+            ordersCreatedTotal.labels('success').inc(dbCount - currentVal);
+          }
+        }
+      } catch (dbErr) {
+        if (memoryOrders.length > 0) {
+          const metricObj = await client.register.getSingleMetric('orders_created_total');
+          const currentVal = metricObj ? (metricObj.hashMap?.['status:success']?.value || 0) : 0;
+          if (memoryOrders.length > currentVal) {
+            ordersCreatedTotal.labels('success').inc(memoryOrders.length - currentVal);
+          }
+        }
+      }
+    }
     res.set('Content-Type', client.register.contentType);
     res.end(await client.register.metrics());
   } catch (err) {

@@ -13,6 +13,7 @@ permissions:
 env:
   AWS_REGION: us-east-1
   IMAGE_PREFIX: pokevault
+  AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
 
 jobs:
   # ─── 1. CODE INTEGRITY & SYNTAX VALIDATION ─────────────────────────────────

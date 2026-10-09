@@ -14,6 +14,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=5002
 
+# Production Hardening: Remove npm CLI to eliminate bundled vulnerable packages (node-tar CVE) & reduce image size
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
+
 # Run as non-root user for security
 USER node
 

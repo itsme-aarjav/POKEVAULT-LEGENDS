@@ -1,0 +1,300 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
+# ─── 1. PROMETHEUS CONFIGMAP ──────────────────────────────────────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 10s
+      evaluation_interval: 10s
+
+    scrape_configs:
+      - job_name: 'pokevault-auth'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['auth-service.pokevault.svc.cluster.local:5001']
+
+      - job_name: 'pokevault-catalog'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['catalog-service.pokevault.svc.cluster.local:5002']
+
+      - job_name: 'pokevault-order'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['order-service.pokevault.svc.cluster.local:5003']
+---
+# ─── 2. PROMETHEUS DEPLOYMENT & SERVICE ───────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: monitoring
+  labels:
+    app: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.50.0
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.retention.time=24h"
+          ports:
+            - containerPort: 9090
+              name: web
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/prometheus
+      volumes:
+        - name: config-volume
+          configMap:
+            name: prometheus-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: monitoring
+  labels:
+    app: prometheus
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9090
+      targetPort: 9090
+      name: web
+  selector:
+    app: prometheus
+---
+# ─── 3. GRAFANA DATASOURCE CONFIGMAP ──────────────────────────────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: monitoring
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus.monitoring.svc.cluster.local:9090
+        isDefault: true
+        jsonData:
+          timeInterval: 10s
+---
+# ─── 4. GRAFANA DASHBOARD PROVIDER CONFIGMAP ─────────────────────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-providers
+  namespace: monitoring
+data:
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards
+---
+# ─── 5. GRAFANA DASHBOARD JSON CONFIGMAP ─────────────────────────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-red-dashboard
+  namespace: monitoring
+data:
+  pokevault-red.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "collapsed": false,
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+          "id": 1,
+          "title": "HTTP Request Rate (RPS - Rate)",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "sum(rate(http_requests_total[1m])) by (job)",
+              "legendFormat": "{{job}} RPS"
+            }
+          ]
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+          "id": 2,
+          "title": "Error Rate (5xx - Errors)",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "sum(rate(http_requests_total{status_code=~\"5..\"}[1m])) by (job) / (sum(rate(http_requests_total[1m])) by (job) + 0.001) * 100",
+              "legendFormat": "{{job}} Error %"
+            }
+          ]
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+          "id": 3,
+          "title": "Latency p95 (Duration in Sec)",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le, job))",
+              "legendFormat": "{{job}} p95"
+            }
+          ]
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+          "id": 4,
+          "title": "Redis Cache Hit vs Miss Ratio (Catalog Service)",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "sum(rate(cache_hits_total[1m]))",
+              "legendFormat": "Cache Hits"
+            },
+            {
+              "expr": "sum(rate(cache_misses_total[1m]))",
+              "legendFormat": "Cache Misses"
+            }
+          ]
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+          "id": 5,
+          "title": "Successful Orders Placed Total",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "sum(orders_created_total{status=\"success\"})",
+              "legendFormat": "Orders Count"
+            }
+          ]
+        }
+      ],
+      "refresh": "5s",
+      "schemaVersion": 38,
+      "style": "dark",
+      "tags": ["pokevault", "devops", "microservices"],
+      "time": { "from": "now-15m", "to": "now" },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "PokéVault Microservices — RED Observability Dashboard",
+      "uid": "pokevault-red-metrics",
+      "version": 1
+    }
+---
+# ─── 6. GRAFANA DEPLOYMENT & SERVICE ──────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:10.4.0
+          env:
+            - name: GF_SECURITY_ALLOW_EMBEDDING
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ENABLED
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+              value: "Admin"
+            - name: GF_AUTH_DISABLE_LOGIN_FORM
+              value: "true"
+          ports:
+            - containerPort: 3000
+              name: http
+          resources:
+            limits:
+              cpu: 300m
+              memory: 384Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - name: datasource-volume
+              mountPath: /etc/grafana/provisioning/datasources
+            - name: provider-volume
+              mountPath: /etc/grafana/provisioning/dashboards
+            - name: dashboard-volume
+              mountPath: /var/lib/grafana/dashboards
+      volumes:
+        - name: datasource-volume
+          configMap:
+            name: grafana-datasources
+        - name: provider-volume
+          configMap:
+            name: grafana-dashboard-providers
+        - name: dashboard-volume
+          configMap:
+            name: grafana-red-dashboard
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: 3000
+      name: http
+  selector:
+    app: grafana

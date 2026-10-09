@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: pokevault-catalog-rollout
+  namespace: pokevault
+  labels:
+    app: pokevault-catalog
+spec:
+  replicas: 4
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: pokevault-catalog
+  strategy:
+    canary:
+      steps:
+        # Step 1: Route 25% of traffic to new Canary release
+        - setWeight: 25
+        # Step 2: Pause 30s to observe errors and performance
+        - pause: { duration: 30s }
+        # Step 3: Increase Canary traffic to 50%
+        - setWeight: 50
+        # Step 4: Pause 30s for secondary verification
+        - pause: { duration: 30s }
+        # Step 5: Full promotion to 100% stable
+  template:
+    metadata:
+      labels:
+        app: pokevault-catalog
+    spec:
+      containers:
+        - name: catalog
+          image: 592668326948.dkr.ecr.us-east-1.amazonaws.com/pokevault-catalog:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5002
+              name: http
+          envFrom:
+            - configMapRef:
+                name: pokevault-config
+            - secretRef:
+                name: pokevault-secret
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5002
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5002
+            initialDelaySeconds: 5
+            periodSeconds: 10

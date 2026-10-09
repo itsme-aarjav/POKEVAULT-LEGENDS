@@ -45,9 +45,8 @@ data "aws_iam_policy_document" "github_actions_trust" {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
       values   = [
-        "repo:${var.github_org}/${var.github_repo}:*",
-        "repo:itsme-aarjav/POKEVAULT-LEGENDS:*",
-        "repo:itsme-aarjav/pokevault-legends:*"
+        "repo:${var.github_org}/*",
+        "repo:${var.github_org}@*/*"
       ]
     }
   }

@@ -6,9 +6,9 @@ global:
 frontend:
   replicaCount: 2
   image:
-    repository: pokevault-frontend
+    repository: 592668326948.dkr.ecr.us-east-1.amazonaws.com/pokevault-frontend
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   service:
     type: ClusterIP
     port: 80
@@ -33,9 +33,9 @@ frontend:
 auth:
   replicaCount: 2
   image:
-    repository: pokevault-auth
+    repository: 592668326948.dkr.ecr.us-east-1.amazonaws.com/pokevault-auth
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   service:
     type: ClusterIP
     port: 5001
@@ -60,9 +60,9 @@ auth:
 catalog:
   replicaCount: 2
   image:
-    repository: pokevault-catalog
+    repository: 592668326948.dkr.ecr.us-east-1.amazonaws.com/pokevault-catalog
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   service:
     type: ClusterIP
     port: 5002
@@ -93,9 +93,9 @@ catalog:
 order:
   replicaCount: 2
   image:
-    repository: pokevault-order
+    repository: 592668326948.dkr.ecr.us-east-1.amazonaws.com/pokevault-order
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   service:
     type: ClusterIP
     port: 5003
@@ -147,13 +147,13 @@ mysql:
 # ─── INGRESS CONTROLLER ─────────────────────────────────────────────────────
 ingress:
   enabled: true
-  className: nginx
+  className: alb
   annotations:
-    kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/proxy-body-size: 8m
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
   hosts:
-    - host: pokevault.local
-      paths:
+    - paths:
         - path: /
           pathType: Prefix
           service: frontend

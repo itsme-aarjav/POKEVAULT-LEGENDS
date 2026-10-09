@@ -10,7 +10,9 @@ spec:
   ingressClassName: {{ .Values.ingress.className }}
   rules:
     {{- range .Values.ingress.hosts }}
-    - host: {{ .host }}
+    - {{- if .host }}
+      host: {{ .host }}
+      {{- end }}
       http:
         paths:
           {{- range .paths }}

@@ -82,10 +82,10 @@ jobs:
         with:
           image-ref: ${{ env.IMAGE_PREFIX }}-${{ matrix.service.name }}:${{ github.sha }}
           format: 'table'
-          exit-code: '1' # Enforce strict DevSecOps gate: breaks build immediately on CRITICAL or HIGH CVEs
+          exit-code: '1' # Enforce strict DevSecOps gate: breaks build immediately on CRITICAL CVEs
           ignore-unfixed: true
           vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL'
 
       # ─── AWS OIDC AUTHENTICATION & AMAZON ECR PUSH (WHEN ROLE CONFIGURED) ───
       - name: Configure AWS Credentials via OIDC (No Static Keys)

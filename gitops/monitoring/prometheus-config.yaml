@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'pokevault-auth'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['auth-service:5001']
+
+  - job_name: 'pokevault-catalog'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['catalog-service:5002']
+
+  - job_name: 'pokevault-order'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['order-service:5003']

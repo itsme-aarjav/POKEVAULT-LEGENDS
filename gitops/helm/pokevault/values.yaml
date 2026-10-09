@@ -1,0 +1,159 @@
+global:
+  environment: production
+  namespace: pokevault
+
+# ─── FRONTEND WEB / GATEWAY ──────────────────────────────────────────────────
+frontend:
+  replicaCount: 2
+  image:
+    repository: pokevault-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+  probes:
+    liveness:
+      path: /health
+      initialDelaySeconds: 10
+      periodSeconds: 15
+    readiness:
+      path: /health
+      initialDelaySeconds: 5
+      periodSeconds: 10
+
+# ─── AUTH MICROSERVICE ───────────────────────────────────────────────────────
+auth:
+  replicaCount: 2
+  image:
+    repository: pokevault-auth-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5001
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+  probes:
+    liveness:
+      path: /health
+      initialDelaySeconds: 15
+      periodSeconds: 15
+    readiness:
+      path: /health
+      initialDelaySeconds: 5
+      periodSeconds: 10
+
+# ─── CATALOG MICROSERVICE (High-Read with HPA & Redis) ──────────────────────
+catalog:
+  replicaCount: 2
+  image:
+    repository: pokevault-catalog-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5002
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 75
+    targetMemoryUtilizationPercentage: 80
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  probes:
+    liveness:
+      path: /health
+      initialDelaySeconds: 15
+      periodSeconds: 15
+    readiness:
+      path: /health
+      initialDelaySeconds: 5
+      periodSeconds: 10
+
+# ─── ORDER MICROSERVICE (Stateful Transactions) ─────────────────────────────
+order:
+  replicaCount: 2
+  image:
+    repository: pokevault-order-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5003
+  resources:
+    limits:
+      cpu: 300m
+      memory: 384Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+  probes:
+    liveness:
+      path: /health
+      initialDelaySeconds: 15
+      periodSeconds: 15
+    readiness:
+      path: /health
+      initialDelaySeconds: 5
+      periodSeconds: 10
+
+# ─── IN-MEMORY CACHE (Redis) ────────────────────────────────────────────────
+redis:
+  image:
+    repository: redis
+    tag: 7-alpine
+  service:
+    type: ClusterIP
+    port: 6379
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+# ─── DATABASE (MySQL 8.0) ───────────────────────────────────────────────────
+mysql:
+  image:
+    repository: mysql
+    tag: "8.0"
+  storage:
+    size: 10Gi
+    storageClass: standard
+  service:
+    type: ClusterIP
+    port: 3306
+
+# ─── INGRESS CONTROLLER ─────────────────────────────────────────────────────
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: 8m
+  hosts:
+    - host: pokevault.local
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend

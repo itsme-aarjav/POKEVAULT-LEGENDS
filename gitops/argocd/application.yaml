@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pokevault-production
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/itsme-aarjav/3-tier-application.git' # Replace with your Git repository URL
+    targetRevision: main
+    path: gitops/helm/pokevault
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-prod.yaml
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: pokevault
+  syncPolicy:
+    automated:
+      prune: true       # Automatically delete resources that are deleted from Git
+      selfHeal: true    # Automatically revert manual kubectl changes back to desired Git state
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

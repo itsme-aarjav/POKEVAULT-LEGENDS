@@ -1,5 +1,7 @@
+version: '3.8'
+
 services:
-  # ─── 1. DATABASE TIER (MySQL 8.0) ──────────────────────────────────────────
+  # ─── 1. DATABASE (MySQL 8.0) ───────────────────────────────────────────────
   mysql:
     image: mysql:8.0
     container_name: pokevault-mysql
@@ -14,7 +16,7 @@ services:
       - mysql_data:/var/lib/mysql
       - ./server/db/mysql_schema.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
-      - "127.0.0.1:3306:3306"
+      - "3306:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "pokevault", "-ppokevault_secret"]
       interval: 10s
@@ -24,44 +26,108 @@ services:
     networks:
       - pokevault-net
 
-  # ─── 2. APPLICATION RUNTIME TIER (Express & Multi-Page Frontend) ───────────
-  app:
+  # ─── 2. IN-MEMORY CACHE (Redis Alpine) ─────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: pokevault-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - pokevault-net
+
+  # ─── 3. AUTH MICROSERVICE ──────────────────────────────────────────────────
+  auth-service:
     build:
-      context: .
+      context: ./services/auth-service
       dockerfile: Dockerfile
-    container_name: pokevault-app
+    container_name: pokevault-auth-service
     restart: unless-stopped
     environment:
-      - NODE_ENV=production
       - PORT=5001
       - HOST=0.0.0.0
+      - NODE_ENV=production
+      - ADMIN_SECRET_KEY=pokevaultadmin123
+    ports:
+      - "5001:5001"
+    networks:
+      - pokevault-net
+
+  # ─── 4. CATALOG MICROSERVICE (High-Read & Redis Cache-Aside) ───────────────
+  catalog-service:
+    build:
+      context: ./services/catalog-service
+      dockerfile: Dockerfile
+    container_name: pokevault-catalog-service
+    restart: unless-stopped
+    environment:
+      - PORT=5002
+      - HOST=0.0.0.0
+      - NODE_ENV=production
       - MYSQL_HOST=mysql
       - MYSQL_PORT=3306
       - MYSQL_USER=pokevault
       - MYSQL_PASSWORD=pokevault_secret
       - MYSQL_DATABASE=pokevault
-      - ADMIN_SECRET_KEY=${ADMIN_SECRET_KEY:-pokevaultadmin123}
-      - PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID:-}
-      - PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET:-}
-      - STOREFRONT_ORIGIN=${STOREFRONT_ORIGIN:-http://localhost}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ADMIN_SECRET_KEY=pokevaultadmin123
+    ports:
+      - "5002:5002"
     depends_on:
       mysql:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - pokevault-net
 
-  # ─── 3. WEB SERVER & REVERSE PROXY TIER (Nginx) ───────────────────────────
-  nginx:
-    image: nginx:alpine
-    container_name: pokevault-nginx
+  # ─── 5. ORDER & INVENTORY MICROSERVICE (Inter-Service Pricing Calls) ──────
+  order-service:
+    build:
+      context: ./services/order-service
+      dockerfile: Dockerfile
+    container_name: pokevault-order-service
+    restart: unless-stopped
+    environment:
+      - PORT=5003
+      - HOST=0.0.0.0
+      - NODE_ENV=production
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=pokevault
+      - MYSQL_PASSWORD=pokevault_secret
+      - MYSQL_DATABASE=pokevault
+      - CATALOG_SERVICE_URL=http://catalog-service:5002
+      - ADMIN_SECRET_KEY=pokevaultadmin123
+    ports:
+      - "5003:5003"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      catalog-service:
+        condition: service_started
+    networks:
+      - pokevault-net
+
+  # ─── 6. FRONTEND STOREFRONT & REVERSE PROXY GATEWAY (Nginx) ────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: ./services/frontend/Dockerfile
+    container_name: pokevault-frontend
     restart: unless-stopped
     ports:
       - "80:80"
-    volumes:
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./docker/nginx/security-headers.conf:/etc/nginx/security-headers.conf:ro
     depends_on:
-      - app
+      - auth-service
+      - catalog-service
+      - order-service
     networks:
       - pokevault-net
 

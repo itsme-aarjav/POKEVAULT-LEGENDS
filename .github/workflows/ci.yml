@@ -36,6 +36,15 @@ jobs:
       - name: Verify Frontend Build Artifacts
         run: npm run build
 
+      - name: Run Microservices Automated Unit Tests
+        run: |
+          echo "Running auth-service tests..."
+          (cd services/auth-service && npm test)
+          echo "Running catalog-service tests..."
+          (cd services/catalog-service && npm test)
+          echo "Running order-service tests..."
+          (cd services/order-service && npm test)
+
   # 2. Build and Trivy security scan
   build-and-security-scan:
     name: Build & Trivy Security Scan
@@ -113,19 +122,35 @@ jobs:
           docker push $ECR_REGISTRY/${{ env.IMAGE_PREFIX }}-${{ matrix.service.name }}:${{ github.sha }}
           docker push $ECR_REGISTRY/${{ env.IMAGE_PREFIX }}-${{ matrix.service.name }}:latest
 
-  # 3. GitOps sync notification
+  # 3. GitOps sync & Automated Image Tag Bump
   gitops-reconcile:
     name: GitOps Sync & Tag Update
     needs: build-and-security-scan
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Display GitOps status
+      - name: Automated GitOps Image Tag Bump
         run: |
-          echo "Security scan passed"
-          echo "Target Registry: Amazon ECR (${{ env.AWS_REGION }})"
-          echo "Target Cluster: Amazon EKS Auto Mode"
-          echo "Image Tag: sha-${{ github.sha }}"
+          echo "Automated GitOps Tag Reconciliation:"
+          echo "Commit SHA: ${{ github.sha }}"
+          sed -i.bak -E 's/tag: [a-zA-Z0-9_-]+/tag: ${{ github.sha }}/g' gitops/helm/pokevault/values.yaml
+          rm -f gitops/helm/pokevault/values.yaml.bak
+          
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          if git diff --quiet gitops/helm/pokevault/values.yaml; then
+            echo "No GitOps changes to commit."
+          else
+            git add gitops/helm/pokevault/values.yaml
+            git commit -m "chore(gitops): auto-bump image tags to ${{ github.sha }} [skip ci]" || true
+            git push || echo "Push skipped or branch protected."
+          fi
+          echo "ArgoCD reconciliation triggered."

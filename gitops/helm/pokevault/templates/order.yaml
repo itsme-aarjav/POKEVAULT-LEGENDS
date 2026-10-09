@@ -1,5 +1,27 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: order-service-success-rate
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app.kubernetes.io/part-of: pokevault
+spec:
+  metrics:
+  - name: success-rate
+    interval: 30s
+    count: 3
+    successCondition: result[0] <= 0.05
+    failureLimit: 2
+    provider:
+      prometheus:
+        address: http://prometheus.monitoring.svc.cluster.local:9090
+        query: |
+          sum(rate(http_requests_total{job="pokevault-order",status_code=~"5.."}[1m]))
+          /
+          (sum(rate(http_requests_total{job="pokevault-order"}[1m])) + 0.0001)
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: pokevault-order
   namespace: {{ .Values.global.namespace }}
@@ -7,9 +29,23 @@ metadata:
     app: pokevault-order
 spec:
   replicas: {{ .Values.order.replicaCount }}
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: pokevault-order
+  strategy:
+    canary:
+      canaryService: order-service-canary
+      stableService: order-service
+      steps:
+      - setWeight: 20
+      - pause: { duration: 45s }
+      - analysis:
+          templates:
+          - templateName: order-service-success-rate
+      - setWeight: 50
+      - pause: { duration: 30s }
+      - setWeight: 100
   template:
     metadata:
       labels:
@@ -49,6 +85,23 @@ metadata:
   namespace: {{ .Values.global.namespace }}
   labels:
     app: pokevault-order
+spec:
+  type: {{ .Values.order.service.type }}
+  ports:
+    - port: {{ .Values.order.service.port }}
+      targetPort: 5003
+      protocol: TCP
+      name: http
+  selector:
+    app: pokevault-order
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service-canary
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: pokevault-order-canary
 spec:
   type: {{ .Values.order.service.type }}
   ports:

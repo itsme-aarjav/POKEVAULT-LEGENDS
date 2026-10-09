@@ -935,6 +935,8 @@ spec:
         app: promtail
     spec:
       serviceAccountName: promtail
+      tolerations:
+        - operator: "Exists"
       containers:
         - name: promtail
           image: grafana/promtail:2.9.4
@@ -1034,11 +1036,11 @@ spec:
               name: otlp-http
           resources:
             limits:
-              cpu: 200m
-              memory: 256Mi
+              cpu: 500m
+              memory: 768Mi
             requests:
-              cpu: 25m
-              memory: 64Mi
+              cpu: 50m
+              memory: 128Mi
           volumeMounts:
             - name: config
               mountPath: /etc/tempo

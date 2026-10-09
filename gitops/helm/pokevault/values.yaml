@@ -159,3 +159,27 @@ ingress:
         - path: /
           pathType: Prefix
           service: frontend
+
+# FinOps & Cloud Cost Optimization
+# Rightsized requests/limits based on OpenCost historical run-rate
+# Karpenter & EKS Auto Mode Spot instance scheduling for stateless tiers
+finops:
+  enabled: true
+  costCenter: "ecommerce-engineering"
+  environment: "production"
+  spotInstances:
+    enabled: true
+    tolerations:
+      - key: "karpenter.sh/capacity-type"
+        operator: "Equal"
+        value: "spot"
+        effect: "NoSchedule"
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 80
+          preference:
+            matchExpressions:
+              - key: "karpenter.sh/capacity-type"
+                operator: "In"
+                values: ["spot"]
+

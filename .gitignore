@@ -43,3 +43,14 @@ override.tf.json
 *_override.tf.json
 .terraformrc
 terraform.rc
+
+# Scratch & Temporary Certs
+scratch/
+*.crt
+*.key
+*.csr
+
+# Large Media (Exceeds GitHub 100MB limit)
+docs/screen-recording/*.mov
+docs/screen-recording/*.mp4
+

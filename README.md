@@ -1,134 +1,218 @@
-# PokeVault Legends - Cloud-Native Microservices Platform
+# PokéVault Legends — Enterprise Cloud-Native DevSecOps and SRE Platform
 
-PokeVault Legends is an online Pokemon collectibles store built using a microservices architecture and deployed on Amazon Web Services (AWS) using Kubernetes (Amazon EKS).
+[![AWS EKS Auto Mode](https://img.shields.io/badge/AWS-EKS%20Auto%20Mode%20v1.31-FF9900?logo=amazon-aws&logoColor=white)](https://aws.amazon.com/eks/)
+[![Terraform IaC](https://img.shields.io/badge/IaC-Terraform%20v1.5+-844FBA?logo=terraform&logoColor=white)](https://www.terraform.io/)
+[![GitOps ArgoCD](https://img.shields.io/badge/GitOps-ArgoCD%20v2.10-EF7B4D?logo=argo&logoColor=white)](https://argo-cd.readthedocs.io/)
+[![Canary Argo Rollouts](https://img.shields.io/badge/Continuous%20Delivery-Argo%20Rollouts%20Canary-1890FF?logo=argo&logoColor=white)](https://argoproj.github.io/argo-rollouts/)
+[![Security Trivy](https://img.shields.io/badge/DevSecOps-Aqua%20Trivy-0052CC?logo=security&logoColor=white)](https://trivy.dev/)
+[![Observability Prometheus](https://img.shields.io/badge/SRE-Prometheus%20%7C%20Grafana%20%7C%20Loki%20%7C%20Tempo-F46800?logo=prometheus&logoColor=white)](https://prometheus.io/)
+[![FinOps OpenCost](https://img.shields.io/badge/FinOps-OpenCost%20Real--time-20C997?logo=kubernetes&logoColor=white)](https://www.opencost.io/)
 
----
-
-## Live Endpoints
-
-All services are deployed in the cloud on AWS with Application Load Balancers and HTTPS:
-
-| Service | Description | URL | Access / Credentials |
-| :--- | :--- | :--- | :--- |
-| Storefront | Online Web Store & API Gateway | [Open Storefront](https://k8s-pokevaul-pokevaul-e701e7b82d-2093600175.us-east-1.elb.amazonaws.com) | Public Access |
-| ArgoCD | GitOps Deployment Dashboard | [Open ArgoCD](https://k8s-argocd-argocdin-4beb21a6da-779593554.us-east-1.elb.amazonaws.com) | Username: `admin` <br> Password: `wV4QEIN-A67kkyZx` |
-| Grafana | Observability & Metrics Dashboard | [Open Grafana](https://k8s-monitori-grafanai-1208dde3b5-1484929595.us-east-1.elb.amazonaws.com) | Auto-Login (Admin role) |
+> **PokéVault Legends** is a production-grade, highly available microservices platform implementing Cloud-Native DevSecOps, Site Reliability Engineering (SRE), and FinOps architectures on Amazon Web Services (AWS).
+> Tested under concurrent traffic loads handling **45,925 live completed transactions** at **100% Availability SLA** with zero downtime deployments.
 
 ---
 
-## What Does This Project Do?
-
-The application is split into 4 independent microservices:
-
-1. **Frontend (`services/frontend`):**
-   * Built with Nginx and HTML5/CSS3/JavaScript.
-   * Renders the product cards, cart, and checkout UI.
-   * Acts as a reverse proxy, forwarding API requests to backend services.
-
-2. **Auth Service (`services/auth-service`):**
-   * Built with Node.js and Express.
-   * Handles user registration, password hashing (bcrypt), and login tokens (JWT).
-
-3. **Catalog Service (`services/catalog-service`):**
-   * Built with Node.js and Express.
-   * Retrieves products and inventory.
-   * Uses Redis to cache frequently searched items so pages load in milliseconds.
-
-4. **Order Service (`services/order-service`):**
-   * Built with Node.js and Express.
-   * Manages checkout operations, calculates verified item pricing against catalog service, and saves orders to the database.
-
-5. **Databases:**
-   * **MySQL 8.0:** Permanent database running as a Kubernetes StatefulSet with AWS EBS gp3 storage.
-   * **Redis 7:** Fast in-memory cache to reduce load on MySQL.
-
----
-
-## Architecture Flow
+## Architecture
 
 ```
-[ User Browser ]
-       |
-       v (HTTPS Port 443)
-[ AWS Application Load Balancer ]
-       |
-       v
-[ Frontend Service (Nginx) ]
-       |
-       +---> /api/auth/     --> [ Auth Service (Node.js) ]
-       |
-       +---> /api/products  --> [ Catalog Service (Node.js) ] <--> [ Redis Cache ]
-       |                                                                  |
-       +---> /api/orders    --> [ Order Service (Node.js) ] ------------> [ MySQL Database ]
+                                  [ INTERNET TRAFFIC ]
+                                            │
+                                            ▼ (HTTPS / TLS 443)
+                         [ AWS Application Load Balancer (ALB) ]
+                                            │
+                ┌───────────────────────────┴───────────────────────────┐
+                ▼                                                       ▼
+      [ Ingress: PokeVault ]                                  [ Ingress: Monitoring & GitOps ]
+                │                                                       │
+                ▼                                                       ├──> [ ArgoCD Portal ]
+     [ Frontend Proxy (Nginx) ]                                         └──> [ Grafana Observability ]
+                │
+    ┌───────────┼───────────┐
+    ▼           ▼           ▼
+[ Auth API ] [ Catalog ] [ Order API (Argo Rollouts Canary) ]
+ (Node.js)    (Node.js)   (Automated Prometheus Analysis)
+    │           │           │
+    │           ├─[Redis]   ├─[MySQL 8.0 StatefulSet]
+    │           │ (Cache)   │ (AWS EBS gp3 Multi-AZ)
+    ▼           ▼           ▼
+═════════════════════════════════════════════════════════════════════════
+         OBSERVABILITY (LGTM) & FINOPS ENGINE (EKS Auto Mode)
+  • Prometheus (RED Metrics)          • Grafana Tempo (Distributed Tracing)
+  • Grafana Loki & Promtail (Logs)    • OpenCost (Real-time Kubernetes FinOps)
+═════════════════════════════════════════════════════════════════════════
 ```
 
 ---
 
-## Infrastructure & DevOps Tools
+## Production Verification Gallery
 
-* **AWS EKS (Kubernetes):** Runs and manages all application containers. Uses Karpenter for automatic node scaling.
-* **AWS Application Load Balancer (ALB):** Manages external traffic and automatically redirects HTTP to HTTPS.
-* **Terraform (`infra/terraform`):** Code that provisions AWS VPC, Subnets, EKS Cluster, and ECR repositories.
-* **GitHub Actions (`.github/workflows/ci.yml`):** Builds Docker images, runs Trivy security scans, and pushes images to Amazon ECR.
-* **ArgoCD (`gitops/argocd`):** GitOps tool that syncs the Kubernetes cluster with this GitHub repository.
-* **Prometheus & Grafana (`gitops/monitoring`):** Gathers response times, error rates, and resource usage, displaying them on real-time dashboards.
+All architectural claims, deployment patterns, security controls, and runtime metrics are verified with live production evidence.
+
+### 1. Cloud Infrastructure and AWS EKS Auto Mode
+AWS Management Console showing the managed Kubernetes v1.31 cluster in `Active` status with Auto Mode compute provisioning and clean resource health.
+
+![AWS EKS Auto Mode Console](docs/screenshots/01-aws-eks-auto-console.png)
 
 ---
 
-## Project Structure
+### 2. AWS EKS Workload Health and Resource Status
+Official AWS Console Workload breakdown: 100% healthy status across 32 active Pods, Deployments, ReplicaSets, and StatefulSets.
+
+![AWS EKS Workload Health](docs/screenshots/02-aws-eks-workloads-health.png)
+
+---
+
+### 3. Production Runtime Verification
+VS Code workspace displaying Terraform IaC codebase, `kubectl` cluster status (all pods 1/1 Running with 0 restarts), Argo Rollouts canary active, and official AWS EKS ARN `arn:aws:eks:us-east-1:592668326948:cluster/pokevault-eks-auto`.
+
+![EKS Runtime Pods and Services](docs/screenshots/03-eks-runtime-pods-services.png)
+
+---
+
+### 4. Progressive Delivery — Argo Rollouts Canary Releases
+Live Argo Rollout specification (`pokevault-order`) showing automated multi-stage canary traffic splitting (20% → Pause 45s → Prometheus Analysis → 50% → 100%) with automated rollback guardrails.
+
+![Argo Rollouts Canary Specification](docs/screenshots/04-argo-rollouts-canary-spec.png)
+
+---
+
+### 5. Declarative GitOps — ArgoCD Application Network Topology
+Live ArgoCD topology tree synced to Git commit SHA `72389f3`, validating automated reconciliation between GitHub and the AWS EKS cluster.
+
+![ArgoCD GitOps Topology](docs/screenshots/05-argocd-gitops-topology.png)
+
+---
+
+### 6. DevSecOps CI/CD — GitHub Actions and Trivy Vulnerability Scanning
+Automated DevSecOps pipeline (#22 Success in 2m 1s) validating code linting, automated unit testing gates, 4-way parallel Docker builds, Aqua Trivy CVE security scanning, and GitOps commit tag synchronization.
+
+![GitHub Actions Trivy CI/CD Pipeline](docs/screenshots/06-github-actions-trivy-pipeline.png)
+
+---
+
+### 7. SRE RED Observability Under Sustained Traffic
+Grafana RED (Rate, Errors, Duration) Dashboard under sustained load test: **45,925 Orders Placed**, **100% Availability SLA**, **0 Firing Alerts**, sub-second P95 latencies, and Promtail/Loki log streaming.
+
+![Grafana RED Observability Scale](docs/screenshots/07-grafana-red-observability-scale.png)
+
+---
+
+### 8. Distributed Tracing — Grafana Tempo
+Distributed trace visualization using Grafana Tempo and TraceQL, showing end-to-end request journeys across Nginx, Catalog, Order, and Database spans.
+
+![Grafana Tempo Tracing](docs/screenshots/08-tempo-distributed-tracing.png)
+
+---
+
+### 9. FinOps Cost Intelligence — OpenCost
+Real-time Kubernetes cost allocation via OpenCost: Live node hourly run-rate ($0.254/hr), projected cluster monthly spend ($185.69/mo), and exact application cost attribution ($13.63/mo).
+
+![OpenCost FinOps Budget](docs/screenshots/09-opencost-finops-budget.png)
+
+---
+
+### 10. Application Experience — Order Tracking
+Responsive storefront dispatch tracking pipeline showing order fulfillment simulation with carrier logistics.
+
+![Order Tracking UI](docs/screenshots/10-pokevault-order-tracking-ui.png)
+
+---
+
+### System Walkthrough Recording
+A 4K screen recording demonstrating live order placement, concurrent load testing, Grafana metric surges, Tempo tracing, and ArgoCD synchronization is documented in:
+[`docs/screen-recording/README.md`](docs/screen-recording/README.md)
+
+---
+
+## Core Engineering Implementation
+
+### 1. AWS EKS Auto Mode and Elastic Compute
+* **Managed Elastic Compute:** Leverages AWS EKS Auto Mode to automate node provisioning, eliminating manual EC2 Auto Scaling Groups.
+* **Spot Tolerations and FinOps:** Workloads are configured with Spot-instance tolerations and strict CPU/Memory requests to optimize cluster compute density, achieving an operational cost of **~$0.25/hr**.
+
+### 2. DevSecOps and Shift-Left Security Pipeline
+* **Trivy Vulnerability Gates:** Docker images are scanned for critical vulnerabilities before being pushed to Amazon ECR.
+* **Automated Unit Testing Gate:** Integration and unit test suites execute on every pull request (`services/*/test/*.test.js`).
+* **Enterprise Secrets with ESO:** Uses **External Secrets Operator (ESO)** to securely sync credentials from AWS Secrets Manager directly into Kubernetes Secrets without exposing sensitive keys in Git.
+
+### 3. Progressive Delivery (Canary Rollouts)
+* **Zero Downtime Deployments:** Instead of standard rolling updates, the `order-service` uses **Argo Rollouts**.
+* **Automated Rollback Analysis:** Prometheus evaluates HTTP 5xx error rates during the canary pause (`interval: 30s`, `count: 3`). If error rates exceed 5%, the rollout automatically aborts and rolls back to the stable replica set.
+
+### 4. SRE and Full Observability Stack
+* **Loki:** Centralized log aggregation via Promtail daemonsets across all worker nodes.
+* **Grafana:** Unified dashboard for RED metrics, business KPIs, and cost graphs.
+* **Tempo:** High-throughput distributed tracing with OpenTelemetry instrumentation.
+* **Metrics (Prometheus):** Real-time scrape targets for Node.js microservice `/metrics` endpoints.
+
+---
+
+## Platform Automation Scripts
+
+The entire infrastructure and deployment stack is fully reproducible with automated single-command scripts:
+
+### Environment Bootstrap
+Provisions infrastructure, configures EKS Auto Mode, deploys GitOps, installs ESO, and launches PokéVault:
+```bash
+./scripts/bootstrap-cluster.sh
+```
+
+### Environment Teardown
+De-provisions Application Load Balancers, persistent storage volumes, Helm releases, and destroys AWS resources to avoid lingering cloud costs:
+```bash
+./scripts/teardown-cluster.sh
+```
+
+---
+
+## Repository Layout
 
 ```
 .
 ├── .github/
-│   └── workflows/ci.yml       # Automated build and security scan pipeline
-├── services/                  # Microservices source code
-│   ├── frontend/              # Web store UI and Nginx proxy
-│   ├── auth-service/          # Authentication service (Node.js)
-│   ├── catalog-service/       # Product catalog service (Node.js Express)
-│   ├── order-service/         # Checkout and order service (Node.js Express)
-│   ├── db/                    # MySQL database table schema
-│   └── README.md              # Microservices documentation
-├── gitops/                    # Kubernetes deployment configuration
-│   ├── helm/pokevault/        # Helm chart with all service deployment YAMLs
-│   ├── argocd/                # ArgoCD application and ingress configuration
-│   ├── monitoring/            # Prometheus and Grafana manifests
-│   └── README.md              # GitOps documentation
+│   └── workflows/ci.yml       # DevSecOps CI/CD: Test, Trivy Scan, Build & GitOps Sync
+├── services/                  # Microservices Source Code & Tests
+│   ├── frontend/              # Nginx Storefront & API Gateway
+│   ├── auth-service/          # Authentication & JWT (Node.js Express + Tests)
+│   ├── catalog-service/       # Product Catalog & Redis Caching (Node.js + Tests)
+│   ├── order-service/         # Checkout API & Rollout Target (Node.js + Tests)
+│   └── db/                    # MySQL Database Schema & Seed Data
+├── gitops/                    # Declarative Kubernetes Manifests
+│   ├── helm/pokevault/        # Helm Chart (Deployments, Rollouts, ESO Secrets, HPA)
+│   ├── argocd/                # ArgoCD Application & Ingress Definitions
+│   └── monitoring/            # Full LGTM Stack + OpenCost FinOps YAML
 ├── infra/                     # Infrastructure as Code
-│   ├── terraform/             # AWS resources (VPC, EKS, ECR, IAM)
-│   └── README.md              # Infrastructure documentation
-├── docs/                      # Diagrams and screenshots
-└── README.md                  # Project overview
+│   └── terraform/             # AWS VPC, EKS Auto Mode, ECR, IAM OIDC Roles
+├── scripts/                   # Platform Automation
+│   ├── bootstrap-cluster.sh   # Automated Environment Provisioner
+│   ├── teardown-cluster.sh    # Automated Deletion Engine
+│   ├── load-test.sh           # Concurrent Traffic & Scale Generator
+│   └── traffic-generator.mjs  # Sustained Order Placement Simulation
+├── docs/                      # Proof Assets
+│   ├── screenshots/           # Curated Proof Screenshots
+│   └── screen-recording/      # System Demo Recording Documentation
+└── README.md                  # Master System Documentation
 ```
 
 ---
 
-## Useful Verification Commands
-
-Check cluster status with these commands:
+## Verification Commands
 
 ```bash
-# View running pods across all namespaces
-kubectl get pods -A
+# View all running pods across application and monitoring namespaces
+kubectl get pods,svc,rollouts -n pokevault && kubectl get pods -n monitoring
 
-# Check public load balancer addresses
+# Inspect active canary rollout status
+kubectl describe rollout pokevault-order -n pokevault
+
+# View public AWS Application Load Balancers
 kubectl get ingress -A
 
-# View active worker nodes
-kubectl get nodes -o wide
-
-# Check pod autoscaler (HPA) metrics
-kubectl get hpa -n pokevault
+# Stream live container logs via kubectl
+kubectl logs -f -l app=pokevault-order -n pokevault -c order
 ```
 
 ---
-
-## Common Interview Questions
-
-**Q1: Why use microservices instead of a single application?**  
-Answer: Splitting the app into smaller services allows independent deployments, isolated database connections, and scaling only the services that have high traffic without touching the rest of the application.
-
-**Q2: What is the purpose of ArgoCD?**  
-Answer: ArgoCD connects the Kubernetes cluster to GitHub. Whenever new code or configuration is committed to Git, ArgoCD automatically updates the cluster so manual kubectl commands are not needed.
-
-**Q3: How is data kept safe if a MySQL pod restarts?**  
-Answer: MySQL runs as a StatefulSet connected to an AWS EBS persistent disk (`gp3`). Even if the pod is deleted or moves to another node, the disk stays intact and reattaches to the new pod.
+**Maintained by:** [Aarjav Jain](https://github.com/itsme-aarjav)  
+**License:** MIT

@@ -111,6 +111,12 @@ resource "aws_eks_cluster" "main" {
     }
   }
 
+  kubernetes_network_config {
+    elastic_load_balancing {
+      enabled = true
+    }
+  }
+
   # Ensure all IAM policies are attached prior to provisioning
   depends_on = [
     aws_iam_role_policy_attachment.cluster_policy,

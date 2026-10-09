@@ -27,7 +27,16 @@ helm uninstall pokevault -n pokevault 2>/dev/null || true
 
 echo "Step 4: Destroying AWS Infrastructure via Terraform..."
 cd "$ROOT_DIR/infra/terraform"
-terraform destroy -auto-approve
+terraform destroy -auto-approve || true
+
+echo "Step 5: Cleaning up any detached dynamic EBS storage volumes..."
+EBS_VOLS=$(aws ec2 describe-volumes --filters "Name=tag:eks:eks-cluster-name,Values=pokevault-eks-auto" "Name=status,Values=available" --region us-east-1 --query "Volumes[*].VolumeId" --output text 2>/dev/null || true)
+for vol in $EBS_VOLS; do
+    if [[ -n "$vol" ]]; then
+        echo "Deleting detached volume: $vol"
+        aws ec2 delete-volume --volume-id "$vol" --region us-east-1 2>/dev/null || true
+    fi
+done
 
 echo "=========================================================="
 echo "All AWS resources destroyed. Teardown complete."

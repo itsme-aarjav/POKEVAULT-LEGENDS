@@ -33,7 +33,7 @@ frontend:
 auth:
   replicaCount: 2
   image:
-    repository: pokevault-auth-service
+    repository: pokevault-auth
     tag: latest
     pullPolicy: IfNotPresent
   service:
@@ -60,7 +60,7 @@ auth:
 catalog:
   replicaCount: 2
   image:
-    repository: pokevault-catalog-service
+    repository: pokevault-catalog
     tag: latest
     pullPolicy: IfNotPresent
   service:
@@ -93,7 +93,7 @@ catalog:
 order:
   replicaCount: 2
   image:
-    repository: pokevault-order-service
+    repository: pokevault-order
     tag: latest
     pullPolicy: IfNotPresent
   service:

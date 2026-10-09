@@ -8,13 +8,12 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/itsme-aarjav/3-tier-application.git' # Replace with your Git repository URL
+    repoURL: 'https://github.com/itsme-aarjav/POKEVAULT-LEGENDS.git'
     targetRevision: main
     path: gitops/helm/pokevault
     helm:
       valueFiles:
         - values.yaml
-        - values-prod.yaml
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: pokevault

@@ -7,13 +7,14 @@ import { renderNavbar, initNavbarEvents } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
 import { renderCartDrawer, initCartDrawerEvents } from './components/cart-drawer.js';
 import { renderProductCard, bindProductCardEvents } from './components/product-card.js';
-import { getAllProducts, filterProducts } from './data/products.js';
+import { getProducts } from './lib/api.js';
 import { CATEGORIES_DATA } from './data/categories.js';
 
 class ShopPage {
   constructor() {
-    this.allProducts = getAllProducts();
+    this.allProducts = [];
     this.displayedCount = 12;
+    this.isLoading = true;
     this.currentFilters = {
       category: 'all',
       pokemon: 'all',
@@ -30,9 +31,63 @@ class ShopPage {
     if (params.has('sort')) this.currentFilters.sortBy = params.get('sort');
 
     this.initLayout();
-    this.renderCategorySidebar();
     this.bindFilterEvents();
-    this.updateCatalog();
+    this.loadCatalog();
+  }
+
+  async loadCatalog() {
+    const grid = document.getElementById('shopProductsGrid');
+    const resultsCountEl = document.getElementById('resultsCount');
+    if (resultsCountEl) resultsCountEl.textContent = 'Connecting to catalog microservice...';
+
+    if (grid) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem;">
+          <div style="font-size: 2.5rem; animation: liveTickerPulse 0.8s infinite; margin-bottom: 0.75rem;">⚡</div>
+          <div style="font-family: var(--font-mono); font-size: 1rem; font-weight: 800; color: #1E293B; margin-bottom: 0.5rem;">
+            LOADING VAULT CATALOG...
+          </div>
+          <div style="font-family: var(--font-mono); font-size: 0.82rem; color: #64748B;">
+            Fetching authentic live pricing and stock from backend microservice
+          </div>
+        </div>
+      `;
+    }
+
+    try {
+      const res = await getProducts();
+      if (!res.success) {
+        if (resultsCountEl) resultsCountEl.textContent = 'Error loading catalog';
+        if (grid) {
+          grid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 3.5rem 2rem; background: #FFF; border: 3px solid #000; box-shadow: 6px 6px 0px #000; border-radius: 8px;">
+              <h3 style="font-family: var(--font-title); font-size: 1.5rem; color: var(--accent-red); margin-bottom: 0.5rem;">UNABLE TO LOAD CATALOG PRODUCTS</h3>
+              <p style="font-family: var(--font-mono); font-size: 0.85rem; color: #666; margin-bottom: 1.5rem;">Could not connect to the catalog microservice (${res.error || 'Backend unavailable'}).</p>
+              <button id="retryShopBtn" class="btn-pill" style="cursor: pointer;">⚡ Retry Loading Catalog</button>
+            </div>
+          `;
+          document.getElementById('retryShopBtn')?.addEventListener('click', () => this.loadCatalog());
+        }
+        return;
+      }
+
+      this.allProducts = res.data || [];
+      this.isLoading = false;
+      this.renderCategorySidebar();
+      this.updateCatalog();
+    } catch (err) {
+      if (resultsCountEl) resultsCountEl.textContent = 'Connection error';
+      if (grid) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 3.5rem 2rem; background: #FFF; border: 3px solid #000; box-shadow: 6px 6px 0px #000; border-radius: 8px;">
+            <h3 style="font-family: var(--font-title); font-size: 1.5rem; color: var(--accent-red); margin-bottom: 0.5rem;">CONNECTION ERROR</h3>
+            <p style="font-family: var(--font-mono); font-size: 0.85rem; color: #666; margin-bottom: 1.5rem;">${err.message}</p>
+            <button id="retryShopBtn" class="btn-pill" style="cursor: pointer;">⚡ Retry Loading Catalog</button>
+          </div>
+        `;
+        document.getElementById('retryShopBtn')?.addEventListener('click', () => this.loadCatalog());
+      }
+    }
   }
 
   initLayout() {
@@ -176,13 +231,57 @@ class ShopPage {
     });
   }
 
+  filterProducts(list, {
+    category = 'all',
+    pokemon = 'all',
+    maxPrice = 15000,
+    rating = 0,
+    inStockOnly = false,
+    sortBy = 'featured'
+  }) {
+    let result = (list || []).filter(p => {
+      if (category !== 'all' && p.category !== category) return false;
+      if (pokemon !== 'all' && p.pokemon && p.pokemon.toLowerCase() !== pokemon.toLowerCase()) return false;
+      if (p.price > maxPrice) return false;
+      if (p.rating < rating) return false;
+      const stock = p.in_stock !== undefined ? Number(p.in_stock) : (p.inStock !== undefined ? Number(p.inStock) : 10);
+      if (inStockOnly && stock <= 0) return false;
+      return true;
+    });
+
+    switch (sortBy) {
+      case 'price-low':
+        result.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-high':
+        result.sort((a, b) => b.price - a.price);
+        break;
+      case 'rating':
+        result.sort((a, b) => b.rating - a.rating);
+        break;
+      case 'newest':
+        result.sort((a, b) => (b.isNew || b.is_new ? 1 : 0) - (a.isNew || a.is_new ? 1 : 0));
+        break;
+      case 'popular':
+        result.sort((a, b) => (b.reviewCount || b.review_count || 0) - (a.reviewCount || a.review_count || 0));
+        break;
+      case 'featured':
+      default:
+        result.sort((a, b) => (b.isFeatured || b.is_featured ? 1 : 0) - (a.isFeatured || a.is_featured ? 1 : 0));
+        break;
+    }
+    return result;
+  }
+
   updateCatalog() {
     const grid = document.getElementById('shopProductsGrid');
     const resultsCountEl = document.getElementById('resultsCount');
     const loadMoreWrap = document.getElementById('loadMoreWrap');
     if (!grid) return;
 
-    const filtered = filterProducts({
+    if (this.isLoading) return;
+
+    const filtered = this.filterProducts(this.allProducts, {
       category: this.currentFilters.category,
       pokemon: this.currentFilters.pokemon,
       maxPrice: this.currentFilters.maxPrice,

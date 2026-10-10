@@ -7,9 +7,9 @@ import { renderNavbar, initNavbarEvents } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
 import { renderCartDrawer, initCartDrawerEvents } from './components/cart-drawer.js';
 import { renderProductCard, bindProductCardEvents } from './components/product-card.js';
-import { getAllProducts, getProductById, getLiveInventoryOverrides } from './data/products.js';
+import { getProduct, getProducts } from './lib/api.js';
 import { getReviewsForProduct } from './data/reviews.js';
-import { addToCart, toggleWishlist, isInWishlist } from './utils/store.js';
+import { getLiveInventoryOverrides, addToCart, toggleWishlist, isInWishlist } from './utils/store.js';
 import { injectProductSeo } from './utils/seo.js';
 import { initLiveViewerCounter, startLiveDispatchCountdown, initExitIntentModal } from './utils/social-proof.js';
 
@@ -19,34 +19,17 @@ const confetti = confettiModule?.default || confettiModule || ((typeof window !=
 class ProductPage {
   constructor() {
     const params = new URLSearchParams(window.location.search);
-    const cardId = params.get('id');
-    this.allProducts = getAllProducts();
-    this.product = getProductById(cardId) || this.allProducts[0];
-    this.reviews = getReviewsForProduct(this.product.id);
-
-    const overrides = getLiveInventoryOverrides();
-    let initStock = this.product.in_stock !== undefined ? Number(this.product.in_stock) : (this.product.inStock !== undefined ? Number(this.product.inStock) : 10);
-    if (overrides[this.product.id] !== undefined) {
-      initStock = Number(overrides[this.product.id]);
-      this.product = {
-        ...this.product,
-        in_stock: initStock,
-        inStock: initStock,
-        availability: initStock > 0 ? "In Stock" : "Out of Stock"
-      };
-    }
-
-    this.selectedQty = initStock > 0 ? 1 : 0;
-
-    // Inject Rich Schema.org Product, Offer, AggregateRating, Review & Breadcrumb JSON-LD
-    injectProductSeo(this.product, this.reviews);
+    this.cardId = params.get('id');
+    this.product = null;
+    this.relatedProducts = [];
+    this.reviews = [];
+    this.selectedQty = 1;
 
     this.initLayout();
-    this.renderProductDetails();
 
     // Listen for live inventory changes across tabs or admin panel
     window.addEventListener('pv-inventory-updated', (e) => {
-      if (e.detail && e.detail.cardId === this.product.id) {
+      if (this.product && e.detail && e.detail.cardId === this.product.id) {
         const newStock = Number(e.detail.stock);
         this.product = {
           ...this.product,
@@ -59,8 +42,109 @@ class ProductPage {
       }
     });
 
-    if (cardId) {
-      this.fetchLiveProductData(cardId);
+    this.loadProductPage(this.cardId);
+  }
+
+  async loadProductPage(cardId) {
+    const root = document.getElementById('productPageRoot');
+
+    if (!cardId) {
+      if (root) {
+        root.innerHTML = `
+          <div style="max-width: 800px; margin: 4rem auto; padding: 4rem 2rem; background: #FFF; border: 3px solid #000; box-shadow: 6px 6px 0px #000; border-radius: 8px; text-align: center;">
+            <h2 style="font-family: var(--font-title); font-size: 2rem; color: var(--accent-red); margin-bottom: 1rem;">NO PRODUCT SPECIFIED</h2>
+            <p style="font-family: var(--font-mono); font-size: 0.95rem; color: #64748B; margin-bottom: 2rem;">Please select a Pokémon item from our store catalog.</p>
+            <a href="shop.html" class="btn-pill" style="text-decoration: none; padding: 14px 28px;">← Browse All Vault Merchandise</a>
+          </div>
+        `;
+      }
+      return;
+    }
+
+    if (root) {
+      root.innerHTML = `
+        <div style="max-width: 1200px; margin: 3rem auto; padding: 5rem 1.5rem; text-align: center;">
+          <div style="font-size: 3rem; animation: liveTickerPulse 0.8s infinite; margin-bottom: 1rem;">⚡</div>
+          <h2 style="font-family: var(--font-title); font-size: 1.8rem; font-weight: 900; color: #0F172A; margin-bottom: 0.5rem;">
+            AUTHENTICATING VAULT COLLECTIBLE...
+          </h2>
+          <p style="font-family: var(--font-mono); font-size: 0.9rem; color: #64748B;">
+            Retrieving certification, real-time inventory &amp; authoritative pricing from catalog microservice
+          </p>
+        </div>
+      `;
+    }
+
+    try {
+      const res = await getProduct(cardId);
+      if (!res.success) {
+        if (res.notFound || res.status === 404) {
+          if (root) {
+            root.innerHTML = `
+              <div style="max-width: 800px; margin: 4rem auto; padding: 4rem 2rem; background: #FFF; border: 3px solid #000; box-shadow: 6px 6px 0px #000; border-radius: 8px; text-align: center;">
+                <h2 style="font-family: var(--font-title); font-size: 2rem; color: var(--accent-red); margin-bottom: 1rem;">PRODUCT NOT FOUND</h2>
+                <p style="font-family: var(--font-mono); font-size: 0.95rem; color: #64748B; margin-bottom: 2rem;">The requested collectible (ID: "${cardId}") could not be found in the PokéVault catalog microservice.</p>
+                <a href="shop.html" class="btn-pill" style="text-decoration: none; padding: 14px 28px;">← Browse All Vault Collectibles</a>
+              </div>
+            `;
+          }
+          document.title = 'Product Not Found — POKÉVAULT LEGENDS';
+          return;
+        }
+
+        // Network or microservice HTTP failure
+        if (root) {
+          root.innerHTML = `
+            <div style="max-width: 800px; margin: 4rem auto; padding: 4rem 2rem; background: #FFF; border: 3px solid #000; box-shadow: 6px 6px 0px #000; border-radius: 8px; text-align: center;">
+              <h2 style="font-family: var(--font-title); font-size: 1.8rem; color: var(--accent-red); margin-bottom: 1rem;">UNABLE TO LOAD PRODUCT</h2>
+              <p style="font-family: var(--font-mono); font-size: 0.9rem; color: #64748B; margin-bottom: 1.5rem;">Could not connect to the catalog microservice (${res.error || 'Backend unavailable'}).</p>
+              <button id="retryProductBtn" class="btn-pill" style="cursor: pointer;">⚡ Retry Connecting</button>
+            </div>
+          `;
+          document.getElementById('retryProductBtn')?.addEventListener('click', () => this.loadProductPage(cardId));
+        }
+        return;
+      }
+
+      this.product = res.data;
+      const overrides = getLiveInventoryOverrides();
+      let initStock = this.product.in_stock !== undefined ? Number(this.product.in_stock) : (this.product.inStock !== undefined ? Number(this.product.inStock) : 10);
+      if (overrides[this.product.id] !== undefined) {
+        initStock = Number(overrides[this.product.id]);
+      }
+
+      this.product = {
+        ...this.product,
+        in_stock: initStock,
+        inStock: initStock,
+        availability: initStock > 0 ? "In Stock" : "Out of Stock"
+      };
+      this.selectedQty = initStock > 0 ? 1 : 0;
+
+      this.reviews = getReviewsForProduct(this.product.id);
+      injectProductSeo(this.product, this.reviews);
+
+      // Fetch related items from dynamic catalog
+      try {
+        const relatedRes = await getProducts({ category: this.product.category });
+        if (relatedRes.success && Array.isArray(relatedRes.data)) {
+          this.relatedProducts = relatedRes.data.filter(item => item.id !== this.product.id).slice(0, 4);
+        }
+      } catch {}
+
+      this.renderProductDetails();
+      this.fetchLiveProductData(this.product.id);
+    } catch (err) {
+      if (root) {
+        root.innerHTML = `
+          <div style="max-width: 800px; margin: 4rem auto; padding: 4rem 2rem; background: #FFF; border: 3px solid #000; box-shadow: 6px 6px 0px #000; border-radius: 8px; text-align: center;">
+            <h2 style="font-family: var(--font-title); font-size: 1.8rem; color: var(--accent-red); margin-bottom: 1rem;">CONNECTION ERROR</h2>
+            <p style="font-family: var(--font-mono); font-size: 0.9rem; color: #64748B; margin-bottom: 1.5rem;">${err.message}</p>
+            <button id="retryProductBtn" class="btn-pill" style="cursor: pointer;">⚡ Retry Connecting</button>
+          </div>
+        `;
+        document.getElementById('retryProductBtn')?.addEventListener('click', () => this.loadProductPage(cardId));
+      }
     }
   }
 
@@ -151,17 +235,15 @@ class ProductPage {
     const isWishlisted = isInWishlist(p.id);
     const starsHtml = '★'.repeat(Math.floor(p.rating)) + (p.rating % 1 !== 0 ? '½' : '');
 
-    // Get related items in same category or associated Pokémon
-    const related = this.allProducts
-      .filter(item => item.id !== p.id && (item.category === p.category || item.pokemon === p.pokemon))
-      .slice(0, 4);
+    // Get related items from dynamic catalog
+    const related = (this.relatedProducts || []).filter(item => item && item.id !== p.id).slice(0, 4);
 
     // Calculate rating counts
     const fiveStarCount = this.reviews.filter(r => r.rating === 5).length;
     const fourStarCount = this.reviews.filter(r => r.rating === 4).length;
     const totalCount = this.reviews.length;
-    const fivePercent = Math.round((fiveStarCount / totalCount) * 100);
-    const fourPercent = Math.round((fourStarCount / totalCount) * 100);
+    const fivePercent = totalCount > 0 ? Math.round((fiveStarCount / totalCount) * 100) : 100;
+    const fourPercent = totalCount > 0 ? Math.round((fourStarCount / totalCount) * 100) : 0;
 
     // Feature tags block
     const featureTags = (p.features && p.features.length > 0)
@@ -178,17 +260,18 @@ class ProductPage {
     const initialRewardsVal = (initialCoins / 100).toFixed(2);
     const unitPriceINR = Math.round(p.price * 83);
 
-    // Bundle Items Calculation
-    const bundleItem1 = related[0] || this.allProducts[1];
-    const bundleItem2 = related[1] || this.allProducts[2];
+    // Bundle Items Calculation from related items
+    const bundleItem1 = related[0] || null;
+    const bundleItem2 = related[1] || null;
+    const hasBundle = Boolean(bundleItem1 && bundleItem2);
     const b1PriceINR = Math.round((bundleItem1?.price || 49.99) * 83);
     const b2PriceINR = Math.round((bundleItem2?.price || 29.99) * 83);
     const rawBundleTotal = unitPriceINR + b1PriceINR + b2PriceINR;
     const discountedBundleTotal = Math.round(rawBundleTotal * 0.85);
     const bundleSavings = rawBundleTotal - discountedBundleTotal;
-    const bundleItem1Stock = bundleItem1?.in_stock !== undefined ? Number(bundleItem1.in_stock) : (Number(bundleItem1?.inStock) || 5);
-    const bundleItem2Stock = bundleItem2?.in_stock !== undefined ? Number(bundleItem2.in_stock) : (Number(bundleItem2?.inStock) || 5);
-    const canBundle = !isOutOfStock && bundleItem1Stock > 0 && bundleItem2Stock > 0;
+    const bundleItem1Stock = bundleItem1 ? (bundleItem1.in_stock !== undefined ? Number(bundleItem1.in_stock) : (Number(bundleItem1.inStock) || 5)) : 0;
+    const bundleItem2Stock = bundleItem2 ? (bundleItem2.in_stock !== undefined ? Number(bundleItem2.in_stock) : (Number(bundleItem2.inStock) || 5)) : 0;
+    const canBundle = hasBundle && !isOutOfStock && bundleItem1Stock > 0 && bundleItem2Stock > 0;
 
     root.innerHTML = `
       <!-- BREADCRUMBS -->
@@ -440,6 +523,7 @@ class ProductPage {
           `}
 
           <!-- FREQUENTLY BOUGHT TOGETHER BUNDLE BUILDER -->
+          ${hasBundle ? `
           <div class="bundle-builder-wrap">
             <div style="font-family:var(--font-mono); font-weight:800; font-size:0.8rem; color:var(--accent-red); letter-spacing:1px; margin-bottom:4px;">
               ⚡ 1-CLICK VAULT BUNDLE (SAVE 15%)
@@ -492,6 +576,7 @@ class ProductPage {
               `}
             </div>
           </div>
+          ` : ''}
 
           <!-- SPECIFICATIONS ACCORDION / TABLE -->
           <div class="pd-specs-box">

@@ -17,18 +17,8 @@ export default function AdminProtectedRoute({ children }) {
 
   useEffect(() => {
     async function checkAdminAuth() {
-      // Check session storage or verify with backend API
       const isAuth = await verifyAdminSession();
-      if (isAuth) {
-        setIsAuthorized(true);
-      } else {
-        const sessionKey = typeof window !== 'undefined' ? sessionStorage.getItem('pvAdminKey') : '';
-        if (sessionKey && (sessionKey === 'pokevaultadmin123' || sessionKey.length >= 12)) {
-          setIsAuthorized(true);
-        } else {
-          setIsAuthorized(false);
-        }
-      }
+      setIsAuthorized(isAuth);
       setIsChecking(false);
     }
 
@@ -45,14 +35,12 @@ export default function AdminProtectedRoute({ children }) {
     }
 
     const res = await loginAdmin(cleanPass);
-    if (res.success || cleanPass === 'pokevaultadmin123' || cleanPass.length >= 12) {
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('pvAdminKey', cleanPass);
-      }
+    if (res.success && res.token) {
       setIsAuthorized(true);
       setAuthError('');
     } else {
-      setAuthError(res.message || 'Invalid Admin Master Key. Please verify permissions.');
+      setIsAuthorized(false);
+      setAuthError(res.error || res.message || 'Invalid Admin Master Key. Please verify permissions.');
     }
   };
 

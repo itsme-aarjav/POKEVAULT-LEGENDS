@@ -118,6 +118,8 @@ export default function ShopifyAdminShell() {
   });
 
   const handleLogout = () => {
+    sessionStorage.removeItem('pvAdminToken');
+    localStorage.removeItem('pvAdminToken');
     sessionStorage.removeItem('pvAdminKey');
     localStorage.removeItem('pvAdminKey');
     window.location.reload();

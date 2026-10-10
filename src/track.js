@@ -89,8 +89,40 @@ class OrderTracker {
     if (!container) return;
 
     let realOrder = null;
+    // PV-006: Order tokens are NEVER accepted from URL query parameters
+    let orderToken = '';
+
+    // Retrieve order token from session-scoped storage (PV-006 remediation)
     try {
-      const res = await fetch(`/api/orders/${orderId}`);
+      const sessionStored = sessionStorage.getItem(`pvOrder_${orderId}`) || sessionStorage.getItem('pvLastOrder');
+      if (sessionStored) {
+        const parsed = JSON.parse(sessionStored);
+        if (parsed.id === orderId || parsed.orderId === orderId || orderId === 'LAST') {
+          orderToken = parsed.accessToken || '';
+        }
+      }
+      // Backwards-compatibility fallback to localStorage if sessionStorage empty
+      if (!orderToken) {
+        const local = localStorage.getItem(`pvOrder_${orderId}`) || localStorage.getItem('pvLastOrder');
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (parsed.id === orderId || parsed.orderId === orderId || orderId === 'LAST') {
+            orderToken = parsed.accessToken || '';
+          }
+        }
+      }
+    } catch (e) {}
+
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (orderToken) {
+        headers['X-Order-Token'] = orderToken;
+        headers['Authorization'] = `Bearer ${orderToken}`;
+      }
+      // PV-006: Strictly send token via headers, NEVER in query parameters
+      const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
+        headers
+      });
       if (res.ok) {
         const json = await res.json();
         if (json && json.success && json.data) {
@@ -101,15 +133,25 @@ class OrderTracker {
 
     if (!realOrder) {
       try {
-        const local = localStorage.getItem(`pvOrder_${orderId}`) || localStorage.getItem('pvLastOrder');
-        if (local) {
-          const parsed = JSON.parse(local);
+        const sessionStored = sessionStorage.getItem(`pvOrder_${orderId}`) || sessionStorage.getItem('pvLastOrder');
+        if (sessionStored) {
+          const parsed = JSON.parse(sessionStored);
           if (parsed.id === orderId || parsed.orderId === orderId || orderId === 'LAST') {
             realOrder = parsed;
           }
         }
+        if (!realOrder) {
+          const local = localStorage.getItem(`pvOrder_${orderId}`) || localStorage.getItem('pvLastOrder');
+          if (local) {
+            const parsed = JSON.parse(local);
+            if (parsed.id === orderId || parsed.orderId === orderId || orderId === 'LAST') {
+              realOrder = parsed;
+            }
+          }
+        }
       } catch (e) {}
     }
+
 
     let data = SAMPLE_ORDERS[orderId];
     if (realOrder) {

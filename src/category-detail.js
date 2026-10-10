@@ -7,31 +7,80 @@ import { renderNavbar, initNavbarEvents } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
 import { renderCartDrawer, initCartDrawerEvents } from './components/cart-drawer.js';
 import { renderProductCard, bindProductCardEvents } from './components/product-card.js';
-import { getProductsByCategory } from './data/products.js';
+import { getProducts } from './lib/api.js';
 import { getCategoryById } from './data/categories.js';
 
 class CategoryDetailPage {
   constructor() {
     const params = new URLSearchParams(window.location.search);
-    const catSlug = params.get('id') || 'trading-cards';
+    this.catSlug = params.get('id') || 'trading-cards';
 
-    this.category = getCategoryById(catSlug) || {
-      id: catSlug,
-      name: catSlug.replace('-', ' ').toUpperCase(),
-      description: `Explore authentic Pokémon items in ${catSlug}.`,
+    this.category = getCategoryById(this.catSlug) || {
+      id: this.catSlug,
+      name: this.catSlug.replace('-', ' ').toUpperCase(),
+      description: `Explore authentic Pokémon items in ${this.catSlug}.`,
       icon: '🏷️',
       bannerColor: 'linear-gradient(135deg, #FFF056 0%, #FFD700 100%)'
     };
 
-    this.products = getProductsByCategory(catSlug);
+    this.products = [];
     this.currentSort = 'featured';
 
     document.title = `${this.category.name} — POKÉVAULT LEGENDS`;
 
     this.initLayout();
     this.renderCategoryHeader();
-    this.renderCategoryProducts();
     this.bindEvents();
+    this.loadCategoryProducts();
+  }
+
+  async loadCategoryProducts() {
+    const grid = document.getElementById('categoryProductsGrid');
+    const countEl = document.getElementById('categoryCount');
+    if (!grid) return;
+
+    if (countEl) countEl.textContent = `Connecting to catalog microservice for ${this.category.name}...`;
+
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem;">
+        <div style="font-size: 2.5rem; animation: liveTickerPulse 0.8s infinite; margin-bottom: 0.75rem;">🏷️</div>
+        <div style="font-family: var(--font-mono); font-size: 1rem; font-weight: 800; color: #1E293B; margin-bottom: 0.5rem;">
+          LOADING CATEGORY PRODUCTS...
+        </div>
+        <div style="font-family: var(--font-mono); font-size: 0.82rem; color: #64748B;">
+          Retrieving live catalog items for "${this.category.name}"
+        </div>
+      </div>
+    `;
+
+    try {
+      const res = await getProducts({ category: this.catSlug });
+      if (!res.success) {
+        if (countEl) countEl.textContent = 'Error loading category items';
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 3.5rem 2rem; background: #FFF; border: 3px solid #000; box-shadow: 6px 6px 0px #000; border-radius: 8px;">
+            <h3 style="font-family: var(--font-title); font-size: 1.5rem; color: var(--accent-red); margin-bottom: 0.5rem;">UNABLE TO LOAD CATEGORY</h3>
+            <p style="font-family: var(--font-mono); font-size: 0.85rem; color: #666; margin-bottom: 1.5rem;">Could not connect to the catalog microservice (${res.error || 'Backend unavailable'}).</p>
+            <button id="retryCatBtn" class="btn-pill" style="cursor: pointer;">⚡ Retry Loading Category</button>
+          </div>
+        `;
+        document.getElementById('retryCatBtn')?.addEventListener('click', () => this.loadCategoryProducts());
+        return;
+      }
+
+      this.products = res.data || [];
+      this.renderCategoryProducts();
+    } catch (err) {
+      if (countEl) countEl.textContent = 'Connection error';
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3.5rem 2rem; background: #FFF; border: 3px solid #000; box-shadow: 6px 6px 0px #000; border-radius: 8px;">
+          <h3 style="font-family: var(--font-title); font-size: 1.5rem; color: var(--accent-red); margin-bottom: 0.5rem;">CONNECTION ERROR</h3>
+          <p style="font-family: var(--font-mono); font-size: 0.85rem; color: #666; margin-bottom: 1.5rem;">${err.message}</p>
+          <button id="retryCatBtn" class="btn-pill" style="cursor: pointer;">⚡ Retry Loading Category</button>
+        </div>
+      `;
+      document.getElementById('retryCatBtn')?.addEventListener('click', () => this.loadCategoryProducts());
+    }
   }
 
   initLayout() {

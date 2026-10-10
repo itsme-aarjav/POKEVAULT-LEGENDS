@@ -13,7 +13,9 @@ const confetti = confettiModule?.default || confettiModule || ((typeof window !=
 class OrderConfirmationPage {
   constructor() {
     const params = new URLSearchParams(window.location.search);
-    this.orderId = params.get('id') || '';
+    this.orderId = params.get('id') || params.get('order') || '';
+    // PV-006 & Phase 3 remediation: Tokens are NEVER retrieved from URL query string
+    this.orderToken = '';
 
     this.initLayout();
     this.loadOrderReceipt();
@@ -44,13 +46,46 @@ class OrderConfirmationPage {
     const discountEl = document.getElementById('receiptDiscount');
     const shippingEl = document.getElementById('receiptShipping');
     const totalEl = document.getElementById('receiptTotal');
+    const trackBtn = document.getElementById('receiptTrackBtn');
 
     let orderData = null;
 
-    // 1. Try to fetch from Backend API
+    // 1. Try to fetch from Backend API with order token from session storage
     if (this.orderId) {
+      if (!this.orderToken) {
+        try {
+          // Check session-scoped storage first (PV-006 remediation)
+          const sessionStored = sessionStorage.getItem(`pvOrder_${this.orderId}`) || sessionStorage.getItem('pvLastOrder');
+          if (sessionStored) {
+            const parsed = JSON.parse(sessionStored);
+            if (parsed.accessToken) this.orderToken = parsed.accessToken;
+          }
+          // Backwards compatibility fallback to localStorage if sessionStorage empty
+          if (!this.orderToken) {
+            const localStored = localStorage.getItem(`pvOrder_${this.orderId}`) || localStorage.getItem('pvLastOrder');
+            if (localStored) {
+              const parsedLocal = JSON.parse(localStored);
+              if (parsedLocal.accessToken) this.orderToken = parsedLocal.accessToken;
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (trackBtn) {
+        // PV-006: Never leak order-access tokens in outbound URLs or track links
+        trackBtn.href = `track.html?order=${encodeURIComponent(this.orderId)}`;
+      }
+
       try {
-        const res = await fetch(`/api/orders/${this.orderId}`);
+        const headers = { 'Content-Type': 'application/json' };
+        if (this.orderToken) {
+          headers['X-Order-Token'] = this.orderToken;
+          headers['Authorization'] = `Bearer ${this.orderToken}`;
+        }
+        // PV-006: Strictly use headers; NEVER pass token in URL query parameter
+        const res = await fetch(`/api/orders/${encodeURIComponent(this.orderId)}`, {
+          headers
+        });
         if (res.ok) {
           const data = await res.json();
           if (data && data.data) {
@@ -62,20 +97,20 @@ class OrderConfirmationPage {
       }
     }
 
-    // 2. Fallback to LocalStorage cache
+    // 2. Fallback to SessionStorage cache, then LocalStorage
     if (!orderData && this.orderId) {
       try {
-        const stored = localStorage.getItem(`pvOrder_${this.orderId}`);
+        const stored = sessionStorage.getItem(`pvOrder_${this.orderId}`) || localStorage.getItem(`pvOrder_${this.orderId}`);
         if (stored) orderData = JSON.parse(stored);
       } catch (e) {
-        console.warn('LocalStorage read error:', e);
+        console.warn('SessionStorage read error:', e);
       }
     }
 
-    // 3. Fallback to last placed order
+    // 3. Fallback to last placed order in session
     if (!orderData) {
       try {
-        const lastOrder = localStorage.getItem('pvLastOrder');
+        const lastOrder = sessionStorage.getItem('pvLastOrder') || localStorage.getItem('pvLastOrder');
         if (lastOrder) {
           orderData = JSON.parse(lastOrder);
           if (orderData.id || orderData.orderId) {
@@ -86,6 +121,7 @@ class OrderConfirmationPage {
         console.warn('Last order read error:', e);
       }
     }
+
 
     // If still no order found, create a blank placeholder structure
     if (!orderData) {

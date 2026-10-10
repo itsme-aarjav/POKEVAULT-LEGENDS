@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "node --test test/*.test.js",
     "start:auth": "node services/auth-service/src/index.js",
     "start:catalog": "node services/catalog-service/src/index.js",
     "start:order": "node services/order-service/src/index.js"

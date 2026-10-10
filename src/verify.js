@@ -5,7 +5,6 @@
 import { renderNavbar, initNavbarEvents } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
 import { renderCartDrawer, initCartDrawerEvents } from './components/cart-drawer.js';
-import { getAllProducts } from './data/products.js';
 
 const SAMPLE_CERTS = {
   "47318042": {

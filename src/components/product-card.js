@@ -3,8 +3,7 @@
  * Renders consistent e-commerce product cards across all pages.
  */
 
-import { isInWishlist, toggleWishlist, addToCart } from '../utils/store.js';
-import { getLiveInventoryOverrides } from '../data/products.js';
+import { isInWishlist, toggleWishlist, addToCart, getLiveInventoryOverrides } from '../utils/store.js';
 
 export function renderProductCard(product) {
   const isWishlisted = isInWishlist(product.id);

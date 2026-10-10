@@ -4,7 +4,19 @@
  */
 
 import { getCart, updateCartQty, removeFromCart, getCartSubtotal, applyPromoCode, removePromoCode, getPromoState, addToCart } from '../utils/store.js';
-import { getAllProducts } from '../data/products.js';
+import { getProducts } from '../lib/api.js';
+
+let liveDrawerProducts = null;
+const fetchDrawerProducts = async () => {
+  if (liveDrawerProducts) return liveDrawerProducts;
+  try {
+    const res = await getProducts();
+    if (res.success && Array.isArray(res.data)) {
+      liveDrawerProducts = res.data;
+    }
+  } catch {}
+  return liveDrawerProducts || [];
+};
 
 export function renderCartDrawer() {
   return `
@@ -155,31 +167,40 @@ export function updateCartDrawerUI() {
     `;
   }).join('');
 
-  // Render In-Cart Upsells in INR
+  // Render In-Cart Upsells in INR (PV-011)
   if (upsellsList) {
-    const all = getAllProducts();
-    const cartIds = new Set(cart.map(i => i.id));
-    const suggested = all.filter(p => !cartIds.has(p.id)).slice(0, 3);
+    const renderUpsellsWith = (all) => {
+      const cartIds = new Set(cart.map(i => i.id));
+      const suggested = (all || []).filter(p => !cartIds.has(p.id)).slice(0, 3);
 
-    upsellsList.innerHTML = suggested.map(p => {
-      const upsellPriceINR = Math.round(p.price * 83);
-      return `
-      <div style="background:#FFF; border:2px solid #000; border-radius:6px; padding:6px 10px; display:flex; align-items:center; gap:8px; min-width:210px; flex-shrink:0;">
-        <img src="${p.image}" style="width:40px; height:40px; object-fit:contain;" alt="${p.name}" />
-        <div style="flex:1; overflow:hidden;">
-          <div style="font-family:var(--font-title); font-size:0.75rem; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#000;">${p.name}</div>
-          <div style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700; color:var(--accent-red);">₹${upsellPriceINR.toLocaleString('en-IN')}</div>
+      upsellsList.innerHTML = suggested.map(p => {
+        const upsellPriceINR = Math.round(p.price * 83);
+        return `
+        <div style="background:#FFF; border:2px solid #000; border-radius:6px; padding:6px 10px; display:flex; align-items:center; gap:8px; min-width:210px; flex-shrink:0;">
+          <img src="${p.image}" style="width:40px; height:40px; object-fit:contain;" alt="${p.name}" />
+          <div style="flex:1; overflow:hidden;">
+            <div style="font-family:var(--font-title); font-size:0.75rem; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#000;">${p.name}</div>
+            <div style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700; color:var(--accent-red);">₹${upsellPriceINR.toLocaleString('en-IN')}</div>
+          </div>
+          <button class="btn-pill drawer-upsell-add-btn" data-upsell-id="${p.id}" style="padding:4px 8px; font-size:0.7rem;">+ Add</button>
         </div>
-        <button class="btn-pill drawer-upsell-add-btn" data-upsell-id="${p.id}" style="padding:4px 8px; font-size:0.7rem;">+ Add</button>
-      </div>
-    `}).join('');
+      `}).join('');
 
-    upsellsList.querySelectorAll('.drawer-upsell-add-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = btn.getAttribute('data-upsell-id');
-        addToCart(id, 1);
+      upsellsList.querySelectorAll('.drawer-upsell-add-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-upsell-id');
+          addToCart(id, 1);
+        });
       });
-    });
+    };
+
+    if (liveDrawerProducts && liveDrawerProducts.length > 0) {
+      renderUpsellsWith(liveDrawerProducts);
+    } else {
+      fetchDrawerProducts().then(prods => {
+        if (prods && prods.length > 0) renderUpsellsWith(prods);
+      });
+    }
   }
 
   if (subtotalEl) subtotalEl.textContent = `₹${Math.round(inrSubtotal - discountAmount).toLocaleString('en-IN')}`;

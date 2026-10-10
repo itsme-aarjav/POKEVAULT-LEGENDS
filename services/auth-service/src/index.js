@@ -3,13 +3,22 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import client from 'prom-client';
 import { traceMiddleware } from './tracer.js';
+import { signToken, verifyToken, timingSafeCompare, extractToken } from './jwt.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 const HOST = process.env.HOST || '0.0.0.0';
-const ADMIN_KEY = process.env.ADMIN_SECRET_KEY || 'pokevaultadmin123';
+const ADMIN_KEY = process.env.ADMIN_SECRET_KEY;
+const JWT_SECRET = process.env.JWT_SIGNING_SECRET;
+
+if (!ADMIN_KEY) {
+  console.warn('[auth-service] WARNING: ADMIN_SECRET_KEY is not configured. Admin authentication will fail-closed.');
+}
+if (!JWT_SECRET) {
+  console.warn('[auth-service] WARNING: JWT_SIGNING_SECRET is not configured. Token signing will fail-closed.');
+}
 
 // Prometheus metrics setup
 const collectDefaultMetrics = client.collectDefaultMetrics;
@@ -60,7 +69,8 @@ app.get('/health', (req, res) => {
     status: 'UP',
     service: 'auth-service',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    configured: Boolean(ADMIN_KEY && JWT_SECRET)
   });
 });
 
@@ -75,38 +85,71 @@ app.get('/metrics', async (req, res) => {
 });
 
 // Authentication routes
-// POST /api/auth/login — Authenticate admin credentials
+// POST /api/auth/login — Authenticate admin credentials and issue signed JWT access token
 app.post('/api/auth/login', (req, res) => {
   try {
     const { key, password } = req.body;
     const provided = key || password;
 
-    if (!provided) {
+    if (!provided || typeof provided !== 'string') {
       return res.status(400).json({ success: false, message: 'Key or password required.' });
     }
 
-    if (provided === ADMIN_KEY || provided === 'pokevaultadmin123' || (typeof provided === 'string' && provided.length >= 24)) {
-      return res.json({
-        success: true,
-        message: 'Admin authenticated successfully',
-        role: 'admin',
-        token: ADMIN_KEY
+    if (!ADMIN_KEY || !JWT_SECRET) {
+      return res.status(500).json({
+        success: false,
+        message: 'Authentication service configuration error: Server credentials unconfigured.'
       });
     }
 
-    return res.status(401).json({ success: false, message: 'Invalid Admin Master Key.' });
+    // Strict constant-time validation of master administrator secret
+    if (!timingSafeCompare(provided, ADMIN_KEY)) {
+      return res.status(401).json({ success: false, message: 'Invalid Admin Master Key.' });
+    }
+
+    // Issue short-lived signed JWT access token (1 hour)
+    const token = signToken({ sub: 'admin', role: 'admin' }, JWT_SECRET, 3600);
+
+    return res.json({
+      success: true,
+      message: 'Admin authenticated successfully',
+      role: 'admin',
+      token
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// GET /api/auth/verify — Verify active admin token
+// GET /api/auth/verify — Verify active signed admin access token
 app.get('/api/auth/verify', (req, res) => {
-  const provided = req.headers['x-admin-key'];
-  if (provided && (provided === ADMIN_KEY || provided === 'pokevaultadmin123' || provided.length >= 24)) {
+  if (!JWT_SECRET) {
+    return res.status(500).json({
+      success: false,
+      authorized: false,
+      message: 'Authentication service configuration error.'
+    });
+  }
+
+  const token = extractToken(req);
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      authorized: false,
+      message: 'Missing authorization token.'
+    });
+  }
+
+  const payload = verifyToken(token, JWT_SECRET);
+  if (payload && payload.role === 'admin') {
     return res.json({ success: true, authorized: true, role: 'admin' });
   }
-  return res.status(401).json({ success: false, authorized: false });
+
+  return res.status(401).json({
+    success: false,
+    authorized: false,
+    message: 'Invalid or expired access token.'
+  });
 });
 
 // Start Server

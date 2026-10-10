@@ -6,7 +6,7 @@ import { renderNavbar, initNavbarEvents } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
 import { renderCartDrawer, initCartDrawerEvents } from './components/cart-drawer.js';
 import { getBlogBySlug, getAllBlogs } from './data/blogs.js';
-import { getProductById } from './data/products.js';
+import { getProduct } from './lib/api.js';
 import { renderProductCard, bindProductCardEvents } from './components/product-card.js';
 
 class BlogPostPage {
@@ -67,14 +67,19 @@ class BlogPostPage {
     initCartDrawerEvents();
   }
 
-  renderArticle() {
+  async renderArticle() {
     const container = document.getElementById('blogArticleContainer');
     if (!container || !this.post) return;
 
     const p = this.post;
-    const relatedProducts = (p.relatedProductIds || [])
-      .map(id => getProductById(id))
-      .filter(Boolean);
+    let relatedProducts = [];
+    try {
+      const results = await Promise.all((p.relatedProductIds || []).map(async (id) => {
+        const res = await getProduct(id);
+        return res.success ? res.data : null;
+      }));
+      relatedProducts = results.filter(Boolean);
+    } catch {}
 
     container.innerHTML = `
       <!-- BREADCRUMBS -->

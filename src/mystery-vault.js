@@ -5,7 +5,7 @@
 import { renderNavbar, initNavbarEvents } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
 import { renderCartDrawer, initCartDrawerEvents } from './components/cart-drawer.js';
-import { getAllProducts } from './data/products.js';
+import { getProducts } from './lib/api.js';
 import { addToCart } from './utils/store.js';
 
 import confettiModule from 'canvas-confetti';
@@ -13,9 +13,21 @@ const confetti = confettiModule?.default || confettiModule || ((typeof window !=
 
 class MysterySimulator {
   constructor() {
-    this.allProducts = getAllProducts();
+    this.allProducts = [];
     this.initLayout();
     this.initEvents();
+    this.loadPool();
+  }
+
+  async loadPool() {
+    try {
+      const res = await getProducts();
+      if (res.success && Array.isArray(res.data)) {
+        this.allProducts = res.data;
+      }
+    } catch (e) {
+      console.warn('Failed to load dynamic products for mystery simulator:', e);
+    }
   }
 
   initLayout() {

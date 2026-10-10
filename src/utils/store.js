@@ -22,6 +22,30 @@ export const getWishlist = () => {
   }
 };
 
+// Live Stock Overrides Helper (Browser Storage & Cross-Tab Sync)
+export const getLiveInventoryOverrides = () => {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem('pokevault_inventory_overrides');
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+};
+
+export const setLiveInventoryOverride = (cardId, stock) => {
+  if (typeof window === 'undefined') return;
+  try {
+    const overrides = getLiveInventoryOverrides();
+    const safeStock = Math.max(0, Number(stock) || 0);
+    overrides[cardId] = safeStock;
+    localStorage.setItem('pokevault_inventory_overrides', JSON.stringify(overrides));
+    window.dispatchEvent(new CustomEvent('pv-inventory-updated', { detail: { cardId, stock: safeStock } }));
+  } catch (e) {
+    console.error('Error saving inventory override:', e);
+  }
+};
+
 // Dispatch Custom Events
 const dispatchCartUpdate = () => {
   window.dispatchEvent(new CustomEvent('pv-cart-updated', { detail: getCart() }));

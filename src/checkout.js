@@ -7,8 +7,7 @@
 import { renderNavbar, initNavbarEvents } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
 import { renderCartDrawer, initCartDrawerEvents } from './components/cart-drawer.js';
-import { getCart, getCartSubtotal, getPromoState, applyPromoCode, removePromoCode, clearCart } from './utils/store.js';
-import { getLiveInventoryOverrides } from './data/products.js';
+import { getCart, getCartSubtotal, getPromoState, applyPromoCode, removePromoCode, clearCart, getLiveInventoryOverrides } from './utils/store.js';
 
 class CheckoutPage {
   constructor() {
@@ -277,7 +276,7 @@ class CheckoutPage {
     });
   }
 
-  async processOrderPlacement(paymentMethod = 'PayPal') {
+  async processOrderPlacement(paymentMethod = 'PayPal', paymentMetadata = {}) {
     const name = document.getElementById('custName')?.value?.trim() || 'Vault Collector';
     const email = document.getElementById('custEmail')?.value?.trim() || 'collector@pokevault.com';
     const street = document.getElementById('custStreet')?.value?.trim() || '102 Pallet Town Way';
@@ -309,8 +308,8 @@ class CheckoutPage {
       totalINR: totals.inrTotal,
       insuranceIncluded: totals.inrShipping > 0,
       paymentMethod,
-      orderStatus: 'received',
-      order_status: 'received'
+      paypalOrderId: paymentMetadata.paypalOrderId || null,
+      paypalCaptureId: paymentMetadata.paypalCaptureId || null
     };
 
     // Check for any out-of-stock items in cart
@@ -339,34 +338,33 @@ class CheckoutPage {
       const data = await res.json();
 
       if (!res.ok || data.success === false) {
-        alert(data.message || 'Unable to place order: Some items in your cart may be out of stock.');
+        alert(data.message || 'Unable to place order: Some items in your cart may be out of stock or payment verification failed.');
         return;
       }
 
       const orderId = data.orderId || data.data?.id || `ORD-${Date.now()}`;
+      const accessToken = data.accessToken || data.data?.accessToken || '';
 
-      const fullOrderRecord = data.data || {
-        ...orderPayload,
+      const fullOrderRecord = {
+        ...(data.data || orderPayload),
         id: orderId,
         orderId,
-        customer_name: orderPayload.customerName,
-        customer_email: orderPayload.customerEmail,
-        shipping_address: orderPayload.shippingAddress,
-        total_amount: orderPayload.totalAmount,
-        discount_amount: orderPayload.discountAmount,
-        promo_code: orderPayload.promoCode,
-        order_status: 'received',
-        status: 'received',
-        order_items: orderPayload.items,
-        tracking_number: `TRK-${Math.floor(10000000 + Math.random() * 90000000)}`,
-        created_at: new Date().toISOString()
+        accessToken
       };
 
-      localStorage.setItem(`pvOrder_${orderId}`, JSON.stringify(fullOrderRecord));
-      localStorage.setItem('pvLastOrder', JSON.stringify(fullOrderRecord));
+      // PV-006 & Phase 3 remediation: Store token strictly in session-scoped storage
+      // Prevents persistent cross-session token exposure in shared browser profiles
+      sessionStorage.setItem(`pvOrder_${orderId}`, JSON.stringify(fullOrderRecord));
+      sessionStorage.setItem('pvLastOrder', JSON.stringify(fullOrderRecord));
+      try {
+        localStorage.removeItem('pvLastOrder');
+        localStorage.removeItem(`pvOrder_${orderId}`);
+      } catch (e) {}
 
       clearCart();
-      window.location.href = `order-confirmation.html?id=${orderId}`;
+      // PV-006 & Phase 3 remediation: Never expose order bearer token in URL query parameters
+      const redirectUrl = `order-confirmation.html?id=${encodeURIComponent(orderId)}`;
+      window.location.href = redirectUrl;
     } catch (err) {
       console.warn('Backend order placement network error:', err);
       alert('Network error placing order. Please try again.');
@@ -388,25 +386,64 @@ class CheckoutPage {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 items: this.cart.map(i => ({ id: i.product?.id || i.id, qty: i.quantity })),
+                promoCode: totals.promoCode || '',
                 discountAmount: totals.discount,
                 insuranceIncluded: totals.shipping > 0,
                 insuranceCost: totals.shipping
               })
             });
             const data = await res.json();
-            return data.orderID || `DEMO-PAYPAL-${Date.now()}`;
+            if (!res.ok || !data.success || !data.orderID) {
+              const msg = data.message || 'PayPal checkout unavailable (gateway unconfigured).';
+              alert(`Payment Gateway Notice: ${msg}`);
+              throw new Error(msg);
+            }
+            return data.orderID;
           } catch (e) {
-            return `DEMO-PAYPAL-${Date.now()}`;
+            console.warn('PayPal createOrder failed:', e.message);
+            throw e;
           }
         },
         onApprove: async (data, actions) => {
-          await this.processOrderPlacement('PayPal Express');
+          const totals = this.getCalculatedTotals();
+          try {
+            // Server-side payment capture and verification (PV-008)
+            const captureRes = await fetch('/api/paypal/capture-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                paypalOrderId: data.orderID,
+                items: this.cart.map(i => ({ id: i.product?.id || i.id, qty: i.quantity })),
+                promoCode: totals.promoCode || '',
+                insuranceIncluded: totals.shipping > 0
+              })
+            });
+
+            const captureData = await captureRes.json();
+            if (!captureRes.ok || !captureData.success) {
+              alert(captureData.message || 'Payment capture failed. Your transaction was not completed.');
+              return;
+            }
+
+            await this.processOrderPlacement('PayPal', {
+              paypalOrderId: data.orderID,
+              paypalCaptureId: captureData.captureId
+            });
+          } catch (err) {
+            console.error('PayPal capture error:', err);
+            alert('An error occurred while finalizing payment. Please contact support.');
+          }
+        },
+        onError: (err) => {
+          console.warn('PayPal button error:', err);
+          alert('PayPal encountered a connection error. If this environment does not have live sandbox credentials, please select another payment method.');
         }
       }).render('#paypalCheckoutContainer');
     } catch (err) {
       console.warn('PayPal button render warning:', err);
     }
   }
+
 }
 
 new CheckoutPage();

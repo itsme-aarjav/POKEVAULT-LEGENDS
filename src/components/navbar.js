@@ -1,5 +1,5 @@
 import { getCart, getWishlist, getCurrency, setCurrency } from '../utils/store.js';
-import { searchProducts } from '../data/products.js';
+import { getProducts } from '../lib/api.js';
 import { initSocialProofToast } from '../utils/social-proof.js';
 
 export function renderNavbar(activePage = 'home') {
@@ -182,33 +182,57 @@ export function initNavbarEvents() {
     link.addEventListener('click', () => mobileNavOverlay.classList.remove('open'));
   });
 
-  // Live Instant Search Dropdown
+  // Live Instant Search Dropdown (PV-011)
   const searchInput = document.getElementById('navSearchInput');
   const searchDropdown = document.getElementById('searchDropdown');
 
   if (searchInput && searchDropdown) {
+    let searchDebounceTimer = null;
+    let latestSearchQuery = '';
+
     searchInput.addEventListener('input', (e) => {
       const q = e.target.value.trim();
+      latestSearchQuery = q;
+      clearTimeout(searchDebounceTimer);
+
       if (q.length < 2) {
         searchDropdown.style.display = 'none';
         return;
       }
 
-      const matches = searchProducts(q).slice(0, 5);
-      if (matches.length === 0) {
-        searchDropdown.innerHTML = `<div class="search-no-result">No Pokémon merchandise found matching "${q}"</div>`;
-      } else {
-        searchDropdown.innerHTML = matches.map(item => `
-          <a href="product.html?id=${item.id}" class="search-dropdown-item">
-            <img src="${item.image}" alt="${item.name}" loading="lazy" width="40" height="40" />
-            <div>
-              <div class="search-item-title">${item.name}</div>
-              <div class="search-item-meta">${item.categoryName} • ₹${Math.round(item.price * 83).toLocaleString('en-IN')}</div>
-            </div>
-          </a>
-        `).join('') + `<a href="search.html?q=${encodeURIComponent(q)}" class="search-view-all">View all results for "${q}" →</a>`;
-      }
+      searchDropdown.innerHTML = `<div class="search-no-result" style="color:#64748B;">Searching catalog...</div>`;
       searchDropdown.style.display = 'block';
+
+      searchDebounceTimer = setTimeout(async () => {
+        try {
+          const res = await getProducts({ search: q });
+          if (latestSearchQuery !== q) return; // stale response guard
+
+          if (!res.success) {
+            searchDropdown.innerHTML = `<div class="search-no-result">Unable to load results (${res.error || 'Connection error'})</div>`;
+            return;
+          }
+
+          const matches = (res.data || []).slice(0, 5);
+          if (matches.length === 0) {
+            searchDropdown.innerHTML = `<div class="search-no-result">No Pokémon merchandise found matching "${q}"</div>`;
+          } else {
+            searchDropdown.innerHTML = matches.map(item => `
+              <a href="product.html?id=${item.id}" class="search-dropdown-item">
+                <img src="${item.image}" alt="${item.name}" loading="lazy" width="40" height="40" />
+                <div>
+                  <div class="search-item-title">${item.name}</div>
+                  <div class="search-item-meta">${item.categoryName} • ₹${Math.round(item.price * 83).toLocaleString('en-IN')}</div>
+                </div>
+              </a>
+            `).join('') + `<a href="search.html?q=${encodeURIComponent(q)}" class="search-view-all">View all results for "${q}" →</a>`;
+          }
+        } catch {
+          if (latestSearchQuery === q) {
+            searchDropdown.innerHTML = `<div class="search-no-result">Connection error searching catalog</div>`;
+          }
+        }
+      }, 250);
     });
 
     document.addEventListener('click', (e) => {

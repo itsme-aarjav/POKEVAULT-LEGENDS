@@ -10,6 +10,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { traceMiddleware, createChildSpan } from './tracer.js';
+import { verifyToken, extractToken } from './jwt.js';
+import { formatCardRecord } from './format.js';
 
 dotenv.config();
 
@@ -19,7 +21,11 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5002;
 const HOST = process.env.HOST || '0.0.0.0';
-const ADMIN_KEY = process.env.ADMIN_SECRET_KEY || 'pokevaultadmin123';
+const JWT_SECRET = process.env.JWT_SIGNING_SECRET;
+
+if (!JWT_SECRET) {
+  console.warn('[catalog-service] WARNING: JWT_SIGNING_SECRET is not configured. Admin token verification will fail-closed.');
+}
 
 // Load static fallback catalog
 const fallbackPath = path.resolve(__dirname, 'data/products.json');
@@ -92,7 +98,7 @@ try {
     host: process.env.MYSQL_HOST || 'pokevault-mysql',
     port: Number(process.env.MYSQL_PORT) || 3306,
     user: process.env.MYSQL_USER || 'pokevault',
-    password: process.env.MYSQL_PASSWORD || 'pokevault_secret',
+    password: process.env.MYSQL_PASSWORD || '',
     database: process.env.MYSQL_DATABASE || 'pokevault',
     waitForConnections: true,
     connectionLimit: 10,
@@ -161,6 +167,8 @@ app.get('/metrics', async (req, res) => {
   }
 });
 
+export { formatCardRecord };
+
 // Catalog routes
 
 // GET /api/cards or /api/products
@@ -217,32 +225,18 @@ const getProductsHandler = async (req, res) => {
     const rows = await queryDatabase(`SELECT * FROM cards ${whereClause} ORDER BY created_at DESC`, params);
 
     if (rows && rows.length > 0) {
-      items = rows.map(r => {
-        let gallery = [];
-        try { gallery = typeof r.gallery === 'string' ? JSON.parse(r.gallery) : (r.gallery || []); } catch {}
-        let specs = {};
-        try { specs = typeof r.specs === 'string' ? JSON.parse(r.specs) : (r.specs || {}); } catch {}
-
-        return {
-          ...r,
-          price: Number(r.price),
-          inStock: Number(r.in_stock || 10),
-          in_stock: Number(r.in_stock || 10),
-          gallery,
-          specs
-        };
-      });
+      items = rows.map(formatCardRecord);
     } else {
       // Fallback in-memory catalog
       items = FALLBACK_PRODUCTS.filter(p => {
         if (category && category !== 'all' && p.category !== category) return false;
-        if (era && era !== 'all' && p.eraCode !== era) return false;
+        if (era && era !== 'all' && (p.eraCode !== era && p.era_code !== era)) return false;
         if (pokemon && pokemon !== 'all' && p.pokemon?.toLowerCase() !== pokemon.toLowerCase()) return false;
-        if (trending === 'true' && !p.isTrending) return false;
-        if (featured === 'true' && !p.isFeatured) return false;
+        if (trending === 'true' && !(p.isTrending || p.is_trending)) return false;
+        if (featured === 'true' && !(p.isFeatured || p.is_featured)) return false;
         if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
         return true;
-      });
+      }).map(formatCardRecord);
     }
 
     const responsePayload = {
@@ -289,18 +283,10 @@ const getSingleProductHandler = async (req, res) => {
     let item = null;
 
     if (rows && rows.length > 0) {
-      const r = rows[0];
-      let gallery = [];
-      try { gallery = typeof r.gallery === 'string' ? JSON.parse(r.gallery) : (r.gallery || []); } catch {}
-      item = {
-        ...r,
-        price: Number(r.price),
-        inStock: Number(r.in_stock || 10),
-        in_stock: Number(r.in_stock || 10),
-        gallery
-      };
+      item = formatCardRecord(rows[0]);
     } else {
-      item = FALLBACK_PRODUCTS.find(c => c.id === id);
+      const fallback = FALLBACK_PRODUCTS.find(c => c.id === id);
+      item = fallback ? formatCardRecord(fallback) : null;
     }
 
     if (!item) {
@@ -326,9 +312,14 @@ app.get('/api/products/:id', getSingleProductHandler);
 
 // POST /api/cards — Upsert Product (Admin protected)
 app.post('/api/cards', async (req, res) => {
-  const adminKey = req.headers['x-admin-key'];
-  if (adminKey !== ADMIN_KEY && adminKey !== 'pokevaultadmin123') {
-    return res.status(403).json({ success: false, message: 'Unauthorized: Valid Admin key required.' });
+  const token = extractToken(req);
+  if (!token || !JWT_SECRET) {
+    return res.status(403).json({ success: false, message: 'Unauthorized: Valid Admin token required.' });
+  }
+
+  const payload = verifyToken(token, JWT_SECRET);
+  if (!payload || payload.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Unauthorized: Valid Admin token required.' });
   }
 
   try {
@@ -358,8 +349,12 @@ app.post('/api/cards', async (req, res) => {
 });
 
 // Start Server
-app.listen(PORT, HOST, () => {
-  console.log(`[catalog-service] Running on http://${HOST}:${PORT}`);
-  console.log(`[catalog-service] Health probe: http://${HOST}:${PORT}/health`);
-  console.log(`[catalog-service] Prometheus metrics: http://${HOST}:${PORT}/metrics`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, HOST, () => {
+    console.log(`[catalog-service] Running on http://${HOST}:${PORT}`);
+    console.log(`[catalog-service] Health probe: http://${HOST}:${PORT}/health`);
+    console.log(`[catalog-service] Prometheus metrics: http://${HOST}:${PORT}/metrics`);
+  });
+}
+
+export default app;

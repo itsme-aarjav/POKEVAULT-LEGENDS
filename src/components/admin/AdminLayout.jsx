@@ -18,7 +18,10 @@ export default function AdminLayout({ activeTab, setActiveTab, children }) {
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('pvAdminToken');
+      localStorage.removeItem('pvAdminToken');
       sessionStorage.removeItem('pvAdminKey');
+      localStorage.removeItem('pvAdminKey');
       window.location.reload();
     }
   };

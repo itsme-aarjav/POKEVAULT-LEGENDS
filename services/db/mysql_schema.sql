@@ -83,13 +83,19 @@ CREATE TABLE IF NOT EXISTS orders (
     insurance_included BOOLEAN DEFAULT TRUE,
     insurance_cost DECIMAL(10, 2) DEFAULT 9.99,
     total_amount DECIMAL(10, 2) NOT NULL,
-    order_status VARCHAR(50) DEFAULT 'received',
+    order_status VARCHAR(50) DEFAULT 'pending_payment',
     payment_method VARCHAR(50) DEFAULT 'PayPal',
-    payment_status VARCHAR(50) DEFAULT 'completed',
+    payment_status VARCHAR(50) DEFAULT 'pending',
+    paypal_order_id VARCHAR(100) DEFAULT NULL,
+    paypal_capture_id VARCHAR(100) DEFAULT NULL,
     tracking_number VARCHAR(100),
+    access_token_hash VARCHAR(64) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_customer_email (customer_email),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    INDEX idx_access_token_hash (access_token_hash),
+    INDEX idx_paypal_order_id (paypal_order_id),
+    INDEX idx_paypal_capture_id (paypal_capture_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 4. ORDER ITEMS TABLE
@@ -106,7 +112,23 @@ CREATE TABLE IF NOT EXISTS order_items (
     CONSTRAINT fk_order_items_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 5. STORE SETTINGS TABLE (Hype Drop & VIP Gate Lock)
+-- 5. PAYMENT RECONCILIATIONS TABLE (PV-008 Post-Capture Persistence Safeguard)
+CREATE TABLE IF NOT EXISTS payment_reconciliations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    paypal_order_id VARCHAR(100) NOT NULL,
+    paypal_capture_id VARCHAR(100) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'USD',
+    customer_email VARCHAR(255),
+    error_message TEXT,
+    resolved BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_recon_paypal_order (paypal_order_id),
+    INDEX idx_recon_capture (paypal_capture_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6. STORE SETTINGS TABLE (Hype Drop & VIP Gate Lock)
+
 CREATE TABLE IF NOT EXISTS store_settings (
     id VARCHAR(50) PRIMARY KEY DEFAULT 'default',
     is_hype_drop_active BOOLEAN DEFAULT FALSE,

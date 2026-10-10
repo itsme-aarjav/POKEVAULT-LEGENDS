@@ -8,7 +8,7 @@ import { renderFooter } from './components/footer.js';
 import { renderCartDrawer, initCartDrawerEvents } from './components/cart-drawer.js';
 import { renderProductCard, bindProductCardEvents } from './components/product-card.js';
 import { getWishlist } from './utils/store.js';
-import { getProductById } from './data/products.js';
+import { getProduct } from './lib/api.js';
 
 class WishlistPage {
   constructor() {
@@ -27,17 +27,15 @@ class WishlistPage {
     initCartDrawerEvents();
   }
 
-  renderWishlist() {
+  async renderWishlist() {
     const grid = document.getElementById('wishlistGrid');
     const countText = document.getElementById('wishlistCountText');
     if (!grid) return;
 
     const wishlistIds = getWishlist();
-    const products = wishlistIds.map(id => getProductById(id)).filter(Boolean);
 
-    if (countText) countText.textContent = `${products.length} Saved Item${products.length === 1 ? '' : 's'} in Wishlist`;
-
-    if (products.length === 0) {
+    if (wishlistIds.length === 0) {
+      if (countText) countText.textContent = `0 Saved Items in Wishlist`;
       grid.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem; background: #FFF; border: 3px solid #000; box-shadow: 6px 6px 0px #000; border-radius: 8px;">
           <h3 style="font-family: var(--font-title); font-size: 1.8rem; color: var(--accent-red); margin-bottom: 0.75rem;">YOUR WISHLIST IS EMPTY</h3>
@@ -48,8 +46,33 @@ class WishlistPage {
       return;
     }
 
-    grid.innerHTML = products.map(p => renderProductCard(p)).join('');
-    bindProductCardEvents(grid);
+    if (countText) countText.textContent = `Loading ${wishlistIds.length} Saved Item${wishlistIds.length === 1 ? '' : 's'} from Catalog...`;
+
+    try {
+      const results = await Promise.all(wishlistIds.map(async (id) => {
+        const res = await getProduct(id);
+        return res.success ? res.data : null;
+      }));
+      const products = results.filter(Boolean);
+
+      if (countText) countText.textContent = `${products.length} Saved Item${products.length === 1 ? '' : 's'} in Wishlist`;
+
+      if (products.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem; background: #FFF; border: 3px solid #000; box-shadow: 6px 6px 0px #000; border-radius: 8px;">
+            <h3 style="font-family: var(--font-title); font-size: 1.8rem; color: var(--accent-red); margin-bottom: 0.75rem;">NO SAVED ITEMS FOUND</h3>
+            <p style="font-family: var(--font-mono); color: #666; margin-bottom: 1.5rem;">Your saved items are no longer available in the active vault catalog.</p>
+            <a href="shop.html" class="btn-pill" style="text-decoration: none;">Browse Pokémon Marketplace →</a>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = products.map(p => renderProductCard(p)).join('');
+      bindProductCardEvents(grid);
+    } catch {
+      if (countText) countText.textContent = 'Error loading wishlist';
+    }
   }
 }
 

@@ -14,6 +14,7 @@ env:
   AWS_REGION: us-east-1
   IMAGE_PREFIX: pokevault
   AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+  GITOPS_REPO: itsme-aarjav/POKEVAULT-LEGENDS-GITOPS
 
 jobs:
   # 1. Code validation
@@ -128,17 +129,19 @@ jobs:
     needs: build-and-security-scan
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
     steps:
-      - name: Checkout Code
+      - name: Checkout GitOps Repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ env.GITOPS_REPO }}
+          token: ${{ secrets.GITOPS_PAT }}
+          path: gitops-repo
 
       - name: Automated GitOps Image Tag Bump
         run: |
+          cd gitops-repo
           echo "Automated GitOps Tag Reconciliation:"
+          echo "Target Repository: ${{ env.GITOPS_REPO }}"
           echo "Commit SHA: ${{ github.sha }}"
           sed -i.bak -E 's/tag: [a-zA-Z0-9_-]+/tag: ${{ github.sha }}/g' gitops/helm/pokevault/values.yaml
           rm -f gitops/helm/pokevault/values.yaml.bak
@@ -151,6 +154,6 @@ jobs:
           else
             git add gitops/helm/pokevault/values.yaml
             git commit -m "chore(gitops): auto-bump image tags to ${{ github.sha }} [skip ci]" || true
-            git push || echo "Push skipped or branch protected."
+            git push origin main || echo "Push skipped or branch protected."
           fi
-          echo "ArgoCD reconciliation triggered."
+          echo "ArgoCD reconciliation triggered in ${{ env.GITOPS_REPO }}."

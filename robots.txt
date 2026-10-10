@@ -1,8 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /admin.html
-Disallow: /checkout.html
-Disallow: /order-confirmation.html
-Disallow: /api/
-
-Sitemap: https://pokevault-legends.com/sitemap.xml

@@ -144,18 +144,18 @@ jobs:
           echo "Target Repository: ${{ env.GITOPS_REPO }}"
           echo "Commit SHA: ${{ github.sha }}"
           python3 -c "
-import re
-with open('gitops/helm/pokevault/values.yaml', 'r') as f:
-    text = f.read()
+          import re
+          with open('gitops/helm/pokevault/values.yaml', 'r') as f:
+              text = f.read()
 
-sha = '${{ github.sha }}'
-for svc in ['frontend', 'auth', 'catalog', 'order']:
-    pattern = rf'({svc}:(?:.|\n)*?image:(?:.|\n)*?tag:\s*)[^\n]+'
-    text = re.sub(pattern, rf'\g<1>{sha}', text)
+          sha = '${{ github.sha }}'
+          for svc in ['frontend', 'auth', 'catalog', 'order']:
+              pattern = rf'({svc}:(?:.|\n)*?image:(?:.|\n)*?tag:\s*)[^\n]+'
+              text = re.sub(pattern, rf'\g<1>{sha}', text)
 
-with open('gitops/helm/pokevault/values.yaml', 'w') as f:
-    f.write(text)
-"
+          with open('gitops/helm/pokevault/values.yaml', 'w') as f:
+              f.write(text)
+          "
 
           
           git config --global user.name "github-actions[bot]"

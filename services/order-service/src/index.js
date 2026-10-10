@@ -150,27 +150,6 @@ app.get('/health', async (req, res) => {
 
 app.get('/metrics', async (req, res) => {
   try {
-    if (pool) {
-      try {
-        const [rows] = await pool.query('SELECT count(*) as count FROM orders');
-        if (rows && rows[0]) {
-          const dbCount = Number(rows[0].count) || 0;
-          const metricObj = await client.register.getSingleMetric('orders_created_total');
-          const currentVal = metricObj ? (metricObj.hashMap?.['status:success']?.value || 0) : 0;
-          if (dbCount > currentVal) {
-            ordersCreatedTotal.labels('success').inc(dbCount - currentVal);
-          }
-        }
-      } catch (dbErr) {
-        if (memoryOrders.length > 0) {
-          const metricObj = await client.register.getSingleMetric('orders_created_total');
-          const currentVal = metricObj ? (metricObj.hashMap?.['status:success']?.value || 0) : 0;
-          if (memoryOrders.length > currentVal) {
-            ordersCreatedTotal.labels('success').inc(memoryOrders.length - currentVal);
-          }
-        }
-      }
-    }
     res.set('Content-Type', client.register.contentType);
     res.end(await client.register.metrics());
   } catch (err) {

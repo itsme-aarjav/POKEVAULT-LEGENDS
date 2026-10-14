@@ -10,7 +10,7 @@ authService:
   port: 5001
   image:
     repository: "pokevault/auth-service"
-    tag: "ea6b9b4"
+    tag: "5e6f229"
   resources:
     requests:
       cpu: "100m"
@@ -24,7 +24,7 @@ catalogService:
   port: 5002
   image:
     repository: "pokevault/catalog-service"
-    tag: "ea6b9b4"
+    tag: "5e6f229"
   resources:
     requests:
       cpu: "100m"
@@ -38,7 +38,7 @@ orderService:
   port: 5003
   image:
     repository: "pokevault/order-service"
-    tag: "ea6b9b4"
+    tag: "5e6f229"
   resources:
     requests:
       cpu: "100m"
@@ -52,7 +52,7 @@ nginxGateway:
   port: 8080
   image:
     repository: "pokevault/nginx-gateway"
-    tag: "ea6b9b4"
+    tag: "5e6f229"
   resources:
     requests:
       cpu: "100m"

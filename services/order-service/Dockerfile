@@ -4,7 +4,8 @@ COPY package*.json ./
 RUN npm install --omit=dev --no-audit --no-fund
 
 FROM node:20-alpine AS runner
-RUN apk update && apk upgrade --no-cache
+RUN apk update && apk upgrade --no-cache && \
+    rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx /opt/yarn*
 WORKDIR /app
 ENV NODE_ENV=production
 USER node

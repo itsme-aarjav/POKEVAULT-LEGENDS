@@ -63,7 +63,8 @@ jobs:
 
       - name: Run Trivy IaC configuration scan (Zero-Tolerance)
         run: |
-          trivy config --exit-code 1 --severity CRITICAL ./infra ./gitops
+          trivy config --exit-code 1 --severity CRITICAL ./infra
+          trivy config --exit-code 1 --severity CRITICAL ./gitops
 
   build-scan-sign-push:
     name: Build, Scan, Sign & Push (${{ matrix.service }})

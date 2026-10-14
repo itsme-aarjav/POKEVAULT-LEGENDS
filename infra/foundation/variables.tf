@@ -13,7 +13,7 @@ variable "domain_name" {
 variable "github_repo" {
   type        = string
   description = "GitHub repository (owner/name) for CI/CD OIDC trust"
-  default     = "aarjavjain/pokevault-legends"
+  default     = "itsme-aarjav/pokevault"
 }
 
 variable "budget_alert_email" {

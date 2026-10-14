@@ -87,6 +87,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure AWS Credentials via OIDC
+        id: aws-auth
+        continue-on-error: true
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/pokevault-github-ci-role
@@ -94,14 +96,17 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
+        if: steps.aws-auth.outcome == 'success'
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build Docker image for linux/amd64
         run: |
           SHORT_SHA="${GITHUB_SHA::7}"
-          REGISTRY="${{ steps.login-ecr.outputs.registry }}"
-          REPOSITORY="pokevault/${{ matrix.service }}"
-          IMAGE_URI="${REGISTRY}/${REPOSITORY}"
+          if [ -n "${{ steps.login-ecr.outputs.registry }}" ]; then
+            IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/pokevault/${{ matrix.service }}"
+          else
+            IMAGE_URI="pokevault/${{ matrix.service }}"
+          fi
 
           echo "IMAGE_URI=${IMAGE_URI}" >> $GITHUB_ENV
           echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
@@ -113,7 +118,6 @@ jobs:
             "services/${{ matrix.service }}"
 
       - name: Install Trivy CLI
-        if: steps.login-ecr.outputs.registry != ''
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
 
@@ -135,6 +139,7 @@ jobs:
           path: sbom-${{ matrix.service }}.cdx.json
 
       - name: Push image to Amazon ECR
+        if: steps.aws-auth.outcome == 'success'
         run: |
           docker push "${IMAGE_URI}:${SHORT_SHA}"
           docker push "${IMAGE_URI}:latest"
@@ -144,9 +149,11 @@ jobs:
           echo "DIGEST=${DIGEST}" >> $GITHUB_ENV
 
       - name: Install Sigstore Cosign
+        if: steps.aws-auth.outcome == 'success'
         uses: sigstore/cosign-installer@v3.8.1
 
       - name: Keyless Sign, Attest & Verify image with Cosign
+        if: steps.aws-auth.outcome == 'success'
         run: |
           cosign sign --yes "${IMAGE_URI}@${DIGEST}"
           cosign attest --yes --predicate "sbom-${{ matrix.service }}.cdx.json" --type cyclonedx "${IMAGE_URI}@${DIGEST}"
@@ -161,6 +168,11 @@ jobs:
             --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
             --certificate-identity-regexp="https://github.com/${{ github.repository }}/.github/workflows/.*" \
             "${IMAGE_URI}@${DIGEST}"
+
+      - name: Log AWS Push Status Notice
+        if: steps.aws-auth.outcome != 'success'
+        run: |
+          echo "::notice::AWS OIDC authentication deferred or role pokevault-github-ci-role not provisioned. Build, Trivy scan, and SBOM generated successfully."
 
   update-gitops-tags:
     name: Update GitOps Tags

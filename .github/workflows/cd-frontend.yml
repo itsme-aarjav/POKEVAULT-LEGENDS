@@ -21,6 +21,8 @@ jobs:
   build-and-deploy:
     name: Build & Deploy Frontend
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID || secrets.AWS_ACCOUNT_ID || '592668326948' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -45,7 +47,7 @@ jobs:
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID || secrets.AWS_ACCOUNT_ID }}:role/pokevault-github-ci-role
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/pokevault-github-ci-role
           aws-region: us-east-1
 
       - name: Deploy to S3 and Invalidate CloudFront

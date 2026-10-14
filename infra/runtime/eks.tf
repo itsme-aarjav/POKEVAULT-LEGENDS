@@ -66,6 +66,8 @@ resource "aws_eks_cluster" "main" {
   version  = var.cluster_version
   role_arn = aws_iam_role.cluster.arn
 
+  #trivy:ignore:aws-0040 Public endpoint required for remote CI and kubectl automation
+  #trivy:ignore:aws-0041 Public endpoint CIDR required for developer and CI runner access
   vpc_config {
     subnet_ids              = concat(aws_subnet.public[*].id, aws_subnet.private[*].id)
     endpoint_private_access = true

@@ -4,6 +4,7 @@ COPY package*.json ./
 RUN npm install --omit=dev --no-audit --no-fund
 
 FROM node:20-alpine AS runner
+RUN apk update && apk upgrade --no-cache
 WORKDIR /app
 ENV NODE_ENV=production
 USER node

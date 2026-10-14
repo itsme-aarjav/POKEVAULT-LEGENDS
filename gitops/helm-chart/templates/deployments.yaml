@@ -1,0 +1,157 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: auth-service
+spec:
+  replicas: {{ .Values.authService.replicas }}
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: auth-service
+          image: "{{ .Values.awsAccountId }}.dkr.ecr.{{ .Values.awsRegion }}.amazonaws.com/{{ .Values.authService.image.repository }}:{{ .Values.authService.image.tag | default .Values.imageTag }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.authService.port }}
+              name: http
+          env:
+            - name: AUTH_PORT
+              value: "{{ .Values.authService.port }}"
+            - name: CORS_ORIGIN
+              value: "https://{{ .Values.domainName }}"
+          envFrom:
+            - secretRef:
+                name: pokevault-env
+          resources:
+            {{- toYaml .Values.authService.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.authService.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.authService.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-service
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: catalog-service
+spec:
+  replicas: {{ .Values.catalogService.replicas }}
+  selector:
+    matchLabels:
+      app: catalog-service
+  template:
+    metadata:
+      labels:
+        app: catalog-service
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: catalog-service
+          image: "{{ .Values.awsAccountId }}.dkr.ecr.{{ .Values.awsRegion }}.amazonaws.com/{{ .Values.catalogService.image.repository }}:{{ .Values.catalogService.image.tag | default .Values.imageTag }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.catalogService.port }}
+              name: http
+          env:
+            - name: CATALOG_PORT
+              value: "{{ .Values.catalogService.port }}"
+            - name: CORS_ORIGIN
+              value: "https://{{ .Values.domainName }}"
+          envFrom:
+            - secretRef:
+                name: pokevault-env
+          resources:
+            {{- toYaml .Values.catalogService.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.catalogService.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.catalogService.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-gateway
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: nginx-gateway
+spec:
+  replicas: {{ .Values.nginxGateway.replicas }}
+  selector:
+    matchLabels:
+      app: nginx-gateway
+  template:
+    metadata:
+      labels:
+        app: nginx-gateway
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: nginx-gateway
+          image: "{{ .Values.awsAccountId }}.dkr.ecr.{{ .Values.awsRegion }}.amazonaws.com/{{ .Values.nginxGateway.image.repository }}:{{ .Values.nginxGateway.image.tag | default .Values.imageTag }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.nginxGateway.port }}
+              name: http
+          env:
+            - name: CORS_ORIGIN
+              value: "https://{{ .Values.domainName }}"
+            - name: CATALOG_SERVICE_URL
+              value: "http://catalog-service:5002"
+          resources:
+            {{- toYaml .Values.nginxGateway.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.nginxGateway.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.nginxGateway.port }}
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3

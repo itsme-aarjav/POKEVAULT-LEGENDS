@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pokevault-production
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/aarjavjain/pokevault-legends.git
+    targetRevision: HEAD
+    path: gitops/helm-chart
+    helm:
+      parameters:
+        - name: awsAccountId
+          value: "592668326948"
+        - name: awsRegion
+          value: "us-east-1"
+        - name: domainName
+          value: "aarjav.site"
+        - name: acmCertificateArn
+          value: ""
+        - name: wafAclArn
+          value: ""
+        - name: imageTag
+          value: "latest"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: pokevault
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

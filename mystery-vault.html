@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Mystery Vault Unboxing Simulator — POKÉVAULT LEGENDS</title>
+  <meta name="description" content="Simulate real-time mystery box openings with guaranteed PSA slabs, rare plushies, figures, and foil drops." />
+  <meta name="keywords" content="pokemon mystery box simulator, unbox pokemon cards, mystery chest unboxing" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://pokevault-legends.com/mystery-vault.html" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Native Browser Import Map for Three.js & Confetti -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "canvas-confetti": "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/+esm"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="halftone-overlay"></div>
+
+  <!-- Shared Navbar Root -->
+  <div id="navbarRoot"></div>
+
+  <main class="mystery-vault-wrap">
+    <!-- HERO -->
+    <section class="portal-hero-banner" style="background: linear-gradient(135deg, #FFF056 0%, #FFD700 100%);">
+      <div style="font-family:var(--font-mono); font-weight:900; color:var(--accent-red); font-size:0.85rem; letter-spacing:1.5px; margin-bottom:6px;">
+        VIRTUAL LOOT SIMULATOR
+      </div>
+      <h1 class="portal-hero-title">🎁 MYSTERY VAULT UNBOXING</h1>
+      <p class="portal-hero-subtitle">
+        Test your luck before you buy! Simulate opening our 3 tier mystery chests with genuine drop rates and guaranteed PSA slab rewards.
+      </p>
+    </section>
+
+    <!-- 3 TIER SELECTOR CARDS -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem; margin-bottom:2.5rem;">
+      <div class="mystery-chest-tier-card">
+        <div style="font-family:var(--font-mono); font-weight:900; font-size:0.8rem; color:#64748B;">TIER 1 (STARTER)</div>
+        <h3 style="font-family:var(--font-title); font-weight:900; font-size:1.3rem; margin:4px 0;">TRAINER STARTER BOX</h3>
+        <img src="assets/mystery_master_box.png" class="mystery-chest-img" alt="Trainer Box" />
+        <div style="font-family:var(--font-mono); font-weight:900; font-size:1.2rem; color:var(--accent-red); margin-bottom:12px;">₹2,499 ($29.99)</div>
+        <button class="btn-pill select-chest-btn" data-tier="starter" style="width:100%;">🎲 SIMULATE ROLL (FREE)</button>
+      </div>
+
+      <div class="mystery-chest-tier-card" style="border-color:#F59E0B; background:#FFFBEB;">
+        <div style="font-family:var(--font-mono); font-weight:900; font-size:0.8rem; color:#D97706;">TIER 2 (MOST POPULAR)</div>
+        <h3 style="font-family:var(--font-title); font-weight:900; font-size:1.3rem; margin:4px 0;">LEGENDARY VAULT CHEST</h3>
+        <img src="assets/mystery_master_box.png" class="mystery-chest-img" alt="Legendary Chest" />
+        <div style="font-family:var(--font-mono); font-weight:900; font-size:1.2rem; color:var(--accent-red); margin-bottom:12px;">₹7,999 ($99.99)</div>
+        <button class="btn-pill select-chest-btn" data-tier="legendary" style="width:100%; background:#F59E0B;">🎲 SIMULATE ROLL (FREE)</button>
+      </div>
+
+      <div class="mystery-chest-tier-card" style="border-color:#8B5CF6; background:#F5F3FF;">
+        <div style="font-family:var(--font-mono); font-weight:900; font-size:0.8rem; color:#7C3AED;">TIER 3 (GRAIL SLAB)</div>
+        <h3 style="font-family:var(--font-title); font-weight:900; font-size:1.3rem; margin:4px 0;">MASTER GRAIL CRATE</h3>
+        <img src="assets/mystery_master_box.png" class="mystery-chest-img" alt="Master Crate" />
+        <div style="font-family:var(--font-mono); font-weight:900; font-size:1.2rem; color:var(--accent-red); margin-bottom:12px;">₹14,999 ($179.99)</div>
+        <button class="btn-pill select-chest-btn" data-tier="master" style="width:100%; background:#8B5CF6;">🎲 SIMULATE ROLL (FREE)</button>
+      </div>
+    </div>
+
+    <!-- SIMULATION UNBOXING STAGE -->
+    <div class="unboxing-stage-box" id="unboxingStage">
+      <div id="unboxingInitialState">
+        <div style="font-size:3.5rem; line-height:1; margin-bottom:12px;">🎁</div>
+        <h2 style="font-family:var(--font-title); font-weight:900; font-size:1.6rem; margin:0 0 8px;">
+          SELECT A MYSTERY CHEST ABOVE TO SIMULATE
+        </h2>
+        <p style="font-family:var(--font-mono); font-size:0.88rem; color:#CBD5E1; max-width:500px; margin:0 auto;">
+          Experience real certified drop algorithms with 100% genuine items from our active 64-product catalog.
+        </p>
+      </div>
+
+      <div id="unboxingActiveState" style="display:none; width:100%;">
+        <!-- Injected during roll -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Shared Cart Drawer & Footer -->
+  <div id="cartDrawerRoot"></div>
+  <div id="footerRoot"></div>
+
+  <script type="module" src="src/mystery-vault.js"></script>
+</body>
+</html>

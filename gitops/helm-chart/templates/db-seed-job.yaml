@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pokevault-db-seeder
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      name: pokevault-db-seeder
+      labels:
+        app: pokevault-db-seeder
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: db-seeder
+          image: "{{ .Values.awsAccountId }}.dkr.ecr.{{ .Values.awsRegion }}.amazonaws.com/{{ .Values.catalogService.image.repository }}:{{ .Values.catalogService.image.tag | default .Values.imageTag }}"
+          imagePullPolicy: IfNotPresent
+          command: ["node", "src/seed.js"]
+          envFrom:
+            - secretRef:
+                name: pokevault-env
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"

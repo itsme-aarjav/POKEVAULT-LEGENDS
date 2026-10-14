@@ -1,0 +1,45 @@
+# Environment & Secrets — NEVER commit these
+.env
+.env.*
+!.env.example
+*.env.local
+*.env.production
+
+# Node binary bundled in project root
+node
+
+# Node Modules
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+build/
+
+# Vite cache
+.vite/
+
+# macOS junk
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc

@@ -1,0 +1,933 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Core Storefront Pages -->
+  <url>
+    <loc>https://pokevault-legends.com/</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/shop.html</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/categories.html</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/about.html</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/contact.html</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/verify.html</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/rewards.html</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/track.html</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/mystery-vault.html</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/blog.html</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/blog-post.html?slug=top-10-vintage-pokemon-cards-2026-value-guide</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.88</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/charizard.png</image:loc>
+      <image:title>The 2026 Grail Guide: Top 10 Vintage Pokémon Cards Surging in Value</image:title>
+      <image:caption>From 1st Edition Shadowless Charizard to Masaki Gengar — what high-end collectors and alternative asset investors are targeting this year.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/blog-post.html?slug=how-to-spot-fake-psa-slabs-tamper-guide</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.88</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/gengar.png</image:loc>
+      <image:title>How to Spot Fake PSA Slabs &amp; Tamper Seals in 2026 (The 7-Point Audit)</image:title>
+      <image:caption>Counterfeiters are using sonic weld re-cases and high-resolution thermal printers. Here is our master appraisal lab's definitive verification checklist.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/blog-post.html?slug=why-japanese-pokemon-center-exclusives-dominate-pop-culture</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.88</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/pikachu.png</image:loc>
+      <image:title>From Gen 1 to Gen 9: Why Japanese Pokémon Center Exclusives Are Dominating Pop Culture</image:title>
+      <image:caption>From Shibuya to Harajuku streetwear and Shibuya graffiti Pikachu: why Japan-only merchandise commands 3x resale premiums globally.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/blog-post.html?slug=celebrity-pokemon-card-boom-modern-fine-art</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.88</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/charizard.png</image:loc>
+      <image:title>Logan Paul, Post Malone &amp; The Celebrity TCG Boom: How Pokémon Cards Became The New Fine Art</image:title>
+      <image:caption>How 2.5-inch pieces of cardboard evolved into six-figure trophy assets gracing red carpets, rap music videos, and Christie's auction houses.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/blog-post.html?slug=psa-vs-bgs-vs-cgc-grading-guide-2026</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.88</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/pikachu.png</image:loc>
+      <image:title>Grading Masterclass: PSA vs BGS vs CGC in 2026 — Which Yields Highest Resale Premium?</image:title>
+      <image:caption>Should you grade with Professional Sports Authenticator (PSA), Beckett (BGS Black Label), or CGC Cards? We break down the real auction ROI data.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=trading-cards</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=plush-toys</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=figures-statues</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=clothing-apparel</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=hats-caps</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=backpacks-bags</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=toys-games</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=collectibles-pins</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=home-decor</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=mugs-drinkware</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=stationery-notebooks</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=posters-art</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=keychains-lanyards</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=phone-accessories</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=gaming-accessories</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=books-guides</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=jewelry-accessories</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/category.html?id=gifts-bundles</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=charizard-base-1st</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/charizard.png</image:loc>
+      <image:title>1st Edition Shadowless Charizard</image:title>
+      <image:caption>The crown jewel of Pokémon collecting. Features iconic 1st edition black stamp, shadowless yellow border framing, and high-intensity pulp halftone fire flare graphics.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=pikachu-illustrator-98</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/pikachu.png</image:loc>
+      <image:title>CoroCoro Pikachu Illustrator Promo</image:title>
+      <image:caption>Awarded exclusively to winners of the 1998 CoroCoro Comic Illustration Contest. Hand-drawn vintage ink styling with classic Japanese pulp dialog clouds.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=shining-rayquaza-star</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/rayquaza.png</image:loc>
+      <image:title>Shining Rayquaza Star</image:title>
+      <image:caption>Striking black shiny Rayquaza unleashing a cosmic stardust beam across galaxy stars. Styled with authentic 1970s pulp sci-fi typography and retro starbursts.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=dark-gengar-neo</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/gengar.png</image:loc>
+      <image:title>Dark Gengar Neo Destiny</image:title>
+      <image:caption>Dark Gengar lurking inside a vintage pulp library surrounded by glowing spellbooks and crystal orbs. High-contrast deep purple halftone line art.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=lugia-crystal-aquapolis</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/lugia.png</image:loc>
+      <image:title>Crystal Lugia Secret Rare</image:title>
+      <image:caption>The elusive Crystal Lugia featuring dual energy dot-codes along the left margin and prismatic prism foil highlights.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=mew-shining-corocoro</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/mew.png</image:loc>
+      <image:title>CoroCoro Shining Mew</image:title>
+      <image:caption>Full-card glitter holographic sparkle effect with pink cosmic halftone clouds and retro vintage Japanese text.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=gengar-masaki-holo-99</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/gengar.png</image:loc>
+      <image:title>Masaki Vending Mail Gengar Holo</image:title>
+      <image:caption>Ultra rare 1999 Japanese Masaki Pass promo card featuring spooky purple swirl holographic foil.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=mewtwo-gold-star-ex</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/mew.png</image:loc>
+      <image:title>Gold Star Mewtwo Unseen Forces</image:title>
+      <image:caption>Iconic Gold Star Mewtwo stepping out of the frame with holographic psychic energy burst.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=snorlax-1st-edition-jungle</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/plush_snorlax.png</image:loc>
+      <image:title>1st Edition Jungle Snorlax Holo</image:title>
+      <image:caption>Gem Mint PSA 10 Snorlax from the 1999 Jungle expansion with crisp 1st Edition stamp.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=eevee-heroes-special-art</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/plush_eevee_bundle.png</image:loc>
+      <image:title>Umbreon VMAX Special Art Alt</image:title>
+      <image:caption>The modern holy grail 'Moonbreon' featuring Umbreon reaching for the full moon.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=plush-lifesize-pikachu-50cm</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/plush_pikachu.png</image:loc>
+      <image:title>Lifesize 1:1 Huggable Pikachu Plush</image:title>
+      <image:caption>Ultra-soft 1:1 scale Pikachu plush with embroidered rosy cheeks and weighted bottom.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=plush-sleeping-snorlax-jumbo</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/plush_snorlax.png</image:loc>
+      <image:title>Giant Sleeping Snorlax Cushion Plush</image:title>
+      <image:caption>Extra large sleeping Snorlax plush designed as a cozy headrest or bed cushion.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=plush-eevee-evolution-set</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/plush_eevee_bundle.png</image:loc>
+      <image:title>Eevee &amp; Eevolutions Plush Bundle (9 Pcs)</image:title>
+      <image:caption>Complete set of 9 plushies including Eevee, Vaporeon, Jolteon, Flareon, Espeon, Umbreon, Leafeon, Glaceon &amp; Sylveon.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=plush-gengar-shadow-tongue</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/plush_gengar_tongue.png</image:loc>
+      <image:title>Gengar Roll-Out Tongue Sleeping Mat Plush</image:title>
+      <image:caption>Hilarious and plush Gengar whose 1.5m giant felt tongue rolls out into a cozy floor mat.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=fig-charizard-seismic-toss-resin</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/figure_statue.png</image:loc>
+      <image:title>Charizard Seismic Toss 1/6 Scale Diorama</image:title>
+      <image:caption>Breathtaking 45cm resin statue capturing Charizard erupting out of volcanic lava with light-up LED flames.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=fig-mewtwo-psychic-strike-artfx</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/statue_mewtwo.png</image:loc>
+      <image:title>Mewtwo ARTFX J 1/8 Scale Figure</image:title>
+      <image:caption>Kotobukiya ARTFX J figure featuring Mewtwo levitating with translucent psychic energy aura base.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=fig-rayquaza-hyper-cluster-figure</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/fig_rayquaza.png</image:loc>
+      <image:title>Rayquaza Dragon Ascent Dynamic Diorama</image:title>
+      <image:caption>Coiled emerald Rayquaza soaring through cloud vortices with translucent ozone particle base.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=fig-lucario-aura-sphere-shf</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/fig_lucario.png</image:loc>
+      <image:title>S.H.Figuarts Lucario Action Figure</image:title>
+      <image:caption>Fully poseable S.H.Figuarts Lucario with interchangeable eyes and Aura Sphere effect parts.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=apparel-gengar-shadow-embroidered-hoodie</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/apparel_gengar_hoodie.png</image:loc>
+      <image:title>Gengar Shadow Realm Heavyweight Hoodie</image:title>
+      <image:caption>Ultra-heavyweight acid wash black hoodie featuring 80,000 stitch chest embroidery of Gengar.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=apparel-charizard-1996-pulp-tee</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/apparel_charizard_tee.png</image:loc>
+      <image:title>1996 Flame Blast Vintage Pulp Graphic Tee</image:title>
+      <image:caption>Retro screenprinted tee showcasing original 1996 Japanese halftone manga illustration.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=apparel-pikachu-electric-varsity-jacket</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/apparel_varsity_jacket.png</image:loc>
+      <image:title>Kanto Gym Leader Wool &amp; Leather Varsity Jacket</image:title>
+      <image:caption>Melton wool body jacket with vegan leather sleeves, chenille Bolt patch, and satin lining.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=apparel-eeveelution-pastel-crewneck</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/apparel_eevee_crewneck.png</image:loc>
+      <image:title>Eeveelution Element Matrix Pastel Sweater</image:title>
+      <image:caption>Cozy pastel lavender crewneck with minimalistic line art of all 8 Eeveelutions.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=hat-ash-ketchum-original-cap</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/hat_ash_ketchum.png</image:loc>
+      <image:title>Ash Ketchum Official Kanto Trainer Snapback</image:title>
+      <image:caption>Exact screen-accurate red and white snapback with embroidered green C logo.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=hat-gengar-embroidered-beanie</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/hat_gengar_beanie.png</image:loc>
+      <image:title>Gengar Shadow Purple Knit Beanie</image:title>
+      <image:caption>Deep purple stretch acrylic knit beanie with embroidered Gengar eyes and grin.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=hat-snorlax-sleeping-dad-hat</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/hat_snorlax_dad_cap.png</image:loc>
+      <image:title>Snorlax Zzz Unstructured Vintage Dad Cap</image:title>
+      <image:caption>Low-profile relaxed dad hat featuring sleeping Snorlax icon and antique brass buckle strap.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=bag-loungefly-charizard-mini-backpack</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/bag_charizard_backpack.png</image:loc>
+      <image:title>Loungefly Charizard Metallic Wings Mini Backpack</image:title>
+      <image:caption>Official Loungefly mini backpack with 3D popup flame tail and metallic wing applique.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=bag-pokeball-trainer-duffel</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/bag_pokeball_duffel.png</image:loc>
+      <image:title>Poké Ball Gym Trainer Canvas Duffel Bag</image:title>
+      <image:caption>Spacious 40-liter travel duffel featuring separate ventilated shoe compartment and water-resistant base.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=bag-gengar-crossbody-chest-pack</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/bag_gengar_crossbody.png</image:loc>
+      <image:title>Gengar Shadow Sling Crossbody Bag</image:title>
+      <image:caption>Compact tactical chest bag with reflective Gengar eyes and headphone port.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=toy-pokemon-monopoly-kanto-edition</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/toy_monopoly_kanto.png</image:loc>
+      <image:title>Monopoly: Pokémon Kanto Edition Board Game</image:title>
+      <image:caption>Buy, sell, and trade Gym locations across Kanto with custom Poké Centers and Poké Marts.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=toy-nanoblock-charizard-deluxe</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/toy_nanoblock_charizard.png</image:loc>
+      <image:title>Nanoblock Deluxe Charizard 3D Micro Puzzle</image:title>
+      <image:caption>Challenging micro building block set capturing Charizard in flight with articulated tail.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=toy-clip-n-go-poke-ball-belt-set</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/toy_clip_n_go_belt.png</image:loc>
+      <image:title>Clip 'N' Go Poké Ball Belt &amp; 2 Figures Set</image:title>
+      <image:caption>Roleplay trainer belt holding up to 6 Poké Balls. Includes Poké Ball, Great Ball, Pikachu &amp; Eevee figures.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=pin-kanto-gym-badges-master-box</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/pin_kanto_badges.png</image:loc>
+      <image:title>Kanto Gym Badges 8-Piece Solid Metal Pin Set</image:title>
+      <image:caption>Heavyweight enamel lapel pins replicating all 8 Indigo Plateau gym badges in solid zinc alloy.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=coin-charizard-25th-commemorative</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/coin_charizard_gold.png</image:loc>
+      <image:title>Charizard 24K Gold-Plated Commemorative Coin</image:title>
+      <image:caption>Heavy 40mm proof coin plated in 24K gold with 3D embossed Charizard front and Poké Ball reverse.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=pin-gengar-shadow-holographic-jumbo-pin</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/pin_gengar_jumbo.png</image:loc>
+      <image:title>Gengar Shadow Glitch Jumbo Enamel Pin</image:title>
+      <image:caption>Extra large 10cm hard enamel pin with purple glitter fill and double rubber clutch back.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=decor-pikachu-neon-led-wall-sign</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/decor_pikachu_neon.png</image:loc>
+      <image:title>Pikachu Electric Tail LED Neon Wall Sign</image:title>
+      <image:caption>Vibrant yellow LED neon sign outlining Pikachu with USB power cord and smart dimmer switch.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=decor-gengar-shadow-portal-area-rug</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/rug_gengar_shadow.jpg</image:loc>
+      <image:title>Gengar Shadow Portal Circular Area Rug</image:title>
+      <image:caption>Ultra-soft round rug creating the illusion of Gengar emerging from a dark purple void portal.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=decor-snorlax-beanbag-chair-cover</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/decor_snorlax_beanbag.png</image:loc>
+      <image:title>Snorlax Giant Lounger Beanbag Cover</image:title>
+      <image:caption>Huge 1.5-meter beanbag skin shaped like sleeping Snorlax (fill beans sold separately).</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=mug-charizard-flame-heat-morphing</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/mug_charizard_heat.jpg</image:loc>
+      <image:title>Charizard Fire Blast Heat-Morphing Mug</image:title>
+      <image:caption>Black ceramic mug that reveals explosive volcanic flames when hot beverage is poured inside.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=drinkware-pokeball-stainless-tumbler</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/tumbler_pokeball.jpg</image:loc>
+      <image:title>Poké Ball Vacuum Insulated Stainless Tumbler</image:title>
+      <image:caption>Double-wall copper insulated tumbler keeping drinks ice cold for 24 hours or hot for 8 hours.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=mug-eeveelution-constellation-glass</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/mug_eevee_glass.jpg</image:loc>
+      <image:title>Eeveelution Gold Foil Celestial Glass Cup</image:title>
+      <image:caption>Elegant double-layer glass cup with floating gold foil stars and Eeveelution silhouettes.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=stat-pokedex-hardcover-leather-journal</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/journal_pokedex_red.jpg</image:loc>
+      <image:title>Red Pokédex Collector Hardcover Journal</image:title>
+      <image:caption>Faux leather journal replica of the original Gen 1 Pokédex with glass camera lens accent.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=stat-kanto-starter-gel-pen-set</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/pens_kanto_starters.jpg</image:loc>
+      <image:title>Kanto Starters 0.5mm Gel Pen Box Set (4 Pcs)</image:title>
+      <image:caption>Set of 4 matte barrel gel pens featuring Bulbasaur, Charmander, Squirtle &amp; Pikachu clips.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=stat-gengar-shadow-desk-pad-mat</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/deskpad_gengar_shadow.jpg</image:loc>
+      <image:title>Gengar Shadow Realm XXL Gaming Desk Mat</image:title>
+      <image:caption>Massive 90cm x 40cm desk mousepad with vibrant purple Gengar shadow graphics.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=art-charizard-1996-pulp-canvas-print</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/canvas_charizard_art.jpg</image:loc>
+      <image:title>Charizard 1996 Volcanic Battle Canvas Art</image:title>
+      <image:caption>Museum-grade cotton canvas print with wood stretcher frame showcasing original pulp art.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=art-rayquaza-cosmic-holographic-foil-print</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/poster_rayquaza_foil.jpg</image:loc>
+      <image:title>Rayquaza Celestial Stardust Foil Art Print</image:title>
+      <image:caption>Limited foil print that shimmers with rainbow stardust reflections under room lighting.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=art-pikachu-illustrator-retro-acrylic-panel</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/acrylic_pikachu_panel.jpg</image:loc>
+      <image:title>Pikachu Illustrator 1998 Acrylic Glass Block</image:title>
+      <image:caption>Freestanding 20x15cm solid optical acrylic block with vibrant rear-printed artwork.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=key-pokeball-heavy-metal-spinning-keychain</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/keychain_pokeball_spin.jpg</image:loc>
+      <image:title>Poké Ball 3D Heavy Metal Spinner Keychain</image:title>
+      <image:caption>Weighted metal Poké Ball keychain with high-speed ball bearing spin mechanism.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=key-gengar-shadow-silicone-keychain</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/keychain_gengar_charm.jpg</image:loc>
+      <image:title>Gengar Shadow 3D Soft Silicone Charm</image:title>
+      <image:caption>Chubby 3D Gengar rubber mascot with wrist strap and clip hook.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=key-trainer-league-neck-lanyard-set</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/lanyard_trainer_kanto.jpg</image:loc>
+      <image:title>Kanto League Trainer Lanyard &amp; Pass Holder</image:title>
+      <image:caption>Dual-sided printed polyester lanyard with break-away safety buckle and clear ID badge sleeve.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=phone-gengar-magsafe-iphone-case</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/keychain_gengar_charm.jpg</image:loc>
+      <image:title>Gengar Shadow Glow MagSafe iPhone Case</image:title>
+      <image:caption>Military grade 10ft drop protection case featuring luminescent Gengar eyes and MagSafe magnet ring.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=phone-pokeball-wireless-charging-pad</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/decor_neon_pokeball.png</image:loc>
+      <image:title>Poké Ball 15W Fast Wireless Charging Pad</image:title>
+      <image:caption>Sleek glass top charging pad that pulses blue energy light when your device is charging.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=phone-pikachu-tail-popsocket-grip</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/jewel_pikachu_pendant.png</image:loc>
+      <image:title>Pikachu Enamel Lightning Tail Phone Grip</image:title>
+      <image:caption>Collapsible phone grip topped with 3D gold enamel lightning bolt tail.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=game-switch-oled-charizard-case</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/console_switch_oled.png</image:loc>
+      <image:title>Charizard Flame Armor Nintendo Switch OLED Case</image:title>
+      <image:caption>EVA hard shell carrying case featuring 3D embossed Charizard cover art and velvet interior.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=game-tcg-rayquaza-stitched-playmat</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/deskpad_gengar_shadow.jpg</image:loc>
+      <image:title>Rayquaza Dragon Ascent Rubber TCG Playmat</image:title>
+      <image:caption>Official size card playmat with high-resolution artwork of Mega Rayquaza in battle.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=game-pro-controller-pikachu-grips</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/console_switch_oled.png</image:loc>
+      <image:title>Pikachu &amp; Eevee Silicone Pro Controller Grips</image:title>
+      <image:caption>Soft silicone protective skin for Switch Pro Controller with matching Poké Ball joystick caps.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=book-pokedex-hardcover-master-guide</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/journal_pokedex_red.jpg</image:loc>
+      <image:title>Official Pokémon National Pokédex Master Hardcover</image:title>
+      <image:caption>Ultimate 500-page hardcover reference book with full artwork, stats &amp; evolutionary trees for every Pokémon.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=book-pokemon-adventures-manga-box-set</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/book_manga_box.png</image:loc>
+      <image:title>Pokémon Adventures: Red &amp; Blue Manga Box Set</image:title>
+      <image:caption>Complete Kanto arc manga box set praised by Satoshi Tajiri as the true vision of the Pokémon world.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=book-art-of-pokemon-25-years-artbook</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/poster_kanto_map.png</image:loc>
+      <image:title>The Art of Pokémon: 25 Years of Animation</image:title>
+      <image:caption>Behind-the-scenes concept art, character sketches, and background matte paintings from 25 years of anime.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=jewel-silver-pikachu-pendant-necklace</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/jewel_pikachu_pendant.png</image:loc>
+      <image:title>925 Sterling Silver Lightning Pikachu Pendant</image:title>
+      <image:caption>Solid 925 sterling silver Pikachu silhouette pendant holding a brilliant cubic zirconia lightning gem.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=jewel-gengar-amethyst-signet-ring</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/jewel_gengar_ring.png</image:loc>
+      <image:title>Gengar Shadow Amethyst Signet Ring</image:title>
+      <image:caption>Heavy signet ring featuring engraved Gengar face clutching a deep purple natural amethyst stone.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=jewel-pokeball-automatic-chronograph-watch</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/jewel_pokeball_watch.png</image:loc>
+      <image:title>Poké Ball Automatic Stainless Collector Watch</image:title>
+      <image:caption>Self-winding 24-jewel automatic timepiece featuring sub-dial Poké Ball motif and sapphire crystal.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=gift-master-vault-mystery-chest-xl</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/mystery_master_box.png</image:loc>
+      <image:title>Master Vault XL Legendary Mystery Chest</image:title>
+      <image:caption>The ultimate mystery box! Contains 1 guaranteed PSA/BGS graded card plus plush, pin, figure &amp; apparel.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=gift-kanto-starter-collector-box</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/pens_kanto_starters.jpg</image:loc>
+      <image:title>Kanto Starter Trainers Anniversary Gift Set</image:title>
+      <image:caption>Curated gift box featuring plush, mug, pin set and keychain celebrating the original Kanto starters.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://pokevault-legends.com/product.html?id=gift-eevee-master-collector-bundle</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://pokevault-legends.com/assets/plush_eevee_bundle.png</image:loc>
+      <image:title>Eevee Evolution Enthusiast Vault Bundle</image:title>
+      <image:caption>Everything Eevee! Includes Eevee plush, Eeveelution desk pad, gold glass mug, and pin.</image:caption>
+    </image:image>
+  </url>
+</urlset>

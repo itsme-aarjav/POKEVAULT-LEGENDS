@@ -1,0 +1,141 @@
+services:
+  mysql:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: pokevault
+      MYSQL_USER: pokevault
+      MYSQL_PASSWORD: pokevaultpass
+    volumes:
+      - ./services/db/mysql_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -prootpassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  db-seeder:
+    build:
+      context: ./services/catalog-service
+      dockerfile: Dockerfile
+    command: ["node", "src/seed.js"]
+    restart: "no"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: pokevault
+      DB_PASSWORD: pokevaultpass
+      DB_NAME: pokevault
+      ADMIN_SECRET_KEY: pokevaultadmin
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    environment:
+      AUTH_PORT: 5001
+      ADMIN_SECRET_KEY: pokevaultadmin
+      JWT_SIGNING_SECRET: pokevault-dev-jwt-secret-32-chars-long!
+      CORS_ORIGIN: "*"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5001/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      db-seeder:
+        condition: service_completed_successfully
+
+  catalog-service:
+    build:
+      context: ./services/catalog-service
+      dockerfile: Dockerfile
+    environment:
+      CATALOG_PORT: 5002
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: pokevault
+      MYSQL_PASSWORD: pokevaultpass
+      MYSQL_DATABASE: pokevault
+      REDIS_URL: redis://redis:6379
+      JWT_SIGNING_SECRET: pokevault-dev-jwt-secret-32-chars-long!
+      CORS_ORIGIN: "*"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5002/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db-seeder:
+        condition: service_completed_successfully
+
+  order-service:
+    build:
+      context: ./services/order-service
+      dockerfile: Dockerfile
+    environment:
+      ORDER_PORT: 5003
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: pokevault
+      MYSQL_PASSWORD: pokevaultpass
+      MYSQL_DATABASE: pokevault
+      CATALOG_SERVICE_URL: http://catalog-service:5002
+      JWT_SIGNING_SECRET: pokevault-dev-jwt-secret-32-chars-long!
+      CORS_ORIGIN: "*"
+      DEMO_MODE: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5003/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      mysql:
+        condition: service_healthy
+      catalog-service:
+        condition: service_healthy
+      db-seeder:
+        condition: service_completed_successfully
+
+  nginx-gateway:
+    build:
+      context: ./services/nginx-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      catalog-service:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

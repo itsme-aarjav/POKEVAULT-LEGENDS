@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Primary Meta Tags -->
+  <title>Contact PokéVault Concierge — Collector Support & Vault Inquiries</title>
+  <meta name="description" content="Get in touch with the PokéVault Legends concierge team for order tracking, card authentication, and vault storage inquiries." />
+  <meta name="keywords" content="contact pokevault, pokemon support, vault concierge" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="canonical" href="https://pokevault-legends.com/contact.html" />
+
+  <!-- OpenGraph / Facebook Meta Tags -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pokevault-legends.com/contact.html" />
+  <meta property="og:site_name" content="POKÉVAULT LEGENDS" />
+  <meta property="og:title" content="Contact PokéVault Concierge — Collector Support & Vault Inquiries" />
+  <meta property="og:description" content="Get in touch with the PokéVault Legends concierge team for order tracking, card authentication, and vault storage inquiries." />
+  <meta property="og:image" content="https://pokevault-legends.com/assets/pikachu.png" />
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://pokevault-legends.com/contact.html" />
+  <meta name="twitter:title" content="Contact PokéVault Concierge — Collector Support & Vault Inquiries" />
+  <meta name="twitter:description" content="Get in touch with the PokéVault Legends concierge team for order tracking, card authentication, and vault storage inquiries." />
+  <meta name="twitter:image" content="https://pokevault-legends.com/assets/pikachu.png" />
+
+  <meta name="description" content="Get in touch with PokéVault Legends curator support or view vault shipping & authenticity FAQs." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Global Stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Native Browser Import Map for Three.js & Confetti -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "canvas-confetti": "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/+esm"
+    }
+  }
+  </script>
+
+</head>
+<body>
+  <div class="halftone-overlay"></div>
+
+  <!-- Shared Navbar Root -->
+  <div id="navbarRoot"></div>
+
+  <!-- HERO -->
+  <header class="page-hero-banner" style="background: linear-gradient(135deg, #00C9FF 0%, #92FE9D 100%); color:#000;">
+    <div class="page-hero-container">
+      <div class="breadcrumb-nav">
+        <a href="index.html" style="color:#000;">Home</a> <span style="color:#000;">/</span> <span class="current" style="color:#000;">Contact &amp; Support</span>
+      </div>
+      <h1 class="page-title" style="color:#000;">VAULT CURATOR SUPPORT</h1>
+      <p class="page-subtitle" style="color:#111;">Have questions about a slab certification, plush order, or vault dispatch? We're here to help.</p>
+    </div>
+  </header>
+
+  <!-- CONTACT LAYOUT -->
+  <main class="page-container" style="padding: 3rem 2rem 6rem; max-width: 900px; margin: 0 auto;">
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+      <!-- FORM -->
+      <div class="table-card" style="padding: 2rem;">
+        <h3 class="summary-title" style="margin-top:0;">SEND A MESSAGE</h3>
+        <form id="contactForm" onsubmit="event.preventDefault(); alert('★ Message received! A Vault Curator will respond within 4 hours.'); this.reset();">
+          <div class="admin-form-group">
+            <label>YOUR NAME *</label>
+            <input type="text" class="admin-form-input" placeholder="e.g. Ash Ketchum" required />
+          </div>
+          <div class="admin-form-group">
+            <label>EMAIL ADDRESS *</label>
+            <input type="email" class="admin-form-input" placeholder="trainer@pokevault.com" required />
+          </div>
+          <div class="admin-form-group">
+            <label>SUBJECT</label>
+            <select class="filter-select">
+              <option>Order Shipping &amp; Tracking</option>
+              <option>Authenticity &amp; Grading Verification</option>
+              <option>Sell / Consign Cards or Collectibles</option>
+              <option>General Support</option>
+            </select>
+          </div>
+          <div class="admin-form-group">
+            <label>MESSAGE *</label>
+            <textarea class="admin-form-input" rows="4" placeholder="How can our curators assist you today?" required></required></textarea>
+          </div>
+          <button type="submit" class="btn-pill" style="width:100%;">Send Message →</button>
+        </form>
+      </div>
+
+      <!-- FAQ ACCORDION -->
+      <div>
+        <h3 class="summary-title" style="margin-top:0;">VAULT FAQ</h3>
+        
+        <div style="background:#FFF; border:3px solid #000; box-shadow:4px 4px 0px #000; border-radius:8px; padding:1.2rem; margin-bottom:1rem;">
+          <h4 style="font-family:var(--font-title); font-size:1rem; margin-top:0; color:var(--accent-red);">Q: Are all merchandise items official?</h4>
+          <p style="font-family:var(--font-mono); font-size:0.85rem; color:#444; margin:0;">Yes! All plushies, figures, apparel, and goods are 100% official Pokémon Center licensed products. All cards are certified by PSA or BGS.</p>
+        </div>
+
+        <div style="background:#FFF; border:3px solid #000; box-shadow:4px 4px 0px #000; border-radius:8px; padding:1.2rem; margin-bottom:1rem;">
+          <h4 style="font-family:var(--font-title); font-size:1rem; margin-top:0; color:var(--accent-red);">Q: How fast is Vault Shipping?</h4>
+          <p style="font-family:var(--font-mono); font-size:0.85rem; color:#444; margin:0;">Express Vault orders ship within 24 hours via tracked armored courier with bubble-foam protection (2-3 business days delivery).</p>
+        </div>
+
+        <div style="background:#FFF; border:3px solid #000; box-shadow:4px 4px 0px #000; border-radius:8px; padding:1.2rem;">
+          <h4 style="font-family:var(--font-title); font-size:1rem; margin-top:0; color:var(--accent-red);">Q: What is the return policy?</h4>
+          <p style="font-family:var(--font-mono); font-size:0.85rem; color:#444; margin:0;">We offer a 30-day money back authenticity return guarantee on all merchandise and slabs.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Shared Cart Drawer -->
+  <div id="cartDrawerRoot"></div>
+
+  <!-- Shared Footer Root -->
+  <div id="footerRoot"></div>
+
+  <script type="module" src="src/contact.js"></script>
+</body>
+</html>

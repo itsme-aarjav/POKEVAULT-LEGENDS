@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Pokémon Category Showcase — POKÉVAULT LEGENDS</title>
+  <meta name="description" content="Explore official Pokémon products in this category." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Global Stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Native Browser Import Map for Three.js & Confetti -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "canvas-confetti": "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/+esm"
+    }
+  }
+  </script>
+
+</head>
+<body>
+  <div class="halftone-overlay"></div>
+
+  <!-- Shared Navbar Root -->
+  <div id="navbarRoot"></div>
+
+  <!-- CATEGORY HERO BANNER -->
+  <header class="page-hero-banner" id="categoryHeroBanner">
+    <div class="page-hero-container">
+      <div class="breadcrumb-nav">
+        <a href="index.html">Home</a> <span>/</span> <a href="categories.html">Categories</a> <span>/</span> <span class="current" id="catBreadcrumbTitle">Category</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; margin-top:8px;">
+        <span id="catIcon" style="font-size:2.5rem;">🏷️</span>
+        <h1 class="page-title" id="catTitle" style="margin:0;">CATEGORY NAME</h1>
+      </div>
+      <p class="page-subtitle" id="catSubtitle">Browse all authentic items in this department.</p>
+    </div>
+  </header>
+
+  <!-- CATEGORY PRODUCTS MAIN CONTENT -->
+  <main class="page-container" style="padding: 2.5rem 2rem 5rem;">
+    <div class="shop-toolbar" style="margin-bottom: 2rem;">
+      <div class="results-count" id="categoryCount">Showing 0 Items</div>
+
+      <div class="toolbar-controls">
+        <label for="catSortBy" style="font-family:var(--font-mono); font-size:0.85rem; font-weight:700;">Sort By:</label>
+        <select id="catSortBy" class="filter-select" style="width: auto;">
+          <option value="featured">Featured Items</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="rating">Highest Rated</option>
+          <option value="popular">Most Popular</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- PRODUCTS GRID -->
+    <div class="cards-grid" id="categoryProductsGrid">
+      <!-- Rendered dynamically -->
+    </div>
+  </main>
+
+  <!-- Shared Cart Drawer -->
+  <div id="cartDrawerRoot"></div>
+
+  <!-- Shared Footer Root -->
+  <div id="footerRoot"></div>
+
+  <script type="module" src="src/category-detail.js"></script>
+</body>
+</html>

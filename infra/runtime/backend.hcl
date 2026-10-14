@@ -1,0 +1,1 @@
+bucket = "pokevault-tfstate-placeholder"

@@ -1,0 +1,62 @@
+awsAccountId: "592668326948"
+awsRegion: "us-east-1"
+domainName: "aarjav.site"
+imageTag: "latest"
+acmCertificateArn: ""
+wafAclArn: ""
+
+authService:
+  replicas: 2
+  port: 5001
+  image:
+    repository: "pokevault/auth-service"
+    tag: ""
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+catalogService:
+  replicas: 2
+  port: 5002
+  image:
+    repository: "pokevault/catalog-service"
+    tag: ""
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+orderService:
+  replicas: 2
+  port: 5003
+  image:
+    repository: "pokevault/order-service"
+    tag: ""
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+nginxGateway:
+  replicas: 2
+  port: 8080
+  image:
+    repository: "pokevault/nginx-gateway"
+    tag: ""
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"

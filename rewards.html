@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>PokéCoins Loyalty &amp; VIP Collector Rewards Hub — POKÉVAULT LEGENDS</title>
+  <meta name="description" content="Earn PokéCoins on every order, climb VIP Trainer Tiers, claim daily streak bonuses, and redeem exclusive discount passes." />
+  <meta name="keywords" content="pokemon loyalty program, pokecoins rewards, vip trainer tiers, pokevault rewards" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://pokevault-legends.com/rewards.html" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="halftone-overlay"></div>
+
+  <!-- Shared Navbar Root -->
+  <div id="navbarRoot"></div>
+
+  <main class="rewards-portal-wrap">
+    <!-- HERO & TIER STATUS -->
+    <div class="rewards-hero-grid">
+      <!-- TIER PROGRESS CARD -->
+      <div class="tier-status-card">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <div style="font-family:var(--font-mono); font-weight:800; font-size:0.8rem; color:var(--accent-red); letter-spacing:1px;">
+              TRAINER VIP STATUS
+            </div>
+            <h2 id="userTierName" style="font-family:var(--font-title); font-weight:900; font-size:1.5rem; margin:4px 0 0; color:#000;">
+              🥉 GYM TRAINER TIER
+            </h2>
+          </div>
+          <div style="background:#FFF056; border:2px solid #000; border-radius:12px; padding:6px 14px; text-align:center; box-shadow:2px 2px 0px #000;">
+            <div style="font-family:var(--font-mono); font-size:0.7rem; font-weight:800;">YOUR BALANCE</div>
+            <div id="userCoinBalance" style="font-family:var(--font-title); font-weight:900; font-size:1.4rem; color:#000;">
+              🪙 450
+            </div>
+          </div>
+        </div>
+
+        <div class="tier-progress-track">
+          <div class="tier-progress-fill" id="tierProgressFill" style="width: 45%;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:0.75rem; color:#64748B;">
+          <span>0 Coins (Gym Trainer)</span>
+          <span id="tierNextGoal">550 coins until Elite Four Tier</span>
+          <span>1,000 Coins</span>
+        </div>
+
+        <div style="margin-top:1.25rem; font-family:var(--font-body); font-size:0.85rem; color:#334155; line-height:1.4;">
+          🪙 <strong>How to Earn:</strong> Earn 10 PokéCoins for every ₹100 spent on all merchandise &amp; PSA slabs. Plus daily streak check-ins!
+        </div>
+      </div>
+
+      <!-- DAILY STREAK CARD -->
+      <div class="daily-streak-card">
+        <div style="font-size:2rem; line-height:1;">🔥</div>
+        <h3 style="font-family:var(--font-title); font-weight:900; font-size:1.25rem; margin:6px 0; color:#000;">
+          DAILY STREAK BONUS
+        </h3>
+        <p style="font-family:var(--font-mono); font-size:0.8rem; color:#475569; margin:0 0 10px;">
+          Check in every 24 hours to multiply your daily coin bonus!
+        </p>
+
+        <div class="streak-days-row" id="streakDaysRow">
+          <!-- 7 day dots injected dynamically -->
+        </div>
+
+        <button class="btn-pill" id="claimStreakBtn" style="width:100%; padding:12px; font-size:0.95rem;">
+          ⚡ CLAIM TODAY'S STREAK BONUS
+        </button>
+      </div>
+    </div>
+
+    <!-- REDEEMABLE REWARDS CATALOG -->
+    <section>
+      <div style="font-family:var(--font-mono); font-weight:800; font-size:0.85rem; color:var(--accent-red); letter-spacing:1px;">
+        EXCLUSIVE REWARD PASSES
+      </div>
+      <h2 class="title-section" style="margin-top:4px; margin-bottom:1.25rem;">REDEEM POKÉCOINS FOR DISCOUNT CODES</h2>
+
+      <div class="rewards-grid" id="rewardsCatalogGrid">
+        <!-- Injected dynamically -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Shared Cart Drawer & Footer -->
+  <div id="cartDrawerRoot"></div>
+  <div id="footerRoot"></div>
+
+  <script type="module" src="src/rewards.js"></script>
+</body>
+</html>

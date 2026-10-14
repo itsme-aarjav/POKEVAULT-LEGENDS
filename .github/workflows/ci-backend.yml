@@ -1,0 +1,186 @@
+name: Backend CI & Supply Chain Security
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'src/**'
+      - 'public/**'
+      - '*.html'
+      - 'styles.css'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: write
+  packages: write
+  security-events: write
+
+jobs:
+  test-and-lint:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install service dependencies
+        run: |
+          npm ci --prefix services/auth-service
+          npm ci --prefix services/catalog-service
+          npm ci --prefix services/order-service
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run storefront tests
+        run: npm test
+
+      - name: Run auth-service tests
+        run: npm test --prefix services/auth-service
+
+      - name: Run catalog-service tests
+        run: npm test --prefix services/catalog-service
+
+      - name: Run order-service tests
+        run: npm test --prefix services/order-service
+
+      - name: Run Trivy IaC configuration scan
+        uses: aquasecurity/trivy-action@v0.29.0
+        with:
+          scan-type: 'config'
+          scan-ref: './infra'
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+
+  build-scan-sign-push:
+    name: Build, Scan, Sign & Push (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    needs: [test-and-lint]
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - auth-service
+          - catalog-service
+          - order-service
+          - nginx-gateway
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID || secrets.AWS_ACCOUNT_ID }}:role/pokevault-github-ci-role
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image for linux/amd64
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          REGISTRY="${{ steps.login-ecr.outputs.registry }}"
+          REPOSITORY="pokevault/${{ matrix.service }}"
+          IMAGE_URI="${REGISTRY}/${REPOSITORY}"
+
+          echo "IMAGE_URI=${IMAGE_URI}" >> $GITHUB_ENV
+          echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
+
+          docker build --platform linux/amd64 \
+            -t "${IMAGE_URI}:${SHORT_SHA}" \
+            -t "${IMAGE_URI}:latest" \
+            -f "services/${{ matrix.service }}/Dockerfile" \
+            "services/${{ matrix.service }}"
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@v0.29.0
+        with:
+          image-ref: ${{ env.IMAGE_URI }}:${{ env.SHORT_SHA }}
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+          exit-code: '0'
+
+      - name: Generate CycloneDX SBOM with Syft
+        uses: anchore/sbom-action@v0.18.0
+        with:
+          image: ${{ env.IMAGE_URI }}:${{ env.SHORT_SHA }}
+          format: 'cyclonedx-json'
+          output-file: sbom-${{ matrix.service }}.cdx.json
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.service }}
+          path: sbom-${{ matrix.service }}.cdx.json
+
+      - name: Push image to Amazon ECR
+        run: |
+          docker push "${IMAGE_URI}:${SHORT_SHA}"
+          docker push "${IMAGE_URI}:latest"
+
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "${IMAGE_URI}:${SHORT_SHA}" | cut -d'@' -f2)
+          echo "Pushed image digest: ${DIGEST}"
+          echo "DIGEST=${DIGEST}" >> $GITHUB_ENV
+
+      - name: Install Sigstore Cosign
+        uses: sigstore/cosign-installer@v3.8.1
+
+      - name: Keyless Sign, Attest & Verify image with Cosign
+        run: |
+          cosign sign --yes "${IMAGE_URI}@${DIGEST}"
+          cosign attest --yes --predicate "sbom-${{ matrix.service }}.cdx.json" --type cyclonedx "${IMAGE_URI}@${DIGEST}"
+
+          cosign verify \
+            --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
+            --certificate-identity-regexp="https://github.com/${{ github.repository }}/.github/workflows/.*" \
+            "${IMAGE_URI}@${DIGEST}"
+
+          cosign verify-attestation \
+            --type cyclonedx \
+            --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
+            --certificate-identity-regexp="https://github.com/${{ github.repository }}/.github/workflows/.*" \
+            "${IMAGE_URI}@${DIGEST}"
+
+  update-gitops-tags:
+    name: Update GitOps Tags
+    runs-on: ubuntu-latest
+    needs: [build-scan-sign-push]
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update Helm Chart image tag if present
+        run: |
+          if [ -f "gitops/helm-chart/values.yaml" ]; then
+            SHORT_SHA="${GITHUB_SHA::7}"
+            sed -i.bak -E "s/(tag:\s*).*/\1\"${SHORT_SHA}\"/" gitops/helm-chart/values.yaml
+            rm -f gitops/helm-chart/values.yaml.bak
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add gitops/helm-chart/values.yaml
+            git commit -m "chore(gitops): update image tag to ${SHORT_SHA} [skip ci]" || exit 0
+            git push
+          else
+            echo "gitops/helm-chart/values.yaml not found, skipping."
+          fi

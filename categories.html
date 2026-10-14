@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="/assets/pokeball-favicon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/pokeball-favicon.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Primary Meta Tags -->
+  <title>Browse All 18 Merchandise Categories — POKÉVAULT LEGENDS</title>
+  <meta name="description" content="Explore 18 official Pokémon product departments: Trading Cards, Plush Toys, Figures, Apparel, Hats, Bags, Home Decor, Mugs, Gaming Gear, and Mystery Chests." />
+  <meta name="keywords" content="pokemon categories, pokemon departments, buy pokemon plushies, pokemon figures store" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="canonical" href="https://pokevault-legends.com/categories.html" />
+
+  <!-- OpenGraph / Facebook Meta Tags -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pokevault-legends.com/categories.html" />
+  <meta property="og:site_name" content="POKÉVAULT LEGENDS" />
+  <meta property="og:title" content="Browse All 18 Merchandise Categories — POKÉVAULT LEGENDS" />
+  <meta property="og:description" content="Explore 18 official Pokémon product departments: Trading Cards, Plush Toys, Figures, Apparel, Hats, Bags, Home Decor, Mugs, Gaming Gear, and Mystery Chests." />
+  <meta property="og:image" content="https://pokevault-legends.com/assets/pikachu.png" />
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://pokevault-legends.com/categories.html" />
+  <meta name="twitter:title" content="Browse All 18 Merchandise Categories — POKÉVAULT LEGENDS" />
+  <meta name="twitter:description" content="Explore 18 official Pokémon product departments: Trading Cards, Plush Toys, Figures, Apparel, Hats, Bags, Home Decor, Mugs, Gaming Gear, and Mystery Chests." />
+  <meta name="twitter:image" content="https://pokevault-legends.com/assets/pikachu.png" />
+
+  <meta name="description" content="Explore all 18 Pokémon merchandise categories: Cards, Plush Toys, Figures, Clothing, Home Decor, Accessories and more." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Global Stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Native Browser Import Map for Three.js & Confetti -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "canvas-confetti": "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/+esm"
+    }
+  }
+  </script>
+
+</head>
+<body>
+  <div class="halftone-overlay"></div>
+
+  <!-- Shared Navbar Root -->
+  <div id="navbarRoot"></div>
+
+  <!-- HERO BANNER -->
+  <header class="page-hero-banner" style="background: linear-gradient(135deg, #00C9FF 0%, #92FE9D 100%);">
+    <div class="page-hero-container">
+      <div class="breadcrumb-nav">
+        <a href="index.html">Home</a> <span>/</span> <span class="current">Categories Directory</span>
+      </div>
+      <h1 class="page-title" style="color:#000;">EXPLORE 18 MERCHANDISE DEPARTMENTS</h1>
+      <p class="page-subtitle" style="color:#111;">From PSA 10 slabs & lifesize plushies to streetwear hoodies and resin dioramas — explore by category.</p>
+    </div>
+  </header>
+
+  <!-- CATEGORIES DIRECTORY GRID -->
+  <main class="page-container" style="padding: 3rem 2rem 5rem;">
+    <div class="categories-directory-grid" id="categoriesDirectoryGrid">
+      <!-- Rendered dynamically by categories.js -->
+    </div>
+  </main>
+
+  <!-- Shared Cart Drawer -->
+  <div id="cartDrawerRoot"></div>
+
+  <!-- Shared Footer Root -->
+  <div id="footerRoot"></div>
+
+  <script type="module" src="src/categories.js"></script>
+</body>
+</html>

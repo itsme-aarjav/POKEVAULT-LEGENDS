@@ -1,0 +1,102 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pokevault-api-ingress
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    alb.ingress.kubernetes.io/group.name: pokevault-shared-alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    {{- if .Values.acmCertificateArn }}
+    alb.ingress.kubernetes.io/certificate-arn: {{ .Values.acmCertificateArn | quote }}
+    {{- end }}
+    {{- if .Values.wafAclArn }}
+    alb.ingress.kubernetes.io/wafv2-acl-arn: {{ .Values.wafAclArn | quote }}
+    {{- end }}
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/success-codes: "200"
+    external-dns.alpha.kubernetes.io/hostname: "api.{{ .Values.domainName }}"
+spec:
+  ingressClassName: alb
+  rules:
+    - host: "api.{{ .Values.domainName }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-gateway
+                port:
+                  number: {{ .Values.nginxGateway.port }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pokevault-argocd-ingress
+  namespace: argocd
+  annotations:
+    alb.ingress.kubernetes.io/group.name: pokevault-shared-alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    {{- if .Values.acmCertificateArn }}
+    alb.ingress.kubernetes.io/certificate-arn: {{ .Values.acmCertificateArn | quote }}
+    {{- end }}
+    {{- if .Values.wafAclArn }}
+    alb.ingress.kubernetes.io/wafv2-acl-arn: {{ .Values.wafAclArn | quote }}
+    {{- end }}
+    alb.ingress.kubernetes.io/healthcheck-path: /healthz
+    alb.ingress.kubernetes.io/success-codes: "200"
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    external-dns.alpha.kubernetes.io/hostname: "argocd.{{ .Values.domainName }}"
+spec:
+  ingressClassName: alb
+  rules:
+    - host: "argocd.{{ .Values.domainName }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argo-cd-argocd-server
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pokevault-grafana-ingress
+  namespace: monitoring
+  annotations:
+    alb.ingress.kubernetes.io/group.name: pokevault-shared-alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    {{- if .Values.acmCertificateArn }}
+    alb.ingress.kubernetes.io/certificate-arn: {{ .Values.acmCertificateArn | quote }}
+    {{- end }}
+    {{- if .Values.wafAclArn }}
+    alb.ingress.kubernetes.io/wafv2-acl-arn: {{ .Values.wafAclArn | quote }}
+    {{- end }}
+    alb.ingress.kubernetes.io/healthcheck-path: /api/health
+    alb.ingress.kubernetes.io/success-codes: "200"
+    external-dns.alpha.kubernetes.io/hostname: "grafana.{{ .Values.domainName }}"
+spec:
+  ingressClassName: alb
+  rules:
+    - host: "grafana.{{ .Values.domainName }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kube-prometheus-stack-grafana
+                port:
+                  number: 80

@@ -44,7 +44,7 @@ export default [
     }
   },
   {
-    files: ['services/**/*.js', 'test/**/*.js', 'vite.config.js'],
+    files: ['services/**/*.js', 'test/**/*.js', 'test/**/*.mjs', '*.mjs', 'vite.config.js'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',

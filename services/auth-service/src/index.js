@@ -75,7 +75,7 @@ app.get('/metrics', metricsHandler);
 app.get('/api/metrics', metricsHandler);
 
 // Health check
-app.get('/health', (req, res) => {
+const healthHandler = (req, res) => {
   res.status(200).json({
     status: 'UP',
     service: 'auth-service',
@@ -83,7 +83,9 @@ app.get('/health', (req, res) => {
     uptime: process.uptime(),
     configured: Boolean(ADMIN_KEY && JWT_SECRET)
   });
-});
+};
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
 
 // Authentication routes
 // POST /api/auth/login — Authenticate admin credentials and issue signed JWT access token

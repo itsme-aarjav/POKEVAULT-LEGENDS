@@ -93,7 +93,7 @@ export function extractToken(req) {
  * Generates a high-entropy cryptographically secure order access token (256 bits)
  */
 export function generateOrderAccessToken() {
-  return crypto.randomBytes(32).toString('hex');
+  return 'otk_' + crypto.randomBytes(30).toString('hex');
 }
 
 /**

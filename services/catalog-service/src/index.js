@@ -31,6 +31,16 @@ try {
   console.warn('[catalog-service] Could not load products.json fallback:', e.message);
 }
 
+const categoriesPath = path.resolve(__dirname, 'data/categories.json');
+let FALLBACK_CATEGORIES = [];
+try {
+  if (fs.existsSync(categoriesPath)) {
+    FALLBACK_CATEGORIES = JSON.parse(fs.readFileSync(categoriesPath, 'utf8'));
+  }
+} catch (e) {
+  console.warn('[catalog-service] Could not load categories.json fallback:', e.message);
+}
+
 const corsOrigin = process.env.CORS_ORIGIN || '*';
 app.use(cors({
   origin: corsOrigin === '*' ? '*' : (corsOrigin.includes(',') ? corsOrigin.split(',').map(s => s.trim()) : corsOrigin)
@@ -212,7 +222,7 @@ const metricsHandler = (req, res) => {
 app.get('/metrics', metricsHandler);
 app.get('/api/metrics', metricsHandler);
 
-app.get('/health', async (req, res) => {
+const healthHandler = async (req, res) => {
   res.status(200).json({
     status: 'UP',
     service: 'catalog-service',
@@ -223,7 +233,10 @@ app.get('/health', async (req, res) => {
       mysql: isDbConnected ? 'UP' : 'STANDBY'
     }
   });
-});
+};
+
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
 
 export { formatCardRecord };
 
@@ -299,6 +312,31 @@ const getProductsHandler = async (req, res) => {
 
 app.get('/api/cards', getProductsHandler);
 app.get('/api/products', getProductsHandler);
+app.get('/api/search', (req, res) => {
+  if (req.query.q && !req.query.search) {
+    req.query.search = req.query.q;
+  }
+  return getProductsHandler(req, res);
+});
+
+// Categories endpoints
+app.get('/api/categories', (req, res) => {
+  res.json({
+    success: true,
+    count: FALLBACK_CATEGORIES.length,
+    data: FALLBACK_CATEGORIES,
+    source: 'catalog-service'
+  });
+});
+
+app.get('/api/categories/:id', (req, res) => {
+  const { id } = req.params;
+  const cat = FALLBACK_CATEGORIES.find(c => c.id === id || c.slug === id);
+  if (!cat) {
+    return res.status(404).json({ success: false, message: 'Category not found' });
+  }
+  return res.json({ success: true, data: cat });
+});
 
 const getSingleProductHandler = async (req, res) => {
   try {

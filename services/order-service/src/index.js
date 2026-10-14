@@ -1255,7 +1255,9 @@ app.post('/api/orders', async (req, res) => {
       message: 'Order created and verified successfully',
       data: {
         ...publicOrderRecord,
-        accessToken: rawAccessToken
+        accessToken: rawAccessToken,
+        orderToken: rawAccessToken,
+        order_token: rawAccessToken
       }
     });
   } catch (err) {
@@ -1510,6 +1512,48 @@ app.post('/api/settings/opt-in', async (req, res) => {
   inMemoryStoreSettings.opt_in_count = (inMemoryStoreSettings.opt_in_count || 0) + 1;
   await queryDatabase('UPDATE store_settings SET opt_in_count = opt_in_count + 1 WHERE id = "default"');
   return res.json({ success: true, count: inMemoryStoreSettings.opt_in_count });
+});
+
+// Promotional Discounts Endpoints
+app.get('/api/discounts', (req, res) => {
+  const discounts = Object.entries(SERVER_PROMO_CODES).map(([code, cfg]) => ({
+    code,
+    type: cfg.type,
+    value: cfg.value || 0,
+    minSubtotalCents: cfg.minSubtotalCents || 0,
+    minSubtotal: +((cfg.minSubtotalCents || 0) / 100).toFixed(2),
+    waiveInsurance: Boolean(cfg.waiveInsurance)
+  }));
+  return res.json({ success: true, count: discounts.length, data: discounts });
+});
+
+app.post('/api/discounts/validate', (req, res) => {
+  const { code, subtotalCents = 0 } = req.body || {};
+  const rawPromo = typeof code === 'string' ? code.trim().toUpperCase() : '';
+  const promoConfig = SERVER_PROMO_CODES[rawPromo];
+  if (!promoConfig) {
+    return res.status(400).json({ success: false, valid: false, message: `Invalid promotional code: "${code}"` });
+  }
+  if (subtotalCents < promoConfig.minSubtotalCents) {
+    const minDollars = (promoConfig.minSubtotalCents / 100).toFixed(2);
+    return res.status(400).json({
+      success: false,
+      valid: false,
+      message: `Promotional code "${rawPromo}" requires a minimum subtotal of $${minDollars}`
+    });
+  }
+  let discountCents = 0;
+  if (promoConfig.type === 'percentage') {
+    discountCents = Math.round((subtotalCents * promoConfig.value) / 100);
+  }
+  return res.json({
+    success: true,
+    valid: true,
+    code: rawPromo,
+    type: promoConfig.type,
+    discountCents,
+    discountAmount: +(discountCents / 100).toFixed(2)
+  });
 });
 
 // Start Server

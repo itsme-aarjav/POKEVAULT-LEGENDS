@@ -25,5 +25,5 @@ variable "budget_alert_email" {
 variable "wait_for_acm_validation" {
   type        = bool
   description = "Whether to block for DNS validation of the ACM certificate"
-  default     = false
+  default     = true
 }

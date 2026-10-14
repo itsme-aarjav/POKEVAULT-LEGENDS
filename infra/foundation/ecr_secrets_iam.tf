@@ -83,7 +83,7 @@ resource "aws_secretsmanager_secret_version" "config" {
 
 resource "aws_iam_openid_connect_provider" "github" {
   url             = "https://token.actions.githubusercontent.com"
-  client_id_list  = ["sts.amazonaws.com"]
+  client_id_list  = ["sts.amazonaws.com", "https://github.com/itsme-aarjav"]
   thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1", "1c58a3a8518e8759bf075b76b750d4f8d264fcd9"]
 }
 
@@ -104,7 +104,10 @@ resource "aws_iam_role" "github_ci" {
             "token.actions.githubusercontent.com:sub" = "repo:${var.github_repo}:*"
           }
           StringEquals = {
-            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+            "token.actions.githubusercontent.com:aud" = [
+              "sts.amazonaws.com",
+              "https://github.com/itsme-aarjav"
+            ]
           }
         }
       }

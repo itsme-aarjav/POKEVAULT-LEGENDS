@@ -9,6 +9,6 @@ RUN apk update && apk upgrade --no-cache && \
 
 USER nginx
 
-EXPOSE 8080 80
+EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]

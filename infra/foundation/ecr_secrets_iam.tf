@@ -105,7 +105,12 @@ resource "aws_iam_role" "github_ci" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:${var.github_repo}:*"
+            "token.actions.githubusercontent.com:sub" = [
+              "repo:${var.github_repo}:*",
+              "repo:itsme-aarjav*",
+              "repo:itsme-aarjav@109032559/pokevault@1419173156:*",
+              "repo:itsme-aarjav*/*"
+            ]
           }
         }
       }
@@ -163,6 +168,15 @@ resource "aws_iam_role_policy" "github_ci" {
           "cloudfront:CreateInvalidation"
         ]
         Resource = aws_cloudfront_distribution.frontend.arn
+      },
+      {
+        Sid    = "CloudFrontRead"
+        Effect = "Allow"
+        Action = [
+          "cloudfront:ListDistributions",
+          "cloudfront:GetDistribution"
+        ]
+        Resource = "*"
       }
     ]
   })

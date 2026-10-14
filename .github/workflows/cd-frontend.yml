@@ -23,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       AWS_ACCOUNT_ID: "592668326948"
+      CLOUDFRONT_DIST_ID: "E3DE85EBKNIBRO"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -70,6 +71,9 @@ jobs:
           DIST_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Aliases.Items!=null && contains(Aliases.Items, 'aarjav.site')].Id | [0]" --output text)
           if [[ -z "${DIST_ID}" || "${DIST_ID}" == "None" ]]; then
             DIST_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?contains(Origins.Items[0].DomainName, 'pokevault-frontend-${ACCOUNT_ID}')].Id | [0]" --output text)
+          fi
+          if [[ -z "${DIST_ID}" || "${DIST_ID}" == "None" ]]; then
+            DIST_ID="${{ env.CLOUDFRONT_DIST_ID }}"
           fi
 
           echo "CloudFront Distribution ID: ${DIST_ID}"

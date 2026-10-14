@@ -63,7 +63,7 @@ jobs:
 
       - name: Run Trivy IaC configuration scan (Zero-Tolerance)
         run: |
-          trivy config --exit-code 1 --severity CRITICAL ./infra
+          trivy config --exit-code 1 --severity CRITICAL ./infra ./gitops
 
   build-scan-sign-push:
     name: Build, Scan, Sign & Push (${{ matrix.service }})
@@ -88,15 +88,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Debug Print OIDC Claims & STS AssumeRole
-        run: |
-          TOKEN=$(curl -sLS -H "User-Agent: actions/tokens" -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com" | jq -r '.value')
-          python3 -c "import sys, json, base64; token='${TOKEN}'; payload=json.loads(base64.b64decode(token.split('.')[1]+'==').decode()); print('OIDC SUB:', payload.get('sub')); print('OIDC AUD:', payload.get('aud')); print('OIDC ISS:', payload.get('iss')); print('OIDC REPO:', payload.get('repository')); print('OIDC WORKFLOW:', payload.get('job_workflow_ref'))"
-          aws sts assume-role-with-web-identity \
-            --role-arn "arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/pokevault-github-ci-role" \
-            --role-session-name "debug-test-session" \
-            --web-identity-token "${TOKEN}" || true
 
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4

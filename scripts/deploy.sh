@@ -84,18 +84,33 @@ aws eks update-kubeconfig --region "${REGION}" --name "${EKS_CLUSTER_NAME}"
 
 # 7. Auto-Inject Dynamic Parameters into Root App Manifest
 ROOT_APP_FILE="${REPO_ROOT}/gitops/root-app.yaml"
-echo "[deploy] Injecting runtime parameters into ${ROOT_APP_FILE}..."
-ACCOUNT_ID="${ACCOUNT_ID}" ACM_CERT_ARN="${ACM_CERT_ARN}" WAF_ACL_ARN="${WAF_ACL_ARN}" ROOT_APP_FILE="${ROOT_APP_FILE}" python3 -c '
+echo "[deploy] Resolving Git repository URL and injecting runtime parameters into ${ROOT_APP_FILE}..."
+
+RAW_GIT_URL=$(git -C "${REPO_ROOT}" config --get remote.origin.url 2>/dev/null || echo "")
+if [[ -z "${RAW_GIT_URL}" ]]; then
+  GIT_REPO_URL="https://github.com/aarjavjain/pokevault-legends.git"
+elif [[ "${RAW_GIT_URL}" =~ ^git@github\.com:(.+)\.git$ ]]; then
+  GIT_REPO_URL="https://github.com/${BASH_REMATCH[1]}.git"
+elif [[ "${RAW_GIT_URL}" =~ ^git@github\.com:(.+)$ ]]; then
+  GIT_REPO_URL="https://github.com/${BASH_REMATCH[1]}.git"
+else
+  GIT_REPO_URL="${RAW_GIT_URL}"
+fi
+echo "[deploy] Dynamic repoURL: ${GIT_REPO_URL}"
+
+ACCOUNT_ID="${ACCOUNT_ID}" ACM_CERT_ARN="${ACM_CERT_ARN}" WAF_ACL_ARN="${WAF_ACL_ARN}" GIT_REPO_URL="${GIT_REPO_URL}" ROOT_APP_FILE="${ROOT_APP_FILE}" python3 -c '
 import os, re
 
 root_app = os.environ["ROOT_APP_FILE"]
 account_id = os.environ["ACCOUNT_ID"]
 acm_arn = os.environ["ACM_CERT_ARN"]
 waf_arn = os.environ["WAF_ACL_ARN"]
+repo_url = os.environ["GIT_REPO_URL"]
 
 with open(root_app, "r") as f:
     content = f.read()
 
+content = re.sub(r"(repoURL:\s*)\S+", r"\g<1>" + repo_url, content)
 content = re.sub(r"(- name: awsAccountId\s+value:\s*)\"[^\"]*\"", r"\g<1>\"" + account_id + "\"", content)
 content = re.sub(r"(- name: acmCertificateArn\s+value:\s*)\"[^\"]*\"", r"\g<1>\"" + acm_arn + "\"", content)
 content = re.sub(r"(- name: wafAclArn\s+value:\s*)\"[^\"]*\"", r"\g<1>\"" + waf_arn + "\"", content)

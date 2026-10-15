@@ -100,6 +100,11 @@ resource "helm_release" "kube_prometheus_stack" {
         }
       }
       grafana = {
+        sidecar = {
+          datasources = {
+            isDefaultDatasource = true
+          }
+        }
         additionalDataSources = [
           {
             name      = "Loki"
@@ -280,6 +285,16 @@ resource "helm_release" "opencost" {
             serviceName   = "kube-prometheus-stack-prometheus"
             namespaceName = "monitoring"
             port          = 9090
+          }
+        }
+        metrics = {
+          serviceMonitor = {
+            enabled = true
+            additionalLabels = {
+              release = "kube-prometheus-stack"
+            }
+            scrapeInterval = "15s"
+            honorLabels    = true
           }
         }
       }

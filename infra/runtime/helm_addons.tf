@@ -130,6 +130,7 @@ resource "helm_release" "loki" {
   version          = "6.6.2"
   namespace        = "monitoring"
   create_namespace = true
+  timeout          = 600
 
   values = [
     yamlencode({
@@ -170,6 +171,18 @@ resource "helm_release" "loki" {
       ruler = {
         replicas = 0
       }
+      chunksCache = {
+        enabled = false
+      }
+      resultsCache = {
+        enabled = false
+      }
+      lokiCanary = {
+        enabled = false
+      }
+      test = {
+        enabled = false
+      }
       loki = {
         auth_enabled  = false
         useTestSchema = true
@@ -187,7 +200,7 @@ resource "helm_release" "loki" {
     })
   ]
 
-  depends_on = [aws_eks_cluster.main, helm_release.kube_prometheus_stack]
+  depends_on = [aws_eks_cluster.main, helm_release.kube_prometheus_stack, kubernetes_storage_class.gp3]
 }
 
 resource "helm_release" "alloy" {
@@ -197,6 +210,7 @@ resource "helm_release" "alloy" {
   version          = "0.5.0"
   namespace        = "monitoring"
   create_namespace = true
+  timeout          = 600
 
   values = [
     yamlencode({

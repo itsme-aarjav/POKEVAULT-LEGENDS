@@ -111,10 +111,10 @@ repo_url = os.environ["GIT_REPO_URL"]
 with open(root_app, "r") as f:
     content = f.read()
 
-content = re.sub(r"(repoURL:\s*)\S+", r"\g<1>" + repo_url, content)
-content = re.sub(r"(- name: awsAccountId\s+value:\s*)\"[^\"]*\"", r"\g<1>\"" + account_id + "\"", content)
-content = re.sub(r"(- name: acmCertificateArn\s+value:\s*)\"[^\"]*\"", r"\g<1>\"" + acm_arn + "\"", content)
-content = re.sub(r"(- name: wafAclArn\s+value:\s*)\"[^\"]*\"", r"\g<1>\"" + waf_arn + "\"", content)
+content = re.sub(r"(repoURL:\s*)\S+", lambda m: f"{m.group(1)}{repo_url}", content)
+content = re.sub(r"(- name: awsAccountId\s+value:\s*)\"[^\"]*\"", lambda m: f"{m.group(1)}\"{account_id}\"", content)
+content = re.sub(r"(- name: acmCertificateArn\s+value:\s*)\"[^\"]*\"", lambda m: f"{m.group(1)}\"{acm_arn}\"", content)
+content = re.sub(r"(- name: wafAclArn\s+value:\s*)\"[^\"]*\"", lambda m: f"{m.group(1)}\"{waf_arn}\"", content)
 
 with open(root_app, "w") as f:
     f.write(content)
@@ -135,6 +135,7 @@ echo "[deploy] Waiting for argo-cd-server to become available..."
 kubectl rollout status deployment/argo-cd-argocd-server -n argocd --timeout=180s 2>/dev/null || true
 
 echo "[deploy] Deploying PokéVault Helm Chart (with retries for admission webhook convergence)..."
+kubectl delete job pokevault-db-seeder -n pokevault --ignore-not-found 2>/dev/null || true
 MAX_ATTEMPTS=5
 ATTEMPT=1
 until helm upgrade --install pokevault "${REPO_ROOT}/gitops/helm-chart" \

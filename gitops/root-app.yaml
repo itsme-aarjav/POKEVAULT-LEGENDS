@@ -20,9 +20,9 @@ spec:
         - name: domainName
           value: "aarjav.site"
         - name: acmCertificateArn
-          value: ""
+          value: "arn:aws:acm:us-east-1:592668326948:certificate/37e215e7-9c39-49e1-bb6c-97ae039dba2e"
         - name: wafAclArn
-          value: ""
+          value: "arn:aws:wafv2:us-east-1:592668326948:regional/webacl/pokevault-alb-waf/6ebab246-7741-442c-a72e-c60c9daaa259"
         - name: imageTag
           value: "latest"
   destination:

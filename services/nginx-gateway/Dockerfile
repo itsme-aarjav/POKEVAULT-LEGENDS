@@ -7,7 +7,7 @@ RUN apk update && apk upgrade --no-cache && \
     mkdir -p /tmp/client_temp /tmp/proxy_temp /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp /var/run /var/cache/nginx /var/log/nginx && \
     chown -R nginx:nginx /tmp /var/cache/nginx /var/log/nginx /etc/nginx /var/run
 
-USER nginx
+USER 101
 
 EXPOSE 8080
 

@@ -125,6 +125,8 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
       containers:
         - name: nginx-gateway
           image: "{{ .Values.awsAccountId }}.dkr.ecr.{{ .Values.awsRegion }}.amazonaws.com/{{ .Values.nginxGateway.image.repository }}:{{ .Values.nginxGateway.image.tag | default .Values.imageTag }}"

@@ -73,7 +73,17 @@ fi
 # 5. Phase 4: Runtime
 echo "[deploy] Deploying Ephemeral Runtime Infrastructure..."
 terraform -chdir="${REPO_ROOT}/infra/runtime" init -backend-config=backend.hcl
-terraform -chdir="${REPO_ROOT}/infra/runtime" apply -auto-approve
+TF_MAX_ATTEMPTS=3
+TF_ATTEMPT=1
+until terraform -chdir="${REPO_ROOT}/infra/runtime" apply -auto-approve; do
+  if [ $TF_ATTEMPT -ge $TF_MAX_ATTEMPTS ]; then
+    echo "[deploy] ERROR: Terraform apply failed after $TF_MAX_ATTEMPTS attempts." >&2
+    exit 1
+  fi
+  echo "[deploy] Terraform apply attempt $TF_ATTEMPT failed (transient DNS/API). Retrying in 5s..."
+  sleep 5
+  ((TF_ATTEMPT++))
+done
 
 EKS_CLUSTER_NAME=$(terraform -chdir="${REPO_ROOT}/infra/runtime" output -raw eks_cluster_name)
 WAF_ACL_ARN=$(terraform -chdir="${REPO_ROOT}/infra/runtime" output -raw waf_web_acl_arn)

@@ -36,28 +36,68 @@
 
 ---
 
-## Platform Walkthrough & Live End-to-End Demo
+## Production Application Tour & Core Capabilities
 
-<div align="center">
+Comprehensive visual tour of the live production system running on AWS, highlighting the collector storefront, API Gateway routing, GitOps progressive delivery, distributed logging, resource monitoring, and real-time FinOps.
 
-<p align="center">
-  <a href="screen-recordings/pokevault-demo.mp4">
-    <img src="screen-recordings/pokevault-demo.webp" alt="PokéVault Live Production Walkthrough (Autoplaying Demo)" width="100%" style="border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);" />
-  </a>
-</p>
+### 1. Storefront Experience & High-Value Trading Card Marketplace
+Live storefront running on `https://aarjav.site`, featuring PSA-authenticated vintage and modern grail cards, atomic inventory counters, dynamic vouchers, and rapid dispatch logistics:
+![Storefront & High-Value Trading Card Catalog](screen-recordings/storefront-product-detail.png)
 
-> **Live Production Walkthrough (Autoplaying Above)**: The interactive demonstration above shows the live Pokémon card 3D viewport, real-time purchase verification popups, and instant catalog queries.
->
-> - **Full Native Resolution (4K / 3360x2016)**: [Download/Stream Original 247 MB Video Recording (pokevault-original-4k.mov)](screen-recordings/pokevault-original-4k.mov) - 100% uncompressed zero-loss master recording via Git LFS.
-> - **Compressed Web Stream**: [Stream 720p HD Video (pokevault-demo.mp4)](screen-recordings/pokevault-demo.mp4) for lightweight playback.
->
-> **Demonstrated Capabilities**:
-> - **Storefront & Catalog**: Live browsing on `aarjav.site`, interactive 3D WebGL Pokémon card rendering, and sub-10ms Redis-cached product queries.
-> - **Checkout Flow**: Cart state management, user authentication, and atomic inventory decrement in Amazon RDS MySQL.
-> - **GitOps & Progressive Delivery**: Argo CD automated application synchronization and Argo Rollouts canary traffic shifting.
-> - **FinOps & Observability**: Real-time Kubernetes cost allocation via OpenCost and cluster metric scraping in Grafana.
+- **PSA & BGS Graded Slab Showcase**: High-resolution displays for authenticated collectibles (such as the PSA 10 Japanese Sylveon / Umbreon VMAX Special Art Alt from Eevee Heroes).
+- **Atomic Stock & Urgency Telemetry**: Real-time inventory status powered by Redis and RDS MySQL ("HIGH DEMAND: Only 1 left in Mumbai Vault - 88% Claimed", "19 collectors viewing right now").
+- **Dynamic Checkout & Discounts**: Tiered discount codes (`POKEVAULT10`), multiple payment rails (UPI, NetBanking, COD), BlueDart Express Pan-India air dispatch, and PokéCoins loyalty rewards.
 
-</div>
+---
+
+### 2. Microservice Routing & Production API Gateway Health
+Direct live response from the public API Gateway (`https://api.aarjav.site/api/health`), verifying end-to-end Kubernetes ingress, internal cluster DNS, and database connection pooling:
+![API Gateway Microservice Health Telemetry](screen-recordings/api-gateway-health-json.png)
+
+- **Ingress & Reverse Proxy**: AWS Application Load Balancer routes public HTTPS `/api/*` traffic to the non-root Nginx Gateway pods on port 8080.
+- **Inter-Service Communication**: Microservices communicate internally via Kubernetes CoreDNS (`http://catalog-service:5002`).
+- **Database Connection Pooling**: Live verification of active MySQL connection pooling (`database: mysql-connected`, `components: {mysql: UP}`).
+
+---
+
+### 3. GitOps Continuous Delivery & Progressive Canary Deployment (Argo CD)
+Live Argo CD dashboard (`https://argocd.aarjav.site`) continuously reconciling the `pokevault-production` application state in real-time:
+![Argo CD GitOps Architecture & Application Topology](screen-recordings/argocd-gitops-topology.png)
+
+- **Declarative Synchronization**: Root application (`gitops/root-app.yaml`) continuously synchronizes cluster state against the Git repository with zero manual intervention.
+- **Canary Progressive Delivery**: Argo Rollouts manages seamless traffic splitting between stable and canary versions of `order-service` without user disruption.
+- **Automated Database Seeding**: Automated Kubernetes Job (`pokevault-db-seeder`) executes schema migrations and hydrates the catalog upon cluster bootstrap.
+
+---
+
+### 4. Distributed Log Aggregation & Streaming Telemetry (Grafana Loki)
+Real-time microsecond-precision log exploration in Grafana (`https://grafana.aarjav.site`) powered by Grafana Loki and Alloy:
+![Grafana Loki Distributed Log Telemetry](screen-recordings/grafana-loki-logs-telemetry.png)
+
+- **Unified Multi-Service Log Streams**: Real-time log aggregation across all container replicas in the `pokevault` namespace.
+- **Microsecond Request Tracing**: Structured JSON logs capturing Nginx gateway forwarding, microservice execution times (e.g., `1ms` for `/api/health`, `5ms` for `/api/inventory/eevee-heroes-special-art`), and client telemetry.
+- **Cost-Optimized Architecture**: Single-binary Loki engine with filesystem persistence on EBS gp3 volumes.
+
+---
+
+### 5. Kubernetes Cluster Compute & Resource Metrics (Prometheus)
+Grafana compute resource dashboard tracking real-time CPU and Memory utilization against requested quotas:
+![Grafana Prometheus Kubernetes Compute Resources](screen-recordings/grafana-prometheus-compute-metrics.png)
+
+- **Resource Quotas & Utilization**: Real-time tracking of pod CPU usage (0.365% of requests, 0.073% of limits) and memory allocations (13.0% of requests).
+- **Per-Service Metrics**: Stacked time-series telemetry across `auth-service`, `catalog-service`, `order-service`, and `nginx-gateway`.
+- **Right-Sizing & Headroom**: Precise metric reporting enabling predictive pod autoscaling and eliminating over-provisioned cloud compute waste.
+
+---
+
+### 6. Cloud FinOps & Real-Time Workload Cost Allocation (OpenCost)
+Production OpenCost dashboard (`https://grafana.aarjav.site`) providing real-time Kubernetes cost visibility:
+![Grafana OpenCost FinOps Dashboard](screen-recordings/grafana-opencost-finops-dashboard.png)
+
+- **Real-Time Cost Transparency**: Accurate hourly cluster run cost (**$0.17 / hr**) and projected monthly spend (**$124.59 / mo**).
+- **Multi-Dimensional Allocation**: Exact spend breakdown across CPU ($99.13), RAM ($24.67), and Persistent Volumes ($0.80).
+- **Per-Namespace Breakdown**: `pokevault` production microservices account for 94% ($23.10) while cluster `monitoring` consumes 6% ($1.58).
+- **Node-Level Cost Attribution**: Direct EC2 instance billing visibility for `c7i-flex.large` compute nodes and AWS EBS gp3 storage volumes.
 
 ---
 

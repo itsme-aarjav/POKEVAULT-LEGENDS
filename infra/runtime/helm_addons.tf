@@ -134,31 +134,55 @@ resource "helm_release" "loki" {
   values = [
     yamlencode({
       deploymentMode = "SingleBinary"
+      singleBinary = {
+        replicas = 1
+      }
+      backend = {
+        replicas = 0
+      }
+      read = {
+        replicas = 0
+      }
+      write = {
+        replicas = 0
+      }
+      ingester = {
+        replicas = 0
+      }
+      querier = {
+        replicas = 0
+      }
+      queryFrontend = {
+        replicas = 0
+      }
+      queryScheduler = {
+        replicas = 0
+      }
+      distributor = {
+        replicas = 0
+      }
+      compactor = {
+        replicas = 0
+      }
+      indexGateway = {
+        replicas = 0
+      }
+      ruler = {
+        replicas = 0
+      }
       loki = {
-        auth_enabled = false
+        auth_enabled  = false
+        useTestSchema = true
         commonConfig = {
           replication_factor = 1
         }
         storage = {
           type = "filesystem"
+          filesystem = {
+            chunks_directory = "/var/loki/chunks"
+            rules_directory  = "/var/loki/rules"
+          }
         }
-        schemaConfig = {
-          configs = [
-            {
-              from         = "2024-01-01"
-              store        = "tsdb"
-              object_store = "filesystem"
-              schema       = "v13"
-              index = {
-                prefix = "index_"
-                period = "24h"
-              }
-            }
-          ]
-        }
-      }
-      singleBinary = {
-        replicas = 1
       }
     })
   ]

@@ -20,17 +20,26 @@ async function seed() {
   console.log(`[db-seed] Connecting to MySQL at ${DB_HOST}:${DB_PORT} as ${DB_USER}...`);
 
   let connection;
-  try {
-    connection = await mysql.createConnection({
-      host: DB_HOST,
-      port: DB_PORT,
-      user: DB_USER,
-      password: DB_PASSWORD,
-      multipleStatements: true
-    });
-  } catch (err) {
-    console.error(`[db-seed] Failed to connect to MySQL:`, err.message);
-    process.exit(1);
+  const maxRetries = 10;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      connection = await mysql.createConnection({
+        host: DB_HOST,
+        port: DB_PORT,
+        user: DB_USER,
+        password: DB_PASSWORD,
+        multipleStatements: true
+      });
+      console.log(`[db-seed] Connected to MySQL successfully on attempt ${attempt}.`);
+      break;
+    } catch (err) {
+      console.warn(`[db-seed] Connection attempt ${attempt}/${maxRetries} to MySQL at ${DB_HOST}:${DB_PORT} failed: ${err.message}`);
+      if (attempt === maxRetries) {
+        console.error(`[db-seed] Failed to connect to MySQL after ${maxRetries} attempts.`);
+        process.exit(1);
+      }
+      await new Promise(res => setTimeout(res, 5000));
+    }
   }
 
   try {

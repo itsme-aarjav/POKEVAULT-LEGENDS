@@ -26,10 +26,10 @@ echo "[deploy] Authenticated as AWS Account: ${ACCOUNT_ID}"
 echo "[deploy] Bootstrapping remote state..."
 bash "${SCRIPT_DIR}/bootstrap-state.sh"
 
-# 2. Phase 3: Foundation (Idempotent; non-blocking on ACM DNS validation)
+# 2. Phase 3: Foundation (Idempotent)
 echo "[deploy] Ensuring Foundation Infrastructure (Route 53, ACM, CloudFront, ECR)..."
 terraform -chdir="${REPO_ROOT}/infra/foundation" init -backend-config=backend.hcl
-terraform -chdir="${REPO_ROOT}/infra/foundation" apply -auto-approve -var="wait_for_acm_validation=false"
+terraform -chdir="${REPO_ROOT}/infra/foundation" apply -auto-approve
 
 FRONTEND_BUCKET=$(terraform -chdir="${REPO_ROOT}/infra/foundation" output -raw frontend_bucket_name 2>/dev/null || echo "")
 CF_DIST_ID=$(terraform -chdir="${REPO_ROOT}/infra/foundation" output -raw cloudfront_distribution_id 2>/dev/null || echo "")
@@ -61,8 +61,9 @@ done
 # 4. Build Frontend & Sync to S3
 if [[ -n "${FRONTEND_BUCKET}" && -f "${REPO_ROOT}/package.json" ]]; then
   echo "[deploy] Building and syncing frontend to S3 (${FRONTEND_BUCKET})..."
-  npm --prefix "${REPO_ROOT}" run build
-  aws s3 sync "${REPO_ROOT}/dist" "s3://${FRONTEND_BUCKET}" --delete
+  VITE_API_BASE_URL="https://api.${DOMAIN_NAME}/api" npm --prefix "${REPO_ROOT}" run build
+  aws s3 sync "${REPO_ROOT}/dist/assets" "s3://${FRONTEND_BUCKET}/assets" --cache-control "public, max-age=31536000, immutable" --delete
+  aws s3 sync "${REPO_ROOT}/dist" "s3://${FRONTEND_BUCKET}" --exclude "assets/*" --cache-control "public, max-age=0, must-revalidate" --delete
   if [[ -n "${CF_DIST_ID}" ]]; then
     echo "[deploy] Invalidating CloudFront cache (${CF_DIST_ID})..."
     aws cloudfront create-invalidation --distribution-id "${CF_DIST_ID}" --paths "/*" >/dev/null
@@ -88,7 +89,7 @@ echo "[deploy] Resolving Git repository URL and injecting runtime parameters int
 
 RAW_GIT_URL=$(git -C "${REPO_ROOT}" config --get remote.origin.url 2>/dev/null || echo "")
 if [[ -z "${RAW_GIT_URL}" ]]; then
-  GIT_REPO_URL="https://github.com/aarjavjain/pokevault-legends.git"
+  GIT_REPO_URL="https://github.com/itsme-aarjav/pokevault.git"
 elif [[ "${RAW_GIT_URL}" =~ ^git@github\.com:(.+)\.git$ ]]; then
   GIT_REPO_URL="https://github.com/${BASH_REMATCH[1]}.git"
 elif [[ "${RAW_GIT_URL}" =~ ^git@github\.com:(.+)$ ]]; then
@@ -120,24 +121,54 @@ with open(root_app, "w") as f:
 '
 
 # 8. Deploy Helm Chart & Argo CD Root Application
-echo "[deploy] Deploying PokéVault Helm Chart..."
-helm upgrade --install pokevault "${REPO_ROOT}/gitops/helm-chart" \
+echo "[deploy] Waiting for required CRDs and controllers to be ready..."
+for crd in clustersecretstores.external-secrets.io externalsecrets.external-secrets.io rollouts.argoproj.io servicemonitors.monitoring.coreos.com applications.argoproj.io; do
+  echo "[deploy] Waiting for CRD ${crd}..."
+  kubectl wait --for condition=established --timeout=180s "crd/${crd}" 2>/dev/null || true
+done
+
+echo "[deploy] Waiting for external-secrets webhook to become available..."
+kubectl rollout status deployment/external-secrets-webhook -n external-secrets --timeout=180s 2>/dev/null || true
+echo "[deploy] Waiting for argo-rollouts controller to become available..."
+kubectl rollout status deployment/argo-rollouts -n argo-rollouts --timeout=180s 2>/dev/null || true
+echo "[deploy] Waiting for argo-cd-server to become available..."
+kubectl rollout status deployment/argo-cd-argocd-server -n argocd --timeout=180s 2>/dev/null || true
+
+echo "[deploy] Deploying PokéVault Helm Chart (with retries for admission webhook convergence)..."
+MAX_ATTEMPTS=5
+ATTEMPT=1
+until helm upgrade --install pokevault "${REPO_ROOT}/gitops/helm-chart" \
   --namespace pokevault \
   --create-namespace \
   --set awsAccountId="${ACCOUNT_ID}" \
   --set awsRegion="${REGION}" \
   --set domainName="${DOMAIN_NAME}" \
   --set acmCertificateArn="${ACM_CERT_ARN}" \
-  --set wafAclArn="${WAF_ACL_ARN}"
+  --set wafAclArn="${WAF_ACL_ARN}"; do
+  if [ $ATTEMPT -ge $MAX_ATTEMPTS ]; then
+    echo "[deploy] ERROR: Helm upgrade failed after $MAX_ATTEMPTS attempts." >&2
+    exit 1
+  fi
+  echo "[deploy] Helm upgrade attempt $ATTEMPT failed. Waiting 10s for admission webhooks/CRDs..."
+  sleep 10
+  ((ATTEMPT++))
+done
 
 echo "[deploy] Applying Argo CD Root Application..."
 kubectl apply -f "${ROOT_APP_FILE}"
 
 # 9. Verify Workload Convergence
 echo "[deploy] Verifying deployment rollouts..."
-kubectl rollout status deployment/auth-service -n pokevault --timeout=180s
-kubectl rollout status deployment/catalog-service -n pokevault --timeout=180s
-kubectl rollout status deployment/nginx-gateway -n pokevault --timeout=180s
+kubectl rollout status deployment/auth-service -n pokevault --timeout=300s
+kubectl rollout status deployment/catalog-service -n pokevault --timeout=300s
+kubectl rollout status deployment/nginx-gateway -n pokevault --timeout=300s
+
+echo "[deploy] Waiting for order-service rollout pod to be ready..."
+kubectl wait --for=condition=Ready pod -l app=order-service -n pokevault --timeout=300s 2>/dev/null || true
+
+echo "[deploy] Waiting for database seeder job completion..."
+kubectl wait --for=condition=complete job/pokevault-db-seeder -n pokevault --timeout=300s 2>/dev/null || true
 
 echo "[deploy] PokéVault Stack deployed successfully."
 kubectl get ingress -A
+

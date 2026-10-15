@@ -42,11 +42,11 @@
 
 <p align="center">
   <a href="screen-recordings/pokevault-demo.mp4">
-    <img src="screen-recordings/demo-player-preview.png" alt="PokéVault End-to-End Walkthrough Video (Click to Play HD)" width="100%" style="border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);" />
+    <img src="screen-recordings/pokevault-demo.gif" alt="PokéVault Live Production Walkthrough (Autoplaying Demo)" width="100%" style="border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);" />
   </a>
 </p>
 
-> **High-Definition Video Walkthrough (720p HD | 30 FPS | 2m 22s)**: Click the preview above or [stream/download the MP4 video](screen-recordings/pokevault-demo.mp4) to watch the complete walkthrough in full native resolution with sharp, crystal-clear text.
+> **Live Production Walkthrough (Autoplaying Above)**: The interactive demonstration above shows the live Pokémon card 3D viewport, real-time purchase verification popups, and instant catalog queries. Click the preview or [open the full HD video recording (pokevault-demo.mp4)](screen-recordings/pokevault-demo.mp4) for the complete multi-minute deep dive covering Argo CD, Grafana OpenCost, and EKS canary rollouts.
 >
 > **Demonstrated Capabilities**:
 > - **Storefront & Catalog**: Live browsing on `aarjav.site`, interactive 3D WebGL Pokémon card rendering, and sub-10ms Redis-cached product queries.

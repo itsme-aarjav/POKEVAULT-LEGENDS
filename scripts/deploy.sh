@@ -145,7 +145,8 @@ until helm upgrade --install pokevault "${REPO_ROOT}/gitops/helm-chart" \
   --set awsRegion="${REGION}" \
   --set domainName="${DOMAIN_NAME}" \
   --set acmCertificateArn="${ACM_CERT_ARN}" \
-  --set wafAclArn="${WAF_ACL_ARN}"; do
+  --set wafAclArn="${WAF_ACL_ARN}" \
+  --force-conflicts; do
   if [ $ATTEMPT -ge $MAX_ATTEMPTS ]; then
     echo "[deploy] ERROR: Helm upgrade failed after $MAX_ATTEMPTS attempts." >&2
     exit 1

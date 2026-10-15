@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ PokéVault Legends
+# PokéVault Legends
 ### Enterprise-Grade, Cost-Optimized Cloud-Native E-Commerce Platform on AWS
 
 [![AWS](https://img.shields.io/badge/AWS-us--east--1-FF9900?logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
@@ -22,7 +22,7 @@
 
 ---
 
-### 🌐 Live Production Cloud Endpoints
+### Live Production Cloud Endpoints
 
 | Service / Layer | Public Endpoint | Infrastructure Mapping | Security & Protocol |
 | :--- | :--- | :--- | :--- |
@@ -36,23 +36,29 @@
 
 ---
 
-## 🎥 Platform Walkthrough & Live End-to-End Demo
+## Platform Walkthrough & Live End-to-End Demo
 
 <div align="center">
 
 <p align="center">
-  <img src="screen-recordings/pokevault-demo.gif" alt="PokéVault Live Platform Walkthrough" width="100%" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);" />
+  <a href="screen-recordings/pokevault-demo.mp4">
+    <img src="screen-recordings/demo-player-preview.png" alt="PokéVault End-to-End Walkthrough Video (Click to Play HD)" width="100%" style="border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);" />
+  </a>
 </p>
 
-> ⚡ **Autoplaying Live Demo**: Showcases the live storefront on [`aarjav.site`](https://aarjav.site), real-time 3D card physics, Redis-cached catalog queries, full cart & checkout flow with atomic MySQL transactions, Argo CD GitOps self-healing, Argo Rollouts progressive canary routing, and OpenCost FinOps budget tracking on AWS EKS Auto Mode.
+> **High-Definition Video Walkthrough (720p HD | 30 FPS | 2m 22s)**: Click the preview above or [stream/download the MP4 video](screen-recordings/pokevault-demo.mp4) to watch the complete walkthrough in full native resolution with sharp, crystal-clear text.
 >
-> 🎬 **High-Definition Video File**: [`screen-recordings/pokevault-demo.mp4`](screen-recordings/pokevault-demo.mp4)
+> **Demonstrated Capabilities**:
+> - **Storefront & Catalog**: Live browsing on `aarjav.site`, interactive 3D WebGL Pokémon card rendering, and sub-10ms Redis-cached product queries.
+> - **Checkout Flow**: Cart state management, user authentication, and atomic inventory decrement in Amazon RDS MySQL.
+> - **GitOps & Progressive Delivery**: Argo CD automated application synchronization and Argo Rollouts canary traffic shifting.
+> - **FinOps & Observability**: Real-time Kubernetes cost allocation via OpenCost and cluster metric scraping in Grafana.
 
 </div>
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ![PokéVault End-to-End Architecture](screen-recordings/architecture-diagram.png)
 
@@ -123,7 +129,7 @@ flowchart TD
 
 ---
 
-## 💡 Key Architectural Innovations
+## Key Architectural Innovations
 
 ### 1. Two-Tier Cost-Optimized Cloud Architecture
 Unlike traditional enterprise cloud architectures that incur hundreds of dollars per month in idle resource waste, PokéVault implements a **Two-Tier Separation of Concerns**:
@@ -153,7 +159,7 @@ PokéVault runs on the newest **AWS EKS Auto Mode (Kubernetes 1.31)**:
 
 ---
 
-## 📦 Microservices & Tech Stack
+## Microservices & Tech Stack
 
 ```
 pokevault/
@@ -181,7 +187,7 @@ pokevault/
 
 ---
 
-## 🚀 GitOps & Progressive Canary Delivery
+## GitOps & Progressive Canary Delivery
 
 PokéVault implements GitOps via **Argo CD** and continuous canary delivery via **Argo Rollouts**:
 
@@ -224,7 +230,7 @@ spec:
 
 ---
 
-## 🛡️ Enterprise Security & Supply Chain DevSecOps
+## Enterprise Security & Supply Chain DevSecOps
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -256,7 +262,7 @@ spec:
 
 ---
 
-## 📊 FinOps & Full-Stack Observability
+## FinOps & Full-Stack Observability
 
 | Observability Component | Technology | Role & Metrics |
 | :--- | :--- | :--- |
@@ -267,7 +273,7 @@ spec:
 
 ---
 
-## 📸 Production Verification & Live Proofs
+## Production Verification & Live Proofs
 
 ### 1. Amazon EKS Auto Mode Cluster (`pokevault-eks`)
 Active EKS v1.31 cluster with Karpenter-managed compute nodes, zero health issues, and zero manual node groups:
@@ -311,7 +317,7 @@ Continuous Integration pipeline validating tests, linting, building images, runn
 
 ---
 
-## ⚡ Quickstart & Deployment Guide
+## Quickstart & Deployment Guide
 
 ### Prerequisites
 - [AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) configured (`aws sts get-caller-identity`)
@@ -360,7 +366,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 
 ---
 
-## 💻 Local Development with Docker Compose
+## Local Development with Docker Compose
 
 To test microservices locally without an AWS account:
 ```bash
@@ -376,11 +382,11 @@ node test-live-runtime.mjs
 
 ---
 
-## 📄 License
+## License
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 ---
 
 <div align="center">
-Crafted with ❤️ by <a href="https://github.com/itsme-aarjav">Aarjav Jain</a>
+Maintained by <a href="https://github.com/itsme-aarjav">Aarjav Jain</a>
 </div>

@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/itsme-aarjav/pokevault.git
+    repoURL: https://github.com/itsme-aarjav/POKEVAULT-LEGENDS.git
     targetRevision: HEAD
     path: gitops/helm-chart
     helm:

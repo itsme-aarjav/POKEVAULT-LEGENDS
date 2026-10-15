@@ -448,8 +448,8 @@ Continuous Integration pipeline validating tests, linting, building images, runn
 ### 1. Bootstrap State & Deploy Everything (Single Command)
 ```bash
 # Clone the repository
-git clone https://github.com/itsme-aarjav/pokevault.git
-cd pokevault
+git clone https://github.com/itsme-aarjav/POKEVAULT-LEGENDS.git
+cd POKEVAULT-LEGENDS
 
 # Execute end-to-end idempotent deployment
 # (Bootstraps S3 state, provisions Foundation, builds images, provisions Runtime, seeds DB, registers Argo CD)

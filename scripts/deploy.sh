@@ -99,7 +99,7 @@ echo "[deploy] Resolving Git repository URL and injecting runtime parameters int
 
 RAW_GIT_URL=$(git -C "${REPO_ROOT}" config --get remote.origin.url 2>/dev/null || echo "")
 if [[ -z "${RAW_GIT_URL}" ]]; then
-  GIT_REPO_URL="https://github.com/itsme-aarjav/pokevault.git"
+  GIT_REPO_URL="https://github.com/itsme-aarjav/POKEVAULT-LEGENDS.git"
 elif [[ "${RAW_GIT_URL}" =~ ^git@github\.com:(.+)\.git$ ]]; then
   GIT_REPO_URL="https://github.com/${BASH_REMATCH[1]}.git"
 elif [[ "${RAW_GIT_URL}" =~ ^git@github\.com:(.+)$ ]]; then

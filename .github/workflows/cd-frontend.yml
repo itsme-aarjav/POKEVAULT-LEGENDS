@@ -1,4 +1,4 @@
-name: Frontend CloudFront CD
+name: pokevault
 
 on:
   push:

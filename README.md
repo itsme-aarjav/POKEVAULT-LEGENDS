@@ -42,7 +42,7 @@
 
 <p align="center">
   <a href="screen-recordings/pokevault-demo.mp4">
-    <img src="screen-recordings/pokevault-demo.gif" alt="PokéVault Live Production Walkthrough (Autoplaying Demo)" width="100%" style="border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);" />
+    <img src="screen-recordings/pokevault-demo.webp" alt="PokéVault Live Production Walkthrough (Autoplaying Demo)" width="100%" style="border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);" />
   </a>
 </p>
 

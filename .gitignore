@@ -23,6 +23,9 @@ build/
 # macOS junk
 .DS_Store
 
+# Large raw video recordings (converted to web-optimized mp4)
+*.mov
+
 # Logs
 *.log
 npm-debug.log*

@@ -136,6 +136,10 @@ kubectl rollout status deployment/argo-cd-argocd-server -n argocd --timeout=180s
 
 echo "[deploy] Deploying PokéVault Helm Chart (with retries for admission webhook convergence)..."
 kubectl delete job pokevault-db-seeder -n pokevault --ignore-not-found 2>/dev/null || true
+kubectl annotate ingressclass alb meta.helm.sh/release-name=pokevault meta.helm.sh/release-namespace=pokevault --overwrite 2>/dev/null || true
+kubectl label ingressclass alb app.kubernetes.io/managed-by=Helm --overwrite 2>/dev/null || true
+kubectl annotate ingressclassparams alb-params meta.helm.sh/release-name=pokevault meta.helm.sh/release-namespace=pokevault --overwrite 2>/dev/null || true
+kubectl label ingressclassparams alb-params app.kubernetes.io/managed-by=Helm --overwrite 2>/dev/null || true
 MAX_ATTEMPTS=5
 ATTEMPT=1
 until helm upgrade --install pokevault "${REPO_ROOT}/gitops/helm-chart" \

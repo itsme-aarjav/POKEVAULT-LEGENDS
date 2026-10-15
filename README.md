@@ -254,21 +254,98 @@ kind: Rollout
 metadata:
   name: order-service
   namespace: pokevault
+  labels:
+    app: order-service
 spec:
   replicas: 2
+  selector:
+    matchLabels:
+      app: order-service
   strategy:
     canary:
+      stableService: order-service
       canaryService: order-service-canary
-      stableService: order-service-stable
-      trafficRouting:
-        nginx:
-          stableIngress: order-service-ingress
       steps:
         - setWeight: 20
-        - pause: { duration: 60s }
+        - pause:
+            duration: 30s
         - setWeight: 50
-        - pause: { duration: 60s }
+        - pause:
+            duration: 30s
+        - setWeight: 100
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: order-service
+          image: 592668326948.dkr.ecr.us-east-1.amazonaws.com/pokevault/order-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5003
+              name: http
+          env:
+            - name: ORDER_PORT
+              value: "5003"
+            - name: CATALOG_SERVICE_URL
+              value: "http://catalog-service:5002"
+            - name: CORS_ORIGIN
+              value: "https://aarjav.site"
+          envFrom:
+            - secretRef:
+                name: pokevault-env
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5003
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5003
+            initialDelaySeconds: 5
+            periodSeconds: 5
 ```
+
+### Zero-Touch Dynamic Endpoint & IP Re-Wiring
+
+In an ephemeral infrastructure model where `./scripts/destroy.sh` completely destroys the EKS cluster, VPC, RDS, and ElastiCache, subsequent `./scripts/deploy.sh` runs result in completely new, dynamically generated AWS resources:
+- A new AWS Application Load Balancer with dynamic IP addresses and DNS hostname.
+- A new RDS MySQL database endpoint and master credentials.
+- A new ElastiCache Redis primary replication endpoint.
+- A new AWS WAFv2 Regional WebACL ARN.
+
+PokéVault implements zero-touch dynamic re-wiring to ensure all components interconnect automatically without manual intervention or manifest updates:
+
+1. **Dynamic DNS Re-Routing via ExternalDNS**:
+   - The shared ingress (`pokevault-shared-alb`) defines host rules for `api.aarjav.site`, `argocd.aarjav.site`, and `grafana.aarjav.site`.
+   - ExternalDNS continuously monitors the Ingress status for the newly provisioned ALB hostname and automatically upserts Route 53 `ALIAS` A-records within seconds.
+   - The permanent Route 53 hosted zone (`aarjav.site`) remains intact, eliminating DNS delegation delays.
+
+2. **Automated Secret Hydration via AWS Secrets Manager & ESO**:
+   - Terraform Runtime provisions RDS and Redis, immediately writing the dynamic database connection string, credentials, and Redis host into AWS Secrets Manager (`pokevault-runtime-secrets`).
+   - The in-cluster **External Secrets Operator (ESO)** and `ClusterSecretStore` synchronize this AWS secret directly into the Kubernetes `pokevault-env` Secret.
+   - Microservice pods consume these values dynamically via `envFrom: secretRef: pokevault-env`, ensuring zero manual config changes across rebuilds.
+
+3. **Automated Ingress WAF & Controller Association**:
+   - `deploy.sh` captures the Terraform-provisioned WAF WebACL ARN and injects it into Helm values and Ingress annotations (`alb.ingress.kubernetes.io/wafv2-acl-arn`).
+   - The AWS Load Balancer Controller binds the new ALB to the regional WAFv2 WebACL during ingress provisioning.
+
+4. **Permanent Foundation vs. Ephemeral Runtime Isolation**:
+   - The Foundation layer (Route 53 hosted zone, ACM wildcard certificate, CloudFront distribution, and S3 SPA bucket) remains permanently deployed at ~$1/mo.
+   - Frontend web clients accessing `https://aarjav.site` always hit the persistent CloudFront edge, which proxies API traffic to `https://api.aarjav.site` without needing DNS or certificate changes.
 
 ---
 
@@ -381,13 +458,19 @@ cd pokevault
 
 ### 2. Verify Live Endpoints
 ```bash
-# Test API Health
-curl -s -i https://api.aarjav.site/healthz
+# Test API Gateway & Microservice Health
+curl -s https://api.aarjav.site/api/health | jq .
 
-# Test Catalog Microservice
-curl -s https://api.aarjav.site/api/catalog/items | jq '.[0:2]'
+# Query Pokémon Trading Cards & Slabs
+curl -s https://api.aarjav.site/api/cards | jq '.[0:2]'
 
-# Test Storefront
+# Query Catalog Categories
+curl -s https://api.aarjav.site/api/categories | jq .
+
+# Query Orders Endpoint (Order State)
+curl -s https://api.aarjav.site/api/orders | jq .
+
+# Verify Frontend CDN Edge Response
 curl -s -I https://aarjav.site | head -n 5
 ```
 

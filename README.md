@@ -46,7 +46,10 @@
   </a>
 </p>
 
-> **Live Production Walkthrough (Autoplaying Above)**: The interactive demonstration above shows the live Pokémon card 3D viewport, real-time purchase verification popups, and instant catalog queries. Click the preview or [open the full HD video recording (pokevault-demo.mp4)](screen-recordings/pokevault-demo.mp4) for the complete multi-minute deep dive covering Argo CD, Grafana OpenCost, and EKS canary rollouts.
+> **Live Production Walkthrough (Autoplaying Above)**: The interactive demonstration above shows the live Pokémon card 3D viewport, real-time purchase verification popups, and instant catalog queries.
+>
+> - **Full Native Resolution (4K / 3360x2016)**: [Download/Stream Original 247 MB Video Recording (pokevault-original-4k.mov)](screen-recordings/pokevault-original-4k.mov) - 100% uncompressed zero-loss master recording via Git LFS.
+> - **Compressed Web Stream**: [Stream 720p HD Video (pokevault-demo.mp4)](screen-recordings/pokevault-demo.mp4) for lightweight playback.
 >
 > **Demonstrated Capabilities**:
 > - **Storefront & Catalog**: Live browsing on `aarjav.site`, interactive 3D WebGL Pokémon card rendering, and sub-10ms Redis-cached product queries.

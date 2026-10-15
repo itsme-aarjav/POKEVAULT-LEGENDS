@@ -23,8 +23,6 @@ build/
 # macOS junk
 .DS_Store
 
-# Large raw video recordings (converted to web-optimized mp4)
-*.mov
 
 # Logs
 *.log
@@ -46,3 +44,4 @@ override.tf.json
 *_override.tf.json
 .terraformrc
 terraform.rc
+Screen Recording*.mov

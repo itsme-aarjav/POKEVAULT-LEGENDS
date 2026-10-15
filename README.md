@@ -507,11 +507,6 @@ node test-live-runtime.mjs
 
 ---
 
-## License
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
----
-
 <div align="center">
 Maintained by <a href="https://github.com/itsme-aarjav">Aarjav Jain</a>
 </div>

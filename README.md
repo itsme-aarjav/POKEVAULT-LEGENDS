@@ -103,7 +103,6 @@ Production OpenCost dashboard (`https://grafana.aarjav.site`) providing real-tim
 
 ## System Architecture
 
-![PokéVault End-to-End Architecture](screen-recordings/architecture-diagram.png)
 
 ```mermaid
 flowchart TD

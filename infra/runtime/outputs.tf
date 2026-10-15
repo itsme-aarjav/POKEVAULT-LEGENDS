@@ -9,12 +9,12 @@ output "eks_cluster_endpoint" {
 }
 
 output "rds_endpoint" {
-  description = "Connection endpoint for PokéVault MySQL RDS instance"
+  description = "Connection endpoint for PokeVault MySQL RDS instance"
   value       = aws_db_instance.mysql.endpoint
 }
 
 output "redis_endpoint" {
-  description = "Primary endpoint address for PokéVault ElastiCache Redis"
+  description = "Primary endpoint address for PokeVault ElastiCache Redis"
   value       = aws_elasticache_cluster.redis.cache_nodes[0].address
 }
 

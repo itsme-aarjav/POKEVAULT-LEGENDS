@@ -1,6 +1,6 @@
 resource "aws_wafv2_web_acl" "alb" {
   name        = "pokevault-alb-waf"
-  description = "Regional WAF for PokéVault ALB"
+  description = "Regional WAF for PokeVault ALB"
   scope       = "REGIONAL"
 
   default_action {

@@ -62,9 +62,10 @@ resource "aws_iam_role_policy_attachment" "node" {
 }
 
 resource "aws_eks_cluster" "main" {
-  name     = var.cluster_name
-  version  = var.cluster_version
-  role_arn = aws_iam_role.cluster.arn
+  name                          = var.cluster_name
+  version                       = var.cluster_version
+  role_arn                      = aws_iam_role.cluster.arn
+  bootstrap_self_managed_addons = false
 
   #trivy:ignore:aws-0040 Public endpoint required for remote CI and kubectl automation
   #trivy:ignore:aws-0041 Public endpoint CIDR required for developer and CI runner access

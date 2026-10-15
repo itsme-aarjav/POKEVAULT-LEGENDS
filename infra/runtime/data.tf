@@ -1,6 +1,6 @@
 resource "aws_security_group" "rds" {
   name        = "${var.cluster_name}-rds-sg"
-  description = "Security group for PokéVault RDS MySQL"
+  description = "Security group for PokeVault RDS MySQL"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -18,7 +18,7 @@ resource "aws_security_group" "rds" {
 
 resource "aws_security_group" "redis" {
   name        = "${var.cluster_name}-redis-sg"
-  description = "Security group for PokéVault ElastiCache Redis"
+  description = "Security group for PokeVault ElastiCache Redis"
   vpc_id      = aws_vpc.main.id
 
   ingress {

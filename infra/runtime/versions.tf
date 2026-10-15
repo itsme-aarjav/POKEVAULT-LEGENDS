@@ -33,7 +33,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project     = "PokéVault Legends"
+      Project     = "PokeVault Legends"
       Environment = "production"
       ManagedBy   = "Terraform"
     }

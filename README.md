@@ -36,18 +36,90 @@
 
 ---
 
-## 🎥 Platform Walkthrough & End-to-End Demo
+## 🎥 Platform Walkthrough & Live End-to-End Demo
 
-https://github.com/user-attachments/assets/pokevault-demo
+<div align="center">
 
-> [!NOTE]
-> The full recorded demo is committed in [`screen-recordings/pokevault-demo.mp4`](screen-recordings/pokevault-demo.mp4), capturing live authentication, catalog browsing with Redis caching, order placement with progressive canary routing, Argo CD synchronizations, and OpenCost FinOps budget monitoring.
+<p align="center">
+  <img src="screen-recordings/pokevault-demo.gif" alt="PokéVault Live Platform Walkthrough" width="100%" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);" />
+</p>
+
+> ⚡ **Autoplaying Live Demo**: Showcases the live storefront on [`aarjav.site`](https://aarjav.site), real-time 3D card physics, Redis-cached catalog queries, full cart & checkout flow with atomic MySQL transactions, Argo CD GitOps self-healing, Argo Rollouts progressive canary routing, and OpenCost FinOps budget tracking on AWS EKS Auto Mode.
+>
+> 🎬 **High-Definition Video File**: [`screen-recordings/pokevault-demo.mp4`](screen-recordings/pokevault-demo.mp4)
+
+</div>
 
 ---
 
 ## 🏗️ System Architecture
 
 ![PokéVault End-to-End Architecture](screen-recordings/architecture-diagram.png)
+
+```mermaid
+flowchart TD
+    subgraph Client["User / Browser"]
+        User["Client Browser"]
+    end
+
+    subgraph Foundation["Permanent Foundation Layer (~$1/mo)"]
+        R53["Route 53 DNS<br/>(aarjav.site)"]
+        CF["CloudFront CDN<br/>(Global Edge)"]
+        S3["S3 Frontend Bucket<br/>(Static SPA Assets)"]
+    end
+
+    subgraph Runtime["Ephemeral Runtime Layer (On-Demand EKS)"]
+        WAF["AWS WAFv2<br/>Regional WebACL"]
+        ALB["AWS Shared Application<br/>Load Balancer"]
+        ING["K8s Shared Ingress Group<br/>(pokevault-shared-alb)"]
+
+        subgraph EKS["AWS EKS Auto Mode Cluster (v1.31)"]
+            NGINX["Nginx API Gateway Pods<br/>(:8080)"]
+            AUTH["Auth Service<br/>(:5001)"]
+            CATALOG["Catalog Service<br/>(:5002)"]
+            ORDER["Order Service<br/>(:5003 - Canary Rollout)"]
+        end
+
+        RDS[("Amazon RDS MySQL 8.0<br/>Multi-AZ Ready")]
+        REDIS[("Amazon ElastiCache<br/>Redis 7 Cluster")]
+    end
+
+    subgraph Observability["Observability & FinOps Stack"]
+        GRAFANA["Grafana Dashboard<br/>(grafana.aarjav.site)"]
+        PROM["Prometheus & Alloy<br/>Metrics Engine"]
+        LOKI[("Grafana Loki<br/>Log Aggregator")]
+        OPENCOST["OpenCost FinOps<br/>Real-Time Cost Allocator"]
+    end
+
+    %% Client Routing
+    User -->|aarjav.site| R53
+    R53 --> CF
+    CF --> S3
+
+    User -->|api.aarjav.site / argocd / grafana| WAF
+    WAF --> ALB
+    ALB --> ING
+
+    %% Ingress to Services
+    ING -->|api.aarjav.site| NGINX
+    ING -->|argocd.aarjav.site| Runtime
+    ING -->|grafana.aarjav.site| GRAFANA
+
+    NGINX -->|/api/auth| AUTH
+    NGINX -->|/api/catalog| CATALOG
+    NGINX -->|/api/orders| ORDER
+
+    %% Data Connections
+    AUTH -->|User Credentials| RDS
+    CATALOG -->|60s Cache Aside| REDIS
+    CATALOG -->|Product Inventory| RDS
+    ORDER -->|Order Transactions| RDS
+
+    %% Observability Connections
+    GRAFANA --> PROM
+    GRAFANA --> LOKI
+    PROM --> OPENCOST
+```
 
 ---
 

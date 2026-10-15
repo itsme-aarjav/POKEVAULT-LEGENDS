@@ -1,3 +1,25 @@
+apiVersion: eks.amazonaws.com/v1
+kind: IngressClassParams
+metadata:
+  name: alb-params
+spec:
+  scheme: internet-facing
+  group:
+    name: pokevault-shared-alb
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: alb
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
+spec:
+  controller: eks.amazonaws.com/alb
+  parameters:
+    apiGroup: eks.amazonaws.com
+    kind: IngressClassParams
+    name: alb-params
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

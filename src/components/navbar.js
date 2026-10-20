@@ -12,11 +12,10 @@ export function renderNavbar(activePage = 'home') {
     <!-- TOP TICKER MARQUEE (Trust, Pop Culture & Urgency) -->
     <div class="ticker-wrap">
       <div class="ticker-move">
-        <span class="ticker-item"><img src="assets/pokeball-emoji.png" alt="Pokéball" class="pokeball-emoji-sm" /> 🔥 POP CULTURE WATCH: 1st Edition Charizard &amp; Illustrator Pikachu Slabs Surge +214% in 2026</span>
-        <span class="ticker-item"><img src="assets/pokeball-emoji.png" alt="Pokéball" class="pokeball-emoji-sm" /> 🌸 DIRECT FROM TOKYO: Authentic Akihabara Pokémon Center Exclusives with Japanese Tags</span>
-        <span class="ticker-item"><img src="assets/pokeball-emoji.png" alt="Pokéball" class="pokeball-emoji-sm" /> ⚡ FREE INSURED BLUEDART VAULT AIR SHIPPING ON ORDERS ₹2,500+</span>
-        <span class="ticker-item"><img src="assets/pokeball-emoji.png" alt="Pokéball" class="pokeball-emoji-sm" /> 🛡️ 100% PSA &amp; BGS AUTHENTICITY WITH 5-POINT FORENSIC VAULT AUDIT</span>
-        <span class="ticker-item"><img src="assets/pokeball-emoji.png" alt="Pokéball" class="pokeball-emoji-sm" /> 🎁 USE CODE "POKEVAULT10" FOR 10% OFF YOUR COLLECTOR ORDER</span>
+        <span class="ticker-item" style="color: #FF385C; font-weight: 900;"><img src="assets/pokeball-emoji.png" alt="Pokéball" class="pokeball-emoji-sm" /> ⚠️ PERSONAL STUDENT PORTFOLIO PROJECT • NOT A REAL STORE • NO ITEMS FOR SALE</span>
+        <span class="ticker-item"><img src="assets/pokeball-emoji.png" alt="Pokéball" class="pokeball-emoji-sm" /> ☁️ AWS CLOUD ARCHITECTURE SHOWCASE (EKS, S3, CLOUDFRONT, TERRAFORM, VITE)</span>
+        <span class="ticker-item"><img src="assets/pokeball-emoji.png" alt="Pokéball" class="pokeball-emoji-sm" /> 🌸 EDUCATIONAL DEMONSTRATION: Akihabara Pokémon Center Merchandise UI Simulation</span>
+        <span class="ticker-item"><img src="assets/pokeball-emoji.png" alt="Pokéball" class="pokeball-emoji-sm" /> 🛡️ 3D WEBGL RENDERING &amp; SIMULATED VAULT AUDIT</span>
       </div>
     </div>
 

@@ -48,13 +48,13 @@ export function renderFooter() {
             <div style="font-family: var(--font-display); font-size: 1.6rem; color: var(--accent-red); margin-top: 2px;">LEGENDS</div>
           </div>
           <p class="footer-bio">
-            The world's premier Pokémon merchandise marketplace and graded slab vault. Collecting legends, plush, figures, apparel, and rare artifacts from Gen 1 to Gen 9.
+            <strong>Non-Commercial Engineering Portfolio</strong>: A personal software engineering and cloud infrastructure demonstration showcasing AWS EKS, S3, CloudFront, Terraform, and modern microservices architecture. Not an active e-commerce store.
           </p>
           <div class="footer-socials">
+            <a href="https://github.com/itsme-aarjav/POKEVAULT-LEGENDS" target="_blank" rel="noopener" class="social-btn" aria-label="GitHub">💻</a>
             <a href="https://twitter.com" target="_blank" rel="noopener" class="social-btn" aria-label="Twitter">📱</a>
             <a href="https://instagram.com" target="_blank" rel="noopener" class="social-btn" aria-label="Instagram">📸</a>
             <a href="https://discord.com" target="_blank" rel="noopener" class="social-btn" aria-label="Discord">💬</a>
-            <a href="https://youtube.com" target="_blank" rel="noopener" class="social-btn" aria-label="YouTube">🎥</a>
           </div>
         </div>
 
@@ -85,22 +85,27 @@ export function renderFooter() {
 
         <div class="footer-col newsletter-col">
           <h4 class="footer-heading">VIP VAULT DISPATCH</h4>
-          <p class="footer-sub-text">Subscribe to get instant alerts on limited plush drops, PSA slab restocks &amp; 10% off coupon codes.</p>
-          <form class="footer-news-form" id="footerNewsForm" onsubmit="event.preventDefault(); alert('★ Thank you for joining PokéVault VIP Dispatch! Your code is POKEVAULT10');">
+          <p class="footer-sub-text">Educational newsletter simulation for personal cloud and DevOps architecture updates.</p>
+          <form class="footer-news-form" id="footerNewsForm" onsubmit="event.preventDefault(); alert('★ Portfolio Demo: Thank you for testing the newsletter subscription component!');">
             <input type="email" placeholder="Enter trainer email..." class="footer-news-input" required />
             <button type="submit" class="btn-pill footer-news-btn">JOIN VIP</button>
           </form>
         </div>
       </div>
 
+      <!-- NON-COMMERCIAL PORTFOLIO DISCLAIMER BAR -->
+      <div style="background: #111; border-top: 2px solid #333; padding: 14px 20px; text-align: center; font-family: var(--font-mono, monospace); font-size: 0.78rem; color: #FFF9C4; line-height: 1.5;">
+        ⚠️ <strong>PERSONAL STUDENT PORTFOLIO PROJECT &bull; NOT A REAL COMMERCIAL STORE</strong>: This website is created solely for personal educational and engineering portfolio demonstration purposes. <strong>NO REAL TRANSACTIONS ARE PROCESSED AND NO GOODS ARE SHIPPED OR SOLD.</strong> This site is fan-made and has no commercial affiliation with Nintendo, Creatures Inc., Game Freak, or The Pokémon Company. All Pokémon trademarks and media belong to their respective copyright holders.
+      </div>
+
       <div class="footer-bottom-bar">
-        <div class="footer-copy-text">© 2026 POKÉVAULT LEGENDS INC. ALL RIGHTS RESERVED. POKÉMON IS A REGISTERED TRADEMARK OF NINTENDO / CREATURES INC. / GAME FREAK.</div>
+        <div class="footer-copy-text">© 2026 POKÉVAULT LEGENDS (PERSONAL PORTFOLIO DEMO BY AARJAV JAIN). POKÉMON IS A REGISTERED TRADEMARK OF NINTENDO / CREATURES INC. / GAME FREAK.</div>
         <div class="footer-legal-links">
-          <a href="about.html">Privacy Policy</a>
+          <a href="about.html">Project Architecture</a>
           <span class="footer-dot-sep">•</span>
-          <a href="about.html">Terms of Vault Dispatch</a>
+          <a href="about.html">Portfolio Disclaimer</a>
           <span class="footer-dot-sep">•</span>
-          <a href="contact.html">Authenticity Guarantee</a>
+          <a href="https://github.com/itsme-aarjav/POKEVAULT-LEGENDS" target="_blank" rel="noopener">GitHub Repository</a>
         </div>
       </div>
     </footer>

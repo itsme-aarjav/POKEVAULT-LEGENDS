@@ -499,6 +499,62 @@ h1, h2, h3, .font-display {
   text-align: center;
 }
 
+/* HERO PERSONAL PROJECT DISCLAIMER (ANTI-NETCRAFT / NON-COMMERCIAL NOTICE) */
+.hero-project-disclaimer {
+  max-width: 860px;
+  width: 95%;
+  margin: 0 auto 1.75rem auto;
+  padding: 14px 20px;
+  background: #FFF9C4;
+  border: 3px solid #000;
+  border-radius: 12px;
+  box-shadow: 5px 5px 0px #000;
+  text-align: left;
+  position: relative;
+  z-index: 5;
+}
+
+.disclaimer-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.disclaimer-tag {
+  background: #000;
+  color: #FFF;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.disclaimer-badge {
+  background: var(--accent-red, #FF385C);
+  color: #FFF;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.disclaimer-body {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: #111;
+  margin: 0;
+}
+
 /* REAL-TIME 3D GPU WEBGL HERO STAGE */
 .hero-3d-stage-wrapper {
   max-width: 480px;

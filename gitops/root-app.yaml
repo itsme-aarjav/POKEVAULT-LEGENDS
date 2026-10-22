@@ -22,7 +22,7 @@ spec:
         - name: acmCertificateArn
           value: "arn:aws:acm:us-east-1:592668326948:certificate/37e215e7-9c39-49e1-bb6c-97ae039dba2e"
         - name: wafAclArn
-          value: "arn:aws:wafv2:us-east-1:592668326948:regional/webacl/pokevault-alb-waf/6ebab246-7741-442c-a72e-c60c9daaa259"
+          value: "arn:aws:wafv2:us-east-1:592668326948:regional/webacl/pokevault-alb-waf/76545a0c-d88d-4d3e-a272-40724e24c9d9"
         - name: imageTag
           value: "latest"
   destination:

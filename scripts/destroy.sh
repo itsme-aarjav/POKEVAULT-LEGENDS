@@ -27,7 +27,9 @@ if [[ -n "${EKS_CLUSTER_NAME}" ]]; then
   echo "[destroy] Updating kubeconfig for ${EKS_CLUSTER_NAME}..."
   if aws eks update-kubeconfig --region "${REGION}" --name "${EKS_CLUSTER_NAME}" 2>/dev/null; then
     echo "[destroy] Step 1: Deleting Argo CD Applications to prevent self-heal reconciliation..."
-    kubectl delete applications.argoproj.io --all -n argocd --ignore-not-found=true --timeout=120s
+    # Auto-clear finalizers so degraded hooks never block teardown
+    kubectl get applications.argoproj.io -n argocd -o jsonpath='{.items[*].metadata.name}' 2>/dev/null | xargs -I {} kubectl patch application {} -n argocd -p '{"metadata":{"finalizers":null}}' --type=merge 2>/dev/null || true
+    kubectl delete applications.argoproj.io --all -n argocd --ignore-not-found=true --timeout=30s || true
 
     echo "[destroy] Step 2: Uninstalling Helm release and removing all Ingresses across namespaces..."
     helm uninstall pokevault -n pokevault 2>/dev/null || true
